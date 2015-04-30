@@ -1,0 +1,23 @@
+Difference between sass-n and meta-align:
+
+
+Weird gap spacing:
+
+In the following alignment C-T-C seems weird, but this is correct, as this scores better than C--T:
+
+ Score = 25.6 bits (27), Expected = 1e-05
+ Identities = 22/25 (88%), Gaps = 2/25 (8%)
+ Strand = Plus / Plus
+
+Query: 1        CCCACAACCC-T-CCACAAGGGGGG 23
+                |||||||||| | |||||| |||||
+Sbjct: 1        CCCACAACCCATCCCACAATGGGGG 25
+
+
+
+Be very careful with classes that have static components that are initialized upon use. These can
+cause problems when used in a multi-threaded context
+
+
+
+

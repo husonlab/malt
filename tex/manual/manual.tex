@@ -1,0 +1,666 @@
+%\listfiles
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{amssymb}
+\usepackage{graphics, graphicx}
+\usepackage{fancyhdr}
+\usepackage{subfigure}
+\usepackage{ifthen}
+\usepackage{version}
+\usepackage{tocbibind}
+\usepackage{makeidx}
+\usepackage{xspace}
+\usepackage{placeins}
+
+%\usepackage{times}
+\usepackage{booktabs}
+\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=blue, 
+            citecolor=blue, urlcolor=blue]{hyperref}
+\raggedbottom
+\sloppy
+
+\parindent=0pt
+\parskip=5pt
+
+\newcommand\MALT{{\sf MALT}\xspace}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input versioninfo.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{\bf User Manual for \MALT V\VERSION}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\author{Daniel H.~Huson}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\makeindex
+
+\input definitions.tex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+%\hfil\includegraphics[height=4cm]{about.pdf}\hfil
+
+{\small
+\setcounter{tocdepth}{1}
+\tableofcontents
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\mysection{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ibf{Disclaimer}:
+This software is provided "AS IS" without warranty of any kind. This is 
+developmental code, and we make no pretension as to it being bug-free and 
+totally reliable. Use at your own risk. We will accept no liability for any 
+damages incurred through the use of this software.
+Use of  \MALT is free for academic usage, however the program is not open source.
+
+\MALT, an acronym for \itt{MEGAN alignment tool} or \iit{MEGAN alignment tool}, is a sequence alignment and analysis tool designed for processing high-throughput sequencing data, especially in the context of metagenomics.
+It is an extension of MEGAN, the \itt{MEGenome Analyzer} and is designed to provide the input for MEGAN,
+but can also be used independently of MEGAN.
+
+The core of the program is an sequence alignment engine that aligns DNA or protein sequences
+to a {DNA or} protein reference database in either {BLASTN (DNA queries and DNA references),}
+BLASTX (DNA queries and protein references) or BLASTP (protein queries and protein references)
+mode. The engine uses a banded-alignment algorithm with affine gap scores
+and BLOSUM substitution matrices (in the case of protein alignments).
+The program can compute both local alignments
+(Smith-Waterman) or semi-global alignments (in which reads are aligned end-to-end into reference sequences), the latter being more appropriate for aligning metagenomic reads to references.
+
+By default, \MALT produces a MEGAN ``RMA'' file that contains taxonomic and functional classifications of the reads
+that can be opened in MEGAN.
+The taxonomic analysis use the naive LCA algorithm (introduced in \cite{MEGAN2011}).
+
+Used as an alignment tool,  \MALT can produce  alignments in BLAST  text format,
+BLAST-tab format or SAM format (both for DNA and protein alignments).
+In addition, the program can be used as a filter to obtain all reads that have a significant alignment, or
+do not have a significant alignment, to the given reference database.
+
+{
+\MALT can also be used to compute a taxonomic analysis of 16S sequences. Here the
+ability to compute a semi-global alignment rather than a local alignment is crucial.
+
+When provided with a listing of gene locations and annotations for a given database of DNA sequences, \MALT is able to predict genes based on BLASTN-style alignments.
+}
+
+\MALT actually consists of two programs, \program{malt-build} and
+\program{malt-run}.
+The \program{malt-build} program is first used to build an index for the given reference database. It
+can index arbitrary large databases, provided the used computer has enough memory.
+For maximum speed, the program uses a hash-table and thus require a large memory machine.
+The  \program{malt-run}  program is then used to perform alignments and analyses.
+
+\MALT does not use a new approach, but is rather a new carefully crafted implementation of existing approaches.
+The program uses spaced seeds rather than consecutive seeds \cite{Burkhardt01,Ma02}.
+It uses a hash table to store seed matches, see, for example, \cite{SSAHA}.
+ It uses a reduced alphabet to determine potential matches between protein sequences \cite{Murphy2000,RapSearch2}.
+ Finally, it uses a banded alignment algorithm \cite{ChaoPM92} that can compute both local and semi global alignments.
+
+Both programs make heavy use of parallelization and require a lot of memory. The ideal \pconcept{hardware requirements}
+are a linux server with 64 cores and 512 GB of memory.
+
+\MALT  performs alignment and analysis of high-throughput sequencing data in a high-throughput manner. Here are some examples:
+
+\begin{enumerate}
+\item
+Using the RefSeq microbial protein database (version 50, containing $10$ million protein sequences with a total length of $3.2$ billion amino acids), a BLASTX-style analysis of taxonomic and functional content of
+a collection of 11 million Illumina reads takes about $900$ wall-clock seconds (using 64 cores).
+The program found about $4.5$ million significant alignments covering about $15$\% of the total reads.
+{
+\item Using the Genbank DNA database (microbes and viruses,
+downloaded early 2013, containing about 2.3 million DNA sequences with a total length of 
+11 billion nucleotides), a BLASTN-style analysis of one million reads takes about $70$ wall-clock seconds. 
+The program finds about two million  significant alignments covering one quarter of the total reads.
+\item Using the Silva database (\itt{SSURef\_NR99\_115\_tax\_silva.fasta}, containing $479,726$ DNA sequences with a total length of  $690$ million nucleotides), the semi-global alignment of $5000$ 16S reads takes about 100 seconds (using 64 cores), producing
+about $100,000$ significant alignments. 
+}
+\end{enumerate}
+
+This document provides both an introduction and a reference manual for \MALT.
+
+\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\mysection{Getting Started}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This section describes how to get started.
+
+Download the program from \url{http://www-ab.informatik.uni-tuebingen.de/software/malt}, 
+see Section~\ref{sec:Obtaining and Installing the Program}
+for details.
+
+Then make sure that you have a license certificate for MEGAN5. This license is required to run \MALT.
+
+
+First, use \program{malt-build} to build an index for \MALT. For example,
+to build an index for all viral proteins in RefSeq, download the following file:
+\url{ftp://ftp.ncbi.nlm.nih.gov/refseq//release/viral/viral.1.protein.faa.gz}
+
+
+Put this file in a single directory called {\tt references}, say. There is no need to unzip the file
+because \MALT is able to read zipped files. Also, in general, when using more than one file of reference sequences,
+there is no need to concatenate the files into one file, as \MALT can process multiple files.
+
+The program \program{malt-build} will be used to build an index for viral reference sequences. We will write the index
+directory to a directory called {\tt index}.
+In the parent directory of the {\tt references} directory, run \program{malt-build} as follows:
+{\footnotesize
+\begin{verbatim}
+set MALT=<path-to-malt-directory>
+malt-build -i references/*.* -d index -g2t $MALT/data/gi_taxid_prot-2014Jan04.bin \
+                   -tre $MALT/data/ncbi.tre.gz -map$MALT/data/ncbi.tre.gz -L megan5-license.txt
+\end{verbatim}
+}
+
+The input files are specified using {\tt -i}, the index is specified using {\tt -d}. 
+The option {\tt -g2t} is used to specify a GI to taxon-id mapping which will be used to identify the taxa associated with
+the reference sequences. A mapping file is supplied in the data directory of \MALT.
+The options {\tt -tre} and {\tt -map} are used to access the NCBI taxonomy, which is needed to perform a taxonomic analysis of the reads as they are aligned. Use {\tt -L} to explicitly provide a MEGAN5 license file to the program, if you have not previously used a licensed version of MEGAN5.
+
+Then, use \program{malt-run} to analyze a file of DNA reads. Assume that the DNA reads are
+contained in two files, {\tt reads1.fna} and {\tt reads2.fna}. Call the program as follows:
+{\footnotesize
+\begin{verbatim}
+malt-run -i reads1.fna reads2.fna -d index -m BlastX -o . -L megan5-license.txt
+\end{verbatim}
+}
+
+If either of the two programs abort due to lack insufficient memory, then please end the files {\tt malt/bin/malt-build} and/or {\tt malt/bin/malt-run}.
+By default, for testing purposes, the memory reserved for the programs is set to $10GB$. 
+For comparison against the NCBI-NR database, for example, you will  need about $300GB$.
+
+All input files are specified using {\tt -i}. Because loading of the index may take a long time, it is best to launch the program on a large
+number of files. The index to use is specified using {\tt -d}. The option {\tt -m} defines the alignment mode of the program, in this
+case {\tt BlastX}. Use {\tt -at} to specify the alignment type.The option {\tt -om} is used to specify the output directory for matches.
+Here we specify the current directory ({\tt .}). The option {\tt --tax} requests that a taxonomic analysis of the reads be performed and {\tt -om .}
+requests that the resulting MEGAN file be written to the current directory.
+The file option {\tt -t} specifies the maximum number of threads.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\mysection{Obtaining and Installing the Program}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\MALT is written in Java and requires a 64-bit Java runtime environment
+version 7 or latter, freely available from \url{http://www.java.org}.
+The Windows and MacOS X installers contain a suitable Java runtime environment that will be used if
+a suitable Java runtime environment cannot be found on the computer.
+
+\MALT is currently in ``open alpha testing'' and is available from:
+
+\url{http://www-ab.informatik.uni-tuebingen.de/software/malt}.
+
+There are three different installers that target major operating systems:
+\begin{itemize}
+\item \itt{MALT\_windows-x64\_\VERSION.exe} provides an installer  for \irm{Windows}.
+\item \itt{MALT\_macos\_\VERSION.dmg} provides an installer for \irm{MacOS X}.
+\item \itt{MALT\_unix\_\VERSION.sh} provides an installer for \irm{Linux} and  \irm{Unix}.
+\end{itemize}
+
+
+Download the installer that is appropriate for your computer. Please note that the \irm{memory requirement}
+of \MALT grows dramatically with the size of the reference database that you wish to employ.
+For example, to align sequences against the NR database requires that you have 512GB of main memory.
+
+Double-click on the downloaded installer program  to start the interactive installation dialog.
+
+Alternatively, under Linux, change into the directory containing the installer and type
+
+{\tt ./\itt{MALT\_unix\_\VERSION.sh}}
+
+This will launch the \MALT installer in GUI mode. To install the program in non-gui console mode,
+type
+
+{\tt ./\itt{MALT\_unix\_\VERSION.sh} -c}
+
+Finally, when updating the installation under Linux, one can perform a completely
+\irm{non-interactive installation} like this (quiet mode):
+
+{\tt ./\itt{MALT\_unix\_\VERSION.sh} -q}
+
+The installation dialog will ask how much memory the program may use. Please set this variable carefully.
+If the amount needs to be changed after installation, then this can be done by editing the files
+ending on \itt{vmoptions} in the installation directory.
+
+Two copies of each of the program \program{malt-build} and \program{malt-run} will be installed.
+The two copies named \itt{malt-build} and \itt{malt-run} are intended in non-interactive, commandline use.
+The two copies  named \itt{malt-build-gui} and \itt{malt-run-gui} provide a very simple GUI interface.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\mysection{Licensing}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\MALT is an extension of MEGAN and so
+any usage of \MALT requires a valid MEGAN license. The following types of licenses are available for MEGAN:
+
+\begin{itemize}
+\item \pconcept{Academic license} This license permits use of the software exclusively for academic research
+(publications in academic journals and papers at academic conferences) and instruction.  This type of license is
+available free of charge from the MEGAN5 website.
+\item   \pconcept{Single user license} This license permits a single user to use the program.
+This type of license is granted for a charge from the University of T\"ubingen, please contact Daniel Huson for details.
+\item   \pconcept{Site license} This license permits use of the program at a single physical location, within
+  a single organization.
+This type of license is granted for a charge from the University of T\"ubingen, please contact Daniel Huson for details.
+  \item   \pconcept{Enterprise license} This license permits use of the program anywhere within
+  a single organization.
+This type of license is granted for a charge from the University of T\"ubingen,please contact Daniel Huson for details.
+\item \pconcept{Evaluation license} This type of license is  granted for 45 days and is for evaluation purposes only.
+   It is available free of charge from the University of T\"ubingen, please contact Daniel Huson for details.
+\end{itemize}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\mysection{The MALT index builder}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The first step in a \MALT analysis is to build an index for the given reference database. This is done
+using  a program called \pprogram{malt-build}.
+
+In summary, \program{malt-build} takes a reference sequence database (represented by
+one or more FastA files, possibly in \itt{gzip} format) as input and produces an index that then can  subsequently be used
+by the main analysis program \program{malt-run} as input.
+If \MALT is to be used as an taxonomic and/or functional analysis tool as well as an alignment tool, then
+in addition,  \program{malt-build} must be provided with a number of mapping files that are used
+to map reference sequences to taxonomic or functional classes{, or to locate genes in DNA reference sequences}.
+
+The \program{malt-build} program is controlled by command-line options, as summarized in Figure~\ref{fig:malt-build-usage}. 
+There are three options for determining input and output:
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item [\itt{--input}] Use to specify all files that contains reference sequences. The files must be in FastA format and
+may be {\em gzipped} (in which case they must end on \itt{.gz}.) 
+{
+\item[\itt{--sequenceType}] Use to specify whether the reference sequences are \itt{DNA} or \itt{Protein} sequences.
+(For \itt{RNA} sequences, use the DNA setting).
+}
+\item[\itt{--index}] Use to specify the name of the index directory. If the directory does not already exist then it will be created.
+If it already exists, then any previous index files will be overwritten.
+\end{itemize}
+
+
+There are two performance-related options:
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--threads}] Use to set the number of threads to use in parallel computations. Default is 8. Set this to
+the number of available cores.
+\item[\itt{--step}]  Use to set step size used to advance seed, values greater than 1 reduce index size and sensitivity. Default value: 1.
+\end{itemize}
+The most important performance-related option is the maximum amount of memory that \program{malt-build}
+is allowed to use. This cannot be set from within the program but rather is set during installation of the software.
+
+\MALT uses a seed-and-extend approach based on ``spaced seeds'' \cite{Burkhardt01,Ma02}. The following options control this:
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--shapes}]
+{Use this to specify the seed shapes used. For DNA sequences, the \irm{default seed shape} is:
+{\tt 111110111011110110111111}.} 
+For protein sequences, by default the program uses the following four shapes:
+{\tt 111101101110111}, {\tt 1111000101011001111}, {\tt 11101001001000100101111} and {\tt 11101001000010100010100111}.
+These seeds were suggested in \cite{Ilie:2011fk}, see \url{http://www.biomedcentral.com/content/supplementary/1471-2164-12-280-s1.pdf}.
+\item[\itt{--maxHitsPerSeed}] Use to specify the maximum number of hits per seed. The program uses this
+to calculate a maximum number of hits per hash value.
+\item[\itt{--proteinReduct}] Use this to specify the alphabet reduction in the case of protein reference sequences.
+By default, the program reduces amino acids to 8 different letters, grouped as follows:
+[LVIMC] [AG] [ST] [P] [FYW] [EDNQ] [KR] [H]. This is referred to as the \iit{BLOSUM50\_8} reduction in \MALT and
+was suggested in \cite{Murphy2000}.
+
+\end{itemize}
+
+There are numerous options that can be used to provide mapping files to \program{malt-build} for classification support.
+These are used
+by the program to map reference sequences or genes to taxonomic and/or functional classes.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{-g2t} \itt{-r2t} \itt{-s2t}] Use to specify mapping files to map reference sequences to taxonomic identifiers (NCBI taxon integer ids).
+Use {\tt -g2t} for a file mapping GI numbers to taxon ids. Use {\tt -r2t} for a file mapping RefSeq identifiers to taxon ids.
+Use {\tt -s2t} for a file that maps \pconcept{synonyms} to taxon ids. A synonym is any word that may occur in
+the header line of a reference sequence.
+\item[\itt{-g2k} \itt{-r2k} \itt{-s2k}] Use to specify mapping files to map reference sequences to KEGG KO numbers  \cite{Kanehisa2000} .
+The detailed usage of three different options is analogous to above.
+\item[\itt{-g2s} \itt{-r2s} \itt{-s2s}] Use to specify mapping files to map reference sequences to SEED \cite{SEED2005} classes.
+Unfortunately, the SEED classification does not assign numerical identifiers to classes. As a work-around,
+\program{malt-build} uses the numerical identifiers defined and used by \irm{MEGAN} \cite{MEGAN2011}.
+The detailed usage of three different options is analogous to above.
+\item[\itt{-g2c} \itt{-r2c} \itt{-s2c}] Use to specify mapping files to map reference sequences to COG and NOG \cite{Tatusov1997,eggNOG} classes.
+Unfortunately,  COG's and NOG's do not share the same space of numerical identifiers. As a work-around,
+\program{malt-build} uses the numerical identifiers defined and used by \irm{MEGAN} \cite{MEGAN2011}.
+The detailed usage of three different options is analogous to above.
+{
+\item[\itt{-gif}] Use this option specify a \concept{gene information file}. Such a file assigns maps genes to intervals
+in reference sequences, as described below. This is usually used when the reference sequences are genomes.
+}
+\end{itemize}
+
+When using classification support, a number of additional files may be necessary. 
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--taxTree}] Use to specify the taxonomic tree, for example \itt{malt/data/ncbi.tre.gz}.
+\item[\itt{--taxMap} ]Use to specify the associated map file, for example  \itt{malt/data/ncbi.map.gz}.
+\item[\itt{--cogMappingFile}] Use to specify the COG mapping file, for example \itt{malt/data/cog.map.gz}.
+\end{itemize}
+
+There are two options concerned with properties and licensing:
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--propertiesFile}] Use to specify the program properties file. By default, \MALT uses the same file as MEGAN5.
+\item[\itt{licenseFile}] Use to specify a MEGAN5 license file. \MALT is an extension of MEGAN5 and use of \MALT requires a valid MEGAN5 license.
+If MEGAN5 is installed, then \MALT will locate and use the corresponding license.
+\end{itemize}
+
+
+There are a couple of other options:
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--random}] Use to specify the seed used by the random number generator.
+\item[\itt{--verbose}] Use to run program in verbose mode.
+\item[\itt{--help}] Report command-line usage.
+\end{itemize}
+
+\begin{figure}[h]
+{\tiny
+\begin{verbatim}
+SYNOPSIS
+	MaltBuild [options]
+DESCRIPTION
+	Builds the MALT index
+OPTIONS
+ Input and output:
+	-i, --input [string(s)]              Input reference file(s). Mandatory option.
+	-s, --sequenceType [string]          Sequence type. Mandatory option. Legal values: DNA, Protein
+	-d, --index [string]                 Name of index directory. Mandatory option.
+ Performance:
+	-t, --threads [number]               Number of worker threads. Default value: 8.
+	-st, --step [number]                 Step size used to advance seed, values greater than 1 reduce index size and sensitivity. Default value: 1.
+ Seed:
+	-ss, --shapes [string(s)]            Seed shape(s). Default value(s): default.
+	-mh, --maxHitsPerSeed [number]       Maximum number of hits per seed. Default value: 1000.
+	-pr, --proteinReduct [string(s)]     Name or definition of protein alphabet reductions (one for each seed, possible values:
+                                             BLOSUM50_10,BLOSUM50_11,BLOSUM50_15,BLOSUM50_4,BLOSUM50_8,DIAMOND_11,GBMR4,HSDM17,
+                                             MALT_10,MALT_12A,MALT_12B,MALT_12C,SDM12,UNREDUCED).
+                                             Default value(s): MALT_12A MALT_12B MALT_12C.
+ Classification support:
+	-g2t, --gi2taxa [string]             GI-to-Taxonomy mapping file. 
+	-r2t, --ref2taxa [string]            RefSeq-to-Taxonomy mapping file. 
+	-s2t, --syn2taxa [string]            Synonyms-to-Taxonomy mapping file. 
+	-g2k, --gi2kegg [string]             GI-to-KEGG mapping file. 
+	-r2k, --ref2kegg [string]            RefSeq-to-KEGG mapping file. 
+	-s2k, --syn2kegg [string]            Synonyms-to-KEGG mapping file. 
+	-g2s, --gi2seed [string]             GI-to-SEED mapping file. 
+	-r2s, --ref2seed [string]            RefSeq-to-SEED mapping file. 
+	-s2s, --syn2seed [string]            Synonyms-to-SEED mapping file. 
+	-g2c, --gi2cog [string]              GI-to-COG mapping file. 
+	-r2c, --ref2cog [string]             RefSeq-to-COG mapping file. 
+	-s2c, --syn2cog [string]             Synonyms-to-COG mapping file. 
+	-gif, -geneInfoFile [string]         File containing gene information. 
+ Additional files:
+	-tre, --taxTree [string]             NCBI tree file (ncbi.tre as used by MEGAN). 
+	-map, --taxMap [string]              NCBI map file (ncbi.map as used by MEGAN). 
+	-cmf, --cogMappingFile [string]      COG mapping file (cog.map file as used by MEGAN). 
+ Properties and license:
+	-p, --propertiesFile [string]        Properties file. Default value: /Users/huson/Library/Preferences/Megan.def.
+	-L, --licenseFile [string]           Specify license file. Default value: /Users/huson/etc/megan5-license.txt.
+ Other:
+	-rns, --random [number]              Random number generator seed. Default value: 666.
+	-hsf, --hashScaleFactor [number]     Hash table scale factor. Default value: 0.9.
+-v, --verbose                        Echo commandline options and be verbose. Default value: false.
+	-h, --help                           Show program usage and quit.
+\end{verbatim}
+}
+\caption{Summary of command-line usage of malt-build.}\label{fig:malt-build-usage}
+\end{figure}
+
+\FloatBarrier
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\mysection{The MALT analyzer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In summary,
+the  program \pprogram{malt-run} is used to align one or more files of input sequences  (DNA or proteins) against
+an index representing a collection of reference  {DNA  or} protein sequences. In a preprocessing step, the index is computed
+using the \program{malt-build}, as described above. Depending on the type of input and reference sequences, 
+the program can be be run in {BLASTN,} BLASTP or BLASTX mode.
+
+The \program{malt-run} program is controlled by command-line options (see Figure~\ref{fig:malt-run-usage}). 
+The first options specifies the program mode and alignment type.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+
+\item[\itt{--mode}] Use this to run the program in {\pconcept{BlastN mode},} \pconcept{BlastP mode} or
+\pconcept{BlastX mode}, that is, to align {DNA and DNA,} protein and protein, or DNA reads against protein references, respectively. Obviously, the former mode can only be used if the employed index contains DNA
+sequences whereas the latter two modes are only applicable to an index based on protein reference sequences.
+\item[\itt{--alignmentType}]  Use this to specify the type of alignments to be performed.
+By default, this is set to \itt{Local} and the program performs \pconcept{local alignment} just like BLAST programs do.
+Alternatively, this can be set to \itt{SemiGlobal}, in which case the program will perform \pconcept{semi global alignment}
+in which reads are aligned end-to-end. 
+\end{itemize}
+
+There are two options for specifying the input.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item [\itt{--inFile}] Use this to specify all input files. Input files must be in FastA or FastQ format and
+may be gzipped, in which case their names must end on \itt{.gz}. 
+\item[\itt{--index}] Use this to specify the directory that contains the index built by \program{malt-build}.
+\end{itemize}
+
+There is a number of options for specifying the output generated by the program.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--output}]   Use to specify the names or locations of the output RMA files.
+	If a single directory is specified, then one output file
+per input file is written to the specified directory. Alternatively, if one or more output files are named, then
+the number of output files must equal the number of input files, in which case the output for the first
+input file is written to first output file, etc. 
+\item[\itt{--alignments}]   Use to specify the files to which alignments should be written.
+	If a single directory is specified, then one output file
+per input file is written to the specified directory. Alternatively, if one or more output files are named, then
+the number of output files must equal the number of input files, in which case the output for the first
+input file is written to first output file, etc. If the argument is the special value \itt{STDOUT} then output is written
+to standard-output rather than to a file. If this option is not supplied, then the program will not output any matches.
+\item[\itt{--format}]  Determines the format used to report alignments. The default format is \itt{SAM}.
+	Other choices are \itt{Text} (full text BLAST matches) and \itt{Tab} (tabulated BLAST format).
+\item[\itt{--gzipOutput}]   Use this to specify whether alignment output should be gzipped. Default is true.
+\item[\itt{--outAligned}]        Use this to specify that all reads that have at least one significant alignment to some reference
+sequence should be saved. 
+File specification possibilities as for \itt{--alignments}.
+\item[\itt{--gzipAligned}]                    Compress aligned reads output using gzip. Default value: true.
+\item[\itt{--outUnaligned}]      Use this to specify that all reads that do not have any significant alignment to any reference
+sequence should be saved.
+File specification possibilities as for \itt{--alignments}.
+\item[\itt{ --gzipUnaligned}]                  Compress unaligned reads output using gzip. Default value: true.
+\end{itemize}
+
+
+There are three performance-related options:
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--threads}] Use to set the number of threads to use in parallel computations. Default is 8. Set this to
+the number of available cores.
+	-rqc,           Cache results for replicated queries. 
+\item[\itt{--maxTables}] Use to set the maximum number of seed tables to use (0=all). Default value: 0.
+\item[\itt{--replicateQueryCache}] Use to turn on caching of replicated queries. This is especially useful for processing 16S datasets
+in which identical sequences occur multiple times. Turning on this feature does not change the output of the program, but can
+cause a significant speed-up. Default value: false.
+\end{itemize}
+The most important performance-related option is the maximum amount of memory that \program{malt-run}
+is allowed to use. This cannot be set from within the program but rather is set during installation of the software.
+
+The following options are used to filter matches by significance. Matches that do not meet all criteria specified are completely ignored.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--minBitScore}]          Minimum bit score. Default value: 50.0.
+\item[\itt{--maxExpected}]           Maximum expected score. Default value: 1.0.
+\item[{\itt{--minPercentIdentity}}]  Minimum percent identity. Default value: 0.0.
+\item[{\itt{--maxAlignmentsPerQuery}}]  Maximum number of alignments per query. Default value: 100.
+\item[{\itt{ --maxAlignmentsPerRef}}]   Maximum number of (non-overlapping) alignments  per reference. Default value: 1.
+\MALT reports up to this many best scoring matches for each hit reference sequence.
+\end{itemize}
+
+{
+There are a number of options that are specific to the \concept{BlastN mode}. They are used to specify scoring and
+are also used in the computation of expected values.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--matchScore}]            Use to specify the alignment match score. Default value: 2.
+\item[\itt{--mismatchScore}]        Use to specify the alignment mis-match score. Default value: -3.
+\item[\itt{--setLambda}]           Parameter Lambda \index{Lambda parameter} for \irm{BLASTN statistics}. Default value: 0.625.
+\item[\itt{--setK}]                   Parameter K \index{K parameter} for BLASTN statistics. Default value: 0.41.
+\end{itemize}
+}
+
+For \concept{BlastP mode} and \concept{BlastX mode} the user need only specify a substitution matrix. The Lambda and
+K values are set automatically.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--subMatrix}] Use to specify the protein substitution matrix to use. Default value: {\tt BLOSUM62}. Legal values: 
+\itt{BLOSUM45}, \itt{BLOSUM50}, \itt{BLOSUM62}, \itt{BLOSUM80}, \itt{BLOSUM90}.
+\end{itemize}
+
+If the query sequences are DNA (or RNA) sequences, that is, if the program is running in  {\concept{BlastN mode}}
+or  \concept{BlastX mode}, then the following options are available.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--forwardOnly}]       Use to align query forward strand only. Default value: false.
+\item[\itt{ --reverseOnly}]       Use to align query reverse strand only. Default value: false.
+\end{itemize}
+
+The program uses the LCA algorithm \cite{MEGAN2007} to assign reads to taxa. There are a number of
+options that control this.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--topPercent}]          Use to specify the \pconcept{top percent} value for LCA algorithm. Default value is 10\%. For each read,
+only those matches are used for taxonomic placement whose bit score is within 10\% of the best score for that read.
+\item[\itt{--minSupport}]           Use to specify the \pconcept{min support} value for the LCA algorithm. 
+\end{itemize}
+
+There are a number of options that control the heuristics used by \program{malt-run}.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[{\itt{--maxSeedsPerFrame}}]   Maximum number of seed matches per offset per read frame. Default value: 100.
+\item[{\itt{--maxSeedsPerRef}}]      Maximum number of seed matches per read and reference. Default value: 20.
+\item[\itt{ --seedShift}]            Seed shift. Default value: 1.
+\item[\itt{ --xDrop}]                XDrop parameter used for ungapped pre-screen. Default value: 7.
+\item[\itt{--minBitPre}]            Min bit score used for ungapped pre-screen. Default value: 30.0.
+\end{itemize}
+
+The program uses a banded-aligner as described in \cite{ChaoPM92}. There are a number of associated options.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--gapOpen}]             Use this to specify the gap open penalty. Default value: 7.
+\item[\itt{--gapExtend}]            Use this to specify  gap extension penalty. Default value: 3.
+\item[\itt{--band}]                 Use this to specify width/2 for banded alignment. Default value: 4.
+\end{itemize}
+
+There are two options concerned with properties and licensing:
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--propertiesFile}] Use to specify the program properties file. By default, \MALT uses the same file as MEGAN5.
+\item[\itt{licenseFile}] Use to specify a MEGAN5 license file. \MALT is an extension of MEGAN5 and use of \MALT requires a valid MEGAN5 license.
+If MEGAN5 is installed, then \MALT will locate and use the corresponding license.
+\end{itemize}
+
+The are a couple of other options:
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--maxShapes}] Specify the maximum number of seed shapes to use. Only useful if the employed index was built using
+more than one seed shape. By default all seed shapes are used.
+\item[\itt{--verbose}] Use to run program in verbose mode.
+\item[\itt{--help}] Report command-line usage.
+\end{itemize}
+
+ \begin{figure}[h]
+{\tiny
+\begin{verbatim}
+SYNOPSIS
+	MaltRun [options]
+DESCRIPTION
+	Runs the MEGAN alignment tool
+OPTIONS
+ Mode:
+	-m, --mode [string]                  Program mode. Mandatory option. Legal values: BlastN, BlastP, BlastX
+	-at, --alignmentType [string]        Type of alignment to be performed. Default value: Local. Legal values: Local, SemiGlobal
+ Input:
+	-i, --inFile [string(s)]             Input file(s) containing queries in FastA or FastQ format. Mandatory option.
+	-d, --index [string]                 Index directory as generated by MaltBuild. Mandatory option.
+ Output:
+	-o, --output [string(s)]             Output RMA file(s) or directory. 
+	-a, --alignments [string(s)]         Output alignment file(s) or directory or STDOUT. 
+	-f, --format [string]                Alignment output format. Default value: SAM. Legal values: SAM, Tab, Text
+	-za, --gzipAlignments                Compress alignments using gzip. Default value: true.
+	-ssq, --samSQ                        Place @SQ lines in SAM files. Default value: false.
+	-ssc, --samSoftClip                  Use soft clipping in SAM files (BlastN mode only). Default value: false.
+	-oa, --outAligned [string(s)]        Aligned reads output file(s) or directory or STDOUT. 
+	-zal, --gzipAligned                  Compress aligned reads output using gzip. Default value: true.
+	-ou, --outUnaligned [string(s)]      Unaligned reads output file(s) or directory or STDOUT. 
+	-zul, --gzipUnaligned                Compress unaligned reads output using gzip. Default value: true.
+ Performance:
+	-t, --numThreads [number]            Number of worker threads. Default value: 8.
+	-mt, --maxTables [number]            Set the maximum number of seed tables to use (0=all). Default value: 0.
+	-rqc, --replicateQueryCache          Cache results for replicated queries. Default value: false.
+ Filter:
+	-b, --minBitScore [number]           Minimum bit score. Default value: 50.0.
+	-e, --maxExpected [number]           Maximum expected score. Default value: 1.0.
+	-id, --minPercentIdentity [number]   Minimum percent identity. Default value: 0.0.
+	-mq, --maxAlignmentsPerQuery [number]   Maximum number of alignments per query. Default value: 25.
+	-mrf, --maxAlignmentsPerRef [number]   Maximum number of (non-overlapping) alignments per reference. Default value: 1.
+ BlastN parameters:
+	-ma, --matchScore [number]           Match score. Default value: 2.
+	-mm, --mismatchScore [number]        Mismatch score. Default value: -3.
+	-la, --setLambda [number]            Parameter Lambda for BLASTN statistics. Default value: 0.625.
+	-K, --setK [number]                  Parameter K for BLASTN statistics. Default value: 0.41.
+ BlastP and BlastX parameters:
+	-psm, --subMatrix [string]           Protein substitution matrix to use. Default value: BLOSUM62. Legal values: BLOSUM45, BLOSUM50, BLOSUM62, BLOSUM80, BLOSUM90
+ DNA query parameters:
+	-fo, --forwardOnly                   Align query forward strand only. Default value: false.
+	-ro, --reverseOnly                   Align query reverse strand only. Default value: false.
+ LCA:
+	-top, --topPercent [number]          Top percent value for LCA algorithm. Default value: 10.0.
+	-supp, --minSupportPercent [number]   Min support value for LCA algorithm as a percent of assigned reads (0==off). Default value: 0.001.
+	-sup, --minSupport [number]          Min support value for LCA algorithm (overrides --minSupportPercent). Default value: 1.
+ Heuristics:
+	-spf, --maxSeedsPerFrame [number]    Maximum number of seed matches per offset per read frame. Default value: 100.
+	-spr, --maxSeedsPerRef [number]      Maximum number of seed matches per read and reference. Default value: 20.
+	-sh, --seedShift [number]            Seed shift. Default value: 1.
+ Banded alignment parameters:
+	-go, --gapOpen [number]              Gap open penalty. Default value: 11.
+	-ge, --gapExtend [number]            Gap extension penalty. Default value: 1.
+	-bd, --band [number]                 Band width/2 for banded alignment. Default value: 4.
+ Properties and license:
+	-p, --propertiesFile [string]        Properties file. Default value: /Users/huson/Library/Preferences/Megan.def.
+	-L, --licenseFile [string]           Specify license file. Default value: /Users/huson/etc/megan5-license.txt.
+ Other:
+	-rqcb, --replicateQueryCacheBits [number]   Bits used for caching replicate queries (size is then 2^bits). Default value: 20.
+	-xP, --xPart                         Show part of the table in human readable form for debugging. Default value: false.
+	-v, --verbose                        Echo commandline options and be verbose. Default value: false.
+	-h, --help                           Show program usage and quit.
+\end{verbatim}
+}
+\caption{Summary of command-line usage of {\tt malt-run}.}\label{fig:malt-run-usage}
+\end{figure}
+
+
+\FloatBarrier
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{\small
+\bibliographystyle{plain}
+\bibliography{compbio-2012}
+}
+
+\printindex
+
+
+\end{document}

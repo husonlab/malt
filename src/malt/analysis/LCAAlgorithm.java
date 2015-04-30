@@ -1,0 +1,204 @@
+package malt.analysis;
+
+import jloda.util.Basic;
+import megan.mainviewer.data.TaxonomyData;
+import megan.mainviewer.data.TaxonomyName2IdMap;
+import megan.mainviewer.data.TaxonomyTree;
+
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * implements the naive and weighted LCA algorithms
+ * Daniel Huson, 8.2014
+ */
+public class LCAAlgorithm {
+    private String[] addresses = new String[1000];
+    private int[] weights = new int[1000];
+
+    /**
+     * returns the LCA of a set of taxon ids
+     *
+     * @param taxonIds
+     * @return id
+     */
+    public int computeNaiveLCA(final int[] taxonIds, final int length) {
+        if (length == 0)
+            return TaxonomyName2IdMap.NOHITS_TAXONID;
+        else if (length == 1)
+            return taxonIds[0];
+
+        if (taxonIds.length > addresses.length) {  // grow, if necessary
+            addresses = new String[taxonIds.length];
+            weights = new int[taxonIds.length];
+        }
+
+        int countKnownTaxa = 0;
+
+        // compute addresses of all hit taxa:
+        for (int i = 0; i < length; i++) {
+            int taxonId = taxonIds[i];
+            if (!TaxonomyData.isTaxonDisabled(taxonId)) {
+                String address = TaxonomyTree.taxId2Address.get(taxonId);
+                if (address != null) {
+                    addresses[countKnownTaxa++] = address;
+                }
+            }
+        }
+
+        for (int i = 0; i < countKnownTaxa; i++) {
+            for (int j = 0; j < countKnownTaxa; j++) {
+                if (i != j && addresses[j] != null) {
+                    if (addresses[i].length() < addresses[j].length() && addresses[j].startsWith(addresses[i])) {
+                        addresses[i] = null;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // compute LCA using addresses:
+        if (countKnownTaxa > 0) {
+            final String address = TaxonomyData.getCommonPrefix(addresses, countKnownTaxa);
+            return TaxonomyTree.address2TaxId.get(address);
+        }
+
+        // although we had some hits, couldn't make an assignment
+        return TaxonomyName2IdMap.UNASSIGNED_TAXONID;
+    }
+
+
+    /**
+     * computes the weighted LCA
+     *
+     * @param tax2weight
+     * @return
+     */
+    public int computeWeightedLCA(final Map<Integer, Integer> tax2weight, final double proportionOfWeightToCover) {
+        if (tax2weight.size() == 0)
+            return TaxonomyName2IdMap.UNASSIGNED_TAXONID;
+        if (tax2weight.size() == 1)
+            return tax2weight.keySet().iterator().next();
+
+        if (tax2weight.size() > addresses.length) {  // grow, if necessary
+            addresses = new String[tax2weight.size()];
+            weights = new int[tax2weight.size()];
+        }
+
+        int length = 0;
+        int aTaxon = 0;
+        int totalWeight = 0;
+        for (Integer taxonId : tax2weight.keySet()) {
+            if (taxonId > 0) {
+                String address = TaxonomyTree.taxId2Address.get(taxonId);
+                Integer weight = tax2weight.get(taxonId);
+                if (address != null && weight != null) {
+                    addresses[length] = address;
+                    weights[length] = weight;
+                    totalWeight += weight;
+                    if (length == 0)
+                        aTaxon = taxonId;
+                    length++;
+                }
+                /*
+                else
+                    System.err.println("(Taxon mapping error: TaxonId="+taxonId+" address="+address+" weight="+weight+")");
+                    */
+            }
+        }
+        if (length == 0)
+            return TaxonomyName2IdMap.UNASSIGNED_TAXONID;
+        else if (length == 1)
+            return aTaxon;
+        try {
+            final int weightToCover = Math.min(totalWeight, (int) Math.ceil(proportionOfWeightToCover * totalWeight));
+            final String address = getCommonPrefix(weightToCover, addresses, weights, length);
+            if (address != null) {
+                return TaxonomyTree.address2TaxId.get(address);
+                /*
+                                int result=TaxonomyTree.address2TaxId.get(address);
+                if(result==77643) {
+                         System.err.println("Returning taxonId="+result+": originalTaxa: " + Basic.toString(tax2weight.keySet(), ",") +
+                                 "\noriginalWeights:  " + Basic.toString(tax2weight.values(), ",") + "\nLength: " + length +
+                                 "\nweights to cover: "+(weights==null?null:Basic.toString(weights,0,length,","))+
+                                 "\nWeight to cover:  " + weightToCover+" totalWeight: "+totalWeight);
+                }
+                                return result;
+                */
+            }
+        } catch (Exception ex) {
+            Basic.caught(ex);
+        }
+        return 1; // assign to root
+    }
+
+    private final BitSet activeSet = new BitSet();
+    private final Map<Character, Integer> ch2weight = new HashMap<Character, Integer>(Character.MAX_VALUE, 1f);
+
+    /**
+     * given a set of addresses, returns the longest prefix that equals or exceeds  the given weight threshold
+     *
+     * @param addresses
+     * @return prefix
+     */
+    private String getCommonPrefix(int weightToCover, String[] addresses, int[] weights, int length) {
+        ch2weight.clear();
+        activeSet.clear();
+        for (int i = 0; i < length; i++) {
+            activeSet.set(i);
+        }
+
+        final StringBuilder buf = new StringBuilder();
+
+        for (int pos = 0; ; pos++) {
+            for (int i = activeSet.nextSetBit(0); i != -1; i = activeSet.nextSetBit(i + 1)) {
+                if (pos == addresses[i].length()) {
+                    activeSet.set(i, false); // run out of symbols
+                    // todo: the next line does not work because it can lead to the weightToCover decreasing all the way to zero
+                    // weightToCover -= weights[i];   // this node lies on route to best node, so it is covered and its weight can  be removed from weightToCover
+                } else {
+                    char ch = addresses[i].charAt(pos);
+                    Integer count = ch2weight.get(ch);
+                    if (count == null)
+                        ch2weight.put(ch, weights[i]);
+                    else
+                        ch2weight.put(ch, count + weights[i]);
+                }
+            }
+            if (activeSet.cardinality() == 0)
+                break;
+
+            // determine the heaviest character
+            Character bestCh = null;
+            int bestCount = 0;
+            for (Character ch : ch2weight.keySet()) {
+                Integer weight = ch2weight.get(ch);
+                if (weight != null && weight > bestCount) {
+                    bestCh = ch;
+                    bestCount = weight;
+                }
+            }
+
+            if (bestCount >= weightToCover && bestCh != null)
+                buf.append(bestCh);
+            else
+                break;
+
+            for (int i = activeSet.nextSetBit(0); i != -1; i = activeSet.nextSetBit(i + 1)) {
+                if (addresses[i].charAt(pos) != bestCh)   // no length problem here, if address too short then it will not be active
+                    activeSet.set(i, false);   // not on best path, remove from active nodes
+            }
+            if (activeSet.cardinality() == 0)
+                break;
+            ch2weight.clear();
+        }
+
+        String result = buf.toString();
+
+        if (result.length() > 0) {
+            return result;
+        } else
+            return null;
+    }
+}

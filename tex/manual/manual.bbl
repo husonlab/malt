@@ -1,0 +1,83 @@
+\begin{thebibliography}{10}
+
+\bibitem{Burkhardt01}
+Stefan Burkhardt and Juha K{\"a}rkk{\"a}inen.
+\newblock Better filtering with gapped q-grams.
+\newblock {\em Fundamenta Informaticae}, XXIII:1001--1018, 2001.
+
+\bibitem{ChaoPM92}
+Kun-Mao Chao, William~R. Pearson, and Webb Miller.
+\newblock Aligning two sequences within a specified diagonal band.
+\newblock {\em Computer Applications in the Biosciences}, 8(5):481--487, 1992.
+
+\bibitem{MEGAN2007}
+D.~H. Huson, A.~F. Auch, J.~Qi, and S.~C. Schuster.
+\newblock {MEGAN} analysis of metagenomic data.
+\newblock {\em Genome Res}, 17(3):377--386, March 2007.
+
+\bibitem{MEGAN2011}
+Daniel~H Huson, Suparna Mitra, Nico Weber, Hans-Joachim Ruscheweyh, and
+  Stephan~C Schuster.
+\newblock Integrative analysis of environmental sequences using {MEGAN\,4}.
+\newblock {\em Genome Research}, 21:1552--1560, 2011.
+
+\bibitem{Ilie:2011fk}
+Lucian Ilie, Silvana Ilie, Shima Khoshraftar, and Anahita~Mansouri Bigvand.
+\newblock Seeds for effective oligonucleotide design.
+\newblock {\em BMC Genomics}, 12:280, 2011.
+
+\bibitem{Kanehisa2000}
+M.~Kanehisa and S.~Goto.
+\newblock {KEGG}: {Kyoto} encyclopedia of genes and genomes.
+\newblock {\em Nucleic Acids Res}, 28(1):27--30, Jan 2000.
+
+\bibitem{Ma02}
+Bin Ma, John Tromp, and Ming Li.
+\newblock {PatternHunter}: faster and more sensitive homology search.
+\newblock {\em Bioinformatics}, 18(3):440--445, 2002.
+
+\bibitem{Murphy2000}
+Lynne~Reed Murphy, Anders Wallqvist, and Ronald~M. Levy.
+\newblock Simplified amino acid alphabets for protein fold recognition and
+  implications for folding.
+\newblock {\em Protein Engineering}, 13:149--152(4), 2000.
+
+\bibitem{SSAHA}
+Z.~Ning, A.~J. Cox, and J.~C. Mullikin.
+\newblock {SSAHA}: a fast search method for large {DNA} databases.
+\newblock {\em Genome Res}, 11(10):1725--1729, 2001.
+
+\bibitem{SEED2005}
+Ross Overbeek, Tadhg Begley, Ralph~M Butler, Jomuna~V Choudhuri, Han-Yu Chuang,
+  Matthew Cohoon, Val\'erie de~Cr\'ecy-Lagard, Naryttza Diaz, Terry Disz,
+  Robert Edwards, Michael Fonstein, Ed~D Frank, Svetlana Gerdes, Elizabeth~M
+  Glass, Alexander Goesmann, Andrew Hanson, Dirk Iwata-Reuyl, Roy Jensen, Neema
+  Jamshidi, Lutz Krause, Michael Kubal, Niels Larsen, Burkhard Linke, Alice~C
+  McHardy, Folker Meyer, Heiko Neuweger, Gary Olsen, Robert Olson, Andrei
+  Osterman, Vasiliy Portnoy, Gordon~D Pusch, Dmitry~A Rodionov, Christian
+  R\"uckert, Jason Steiner, Rick Stevens, Ines Thiele, Olga Vassieva, Yuzhen
+  Ye, Olga Zagnitko, and Veronika Vonstein.
+\newblock The subsystems approach to genome annotation and its use in the
+  project to annotate 1000 genomes.
+\newblock {\em Nucleic Acids Res}, 33(17):5691--5702, 2005.
+
+\bibitem{eggNOG}
+Sean Powell, Damian Szklarczyk, Kalliopi Trachana, Alexander Roth, Michael
+  Kuhn, Jean Muller, Roland Arnold, Thomas Rattei, Ivica Letunic, Tobias
+  Doerks, Lars~Juhl Jensen, Christian von Mering, and Peer Bork.
+\newblock {eggNOG} v3.0: orthologous groups covering 1133 organisms at 41
+  different taxonomic ranges.
+\newblock {\em Nucleic Acids Research}, 40(Database-Issue):284--289, 2012.
+
+\bibitem{Tatusov1997}
+R.~L. Tatusov, E.~V. Koonin, and D.~J. Lipman.
+\newblock A genomic perspective on protein families.
+\newblock {\em Science}, 278(5338):631--637, Oct 1997.
+
+\bibitem{RapSearch2}
+Yongan Zhao, Haixu Tang, and Yuzhen Ye.
+\newblock {RAPSearch2}: a fast and memory-efficient protein similarity search
+  tool for next-generation sequencing data.
+\newblock {\em Bioinformatics}, 28(1):125--126, 2012.
+
+\end{thebibliography}

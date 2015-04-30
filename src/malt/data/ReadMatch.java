@@ -1,0 +1,151 @@
+package malt.data;
+
+import jloda.util.Basic;
+
+import java.util.Comparator;
+
+/**
+ * A match for a given read
+ * Daniel Huson, 8.2014
+ */
+public
+/**
+ * a read match, consisting of a score, reference ID and the match text
+ */
+class ReadMatch {
+    private static long numberOfEntries = 0;
+    private long entryNumber;  // used to make all matches unique
+
+    private float bitScore;
+    private float expected;
+    private int percentIdentity;
+    private int refId;
+    private byte[] text;      // match text
+    private byte[] rma3Text;
+
+    private int startRef; // start position of match in reference sequence
+    private int endRef;  // end position of match in reference sequence
+
+    /**
+     * constructor
+     */
+    public ReadMatch() {
+
+    }
+
+    /**
+     * returns a copy
+     *
+     * @return copy
+     */
+    public ReadMatch getCopy() {
+        return new ReadMatch(bitScore, expected, percentIdentity, refId, text, rma3Text, startRef, endRef);
+    }
+
+    /**
+     * constructor
+     *
+     * @param bitScore
+     * @param refId
+     * @param text
+     */
+    public ReadMatch(float bitScore, float expected, int percentIdentity, int refId, byte[] text, byte[] rma3Text, int startRef, int endRef) {
+        this.bitScore = bitScore;
+        this.expected = expected;
+        this.percentIdentity = percentIdentity;
+        this.refId = refId;
+        this.entryNumber = ++numberOfEntries;
+        this.text = text;
+        this.rma3Text = rma3Text;
+        this.startRef = startRef;
+        this.endRef = endRef;
+    }
+
+    /**
+     * reuse this object
+     *
+     * @param score
+     * @param refId
+     * @param text
+     */
+    public void set(float score, int refId, byte[] text, byte[] rma3Text, int startRef, int endRef) {
+        this.bitScore = score;
+        this.refId = refId;
+        this.entryNumber = ++numberOfEntries;
+        this.text = text;
+        this.rma3Text = rma3Text;
+        this.startRef = startRef;
+        this.endRef = endRef;
+    }
+
+    public double getBitScore() {
+        return bitScore;
+    }
+
+    public float getExpected() {
+        return expected;
+    }
+
+    public int getPercentIdentity() {
+        return percentIdentity;
+    }
+
+    public int getRefId() {
+        return refId;
+    }
+
+    public byte[] getText() {
+        return text;
+    }
+
+    public byte[] getRMA3Text() {
+        return rma3Text;
+    }
+
+    public int getStartRef() {
+        return startRef;
+    }
+
+    public int getEndRef() {
+        return endRef;
+    }
+
+    public String toString() {
+        return "RefId=" + refId + " bitScore=" + bitScore + " start=" + startRef + " end=" + endRef + " text=" + (text == null ? "null" : Basic.toString(text));
+    }
+
+    /**
+     * get comparator
+     */
+    static public Comparator<ReadMatch> createComparator() {
+        return new Comparator<ReadMatch>() {
+            public int compare(ReadMatch a, ReadMatch b) {
+                if (a.bitScore < b.bitScore)
+                    return -1;
+                else if (a.bitScore > b.bitScore)
+                    return 1;
+                else if (a.refId < b.refId)
+                    return 1;
+                else if (a.refId > b.refId)
+                    return -1;
+                else if (a.entryNumber < b.entryNumber)
+                    return -1;
+                else if (a.entryNumber > b.entryNumber)
+                    return 1;
+                else
+                    return 0;
+            }
+        };
+    }
+
+    /**
+     * does this overlap the given reference coordinates?
+     *
+     * @param start
+     * @param end
+     * @return overlaps the given coordinates?
+     */
+    public boolean overlap(int start, int end) {
+        return !(Math.min(startRef, endRef) >= Math.max(start, end) || Math.max(startRef, endRef) <= Math.min(start, end));
+    }
+}
