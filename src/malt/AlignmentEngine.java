@@ -13,7 +13,7 @@ import malt.malt2.Malt2RMA3Writer;
 import malt.mapping.TaxonMapping;
 import malt.util.FixedSizePriorityQueue;
 import malt.util.Utilities;
-import megan.util.BlastMode;
+import megan.parsers.blast.BlastMode;
 
 import java.io.IOException;
 import java.io.OutputStream;

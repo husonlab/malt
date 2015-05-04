@@ -1,7 +1,7 @@
 package malt.io;
 
 import malt.data.DNA5;
-import megan.util.BlastMode;
+import megan.parsers.blast.BlastMode;
 
 /**
  * helps to create a SAM line from an alignment

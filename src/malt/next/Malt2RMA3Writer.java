@@ -5,15 +5,16 @@ import jloda.util.CanceledException;
 import jloda.util.ListOfLongs;
 import jloda.util.ProgressPercentage;
 import malt.Version;
+import malt.malt2.AnalyzerRMA3;
 import malt.mapping.MappingHelper;
 import megan.algorithms.MinSupportFilter;
 import megan.core.ClassificationType;
 import megan.core.SampleAttributeTable;
 import megan.data.TextStoragePolicy;
+import megan.io.OutputWriter;
+import megan.parsers.blast.BlastMode;
 import megan.parsers.sam.SAMMatch;
-import megan.rma2.io.OutputWriter;
 import megan.rma3.*;
-import megan.util.BlastMode;
 
 import java.io.File;
 import java.io.IOException;
@@ -117,7 +118,7 @@ public class Malt2RMA3Writer {
         matchesFooter.setUseSeed(doSeed);
         matchesFooter.setUseCog(doCog);
 
-        classificationsFooter = new ClassificationsFooterRMA3(doKegg, doSeed, doCog);
+        classificationsFooter = new ClassificationsFooterRMA3(doKegg, doSeed, doCog, false);
 
         auxFooter = new AuxBlocksFooterRMA3();
 
@@ -127,7 +128,7 @@ public class Malt2RMA3Writer {
 
         matches = new MatchLineRMA3[matchesFooter.getMaxMatchesPerRead()];
         for (int i = 0; i < matches.length; i++) {
-            matches[i] = new MatchLineRMA3(TextStoragePolicy.Embed, matchesFooter.isUseKegg(), matchesFooter.isUseSeed(), matchesFooter.isUseCog());
+            matches[i] = new MatchLineRMA3(TextStoragePolicy.Embed, matchesFooter.isUseKegg(), matchesFooter.isUseSeed(), matchesFooter.isUseCog(), false);
         }
         matchesFooter.setMatchFormatDef(matches[0].getFormatDef());
 

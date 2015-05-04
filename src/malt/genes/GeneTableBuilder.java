@@ -4,8 +4,8 @@ import jloda.util.Basic;
 import jloda.util.FileInputIterator;
 import jloda.util.ProgressPercentage;
 import malt.data.ReferencesDBBuilder;
-import megan.access.ClassificationMapper;
-import megan.cogviewer.data.CogData;
+import megan.classification.ClassificationManager;
+import megan.classification.IdMapper;
 import net.sf.picard.util.IntervalTree;
 
 import java.io.*;
@@ -22,21 +22,30 @@ import java.util.concurrent.Executors;
  */
 public class GeneTableBuilder {
     final public static byte[] MAGIC_NUMBER = "MAGenesV0.3.".getBytes();
-    private final ClassificationMapper mapper;
 
     private final int numberOfSyncObjects = 1024;
     private final Object[] syncObjects = new Object[numberOfSyncObjects];  // use lots of objects to synchronize on so that threads don't in each others way
+    private final IdMapper keggMapper;
+    private final IdMapper cogMapper;
 
     /**
      * constructor
      *
      * @throws IOException
      */
-    public GeneTableBuilder(final ClassificationMapper mapper) throws IOException {
+    public GeneTableBuilder() throws IOException {
         // create the synchronization objects
         for (int i = 0; i < numberOfSyncObjects; i++)
             syncObjects[i] = new Object();
-        this.mapper = mapper;
+
+        if (ClassificationManager.get("KEGG").getIdMapper().isActiveMap(IdMapper.MapType.GI))
+            keggMapper = ClassificationManager.get("KEGG").getIdMapper();
+        else
+            keggMapper = null;
+        if (ClassificationManager.get("COG").getIdMapper().isActiveMap(IdMapper.MapType.GI))
+            cogMapper = ClassificationManager.get("COG").getIdMapper();
+        else
+            cogMapper = null;
     }
 
     /**
@@ -66,7 +75,7 @@ public class GeneTableBuilder {
      * @return gi to reference index mapping
      */
     private Map<Long, Integer> computeGi2RefIndex(final ReferencesDBBuilder referencesDB, final int numberOfThreads) {
-        final Map<Long, Integer> gi2refIndex = new HashMap<Long, Integer>(referencesDB.getNumberOfSequences(), 1f);
+        final Map<Long, Integer> gi2refIndex = new HashMap<>(referencesDB.getNumberOfSequences(), 1f);
 
         final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
         final CountDownLatch countDownLatch = new CountDownLatch(numberOfThreads);
@@ -202,7 +211,7 @@ public class GeneTableBuilder {
                     location = new int[]{1, referencesDB.getSequence(refIndex).length};
                 } else {
                     location = parseLocations(tokens[1]);
-                    if (location.length == 0)
+                    if (location == null || location.length == 0)
                         return false; // no locations, skip
                 }
                 if (tokens[2].equals("*")) { // a "*" indicates to use the same GI number as reference
@@ -210,22 +219,25 @@ public class GeneTableBuilder {
                 } else
                     geneItem.setGiNumber(Basic.parseLong(tokens[2].trim()));
                 // set ko number:
+                if (keggMapper != null)
                 {
-                    Integer ko = mapper.getKeggIdFromGI(geneItem.getGiNumber());
+                    Integer ko = keggMapper.getIdFromGI(geneItem.getGiNumber());
                     if (ko != null && ko != 0) {
                         geneItem.setKeggId(String.format("K%05d", ko).getBytes());
                         // System.err.println("gi: "+geneItem.getGiNumber()+" ko: "+ko);
                     }
                 }
                 // set cog:
+                if (cogMapper != null)
                 {
-                    Integer cog = mapper.getCogIdFromGI(geneItem.getGiNumber());
+                    Integer cog = cogMapper.getIdFromGI(geneItem.getGiNumber());
                     if (cog != null && cog != 0) {
-                        String name = CogData.getName2IdMap().get(cog);
+                        String name = cogMapper.getName2IdMap().get(cog);
                         if (name != null)
                             geneItem.setCogId(name.getBytes());
                     }
                 }
+
                 if (tokens.length > 3)
                     geneItem.setProteinId(tokens[3].trim().getBytes());
                 if (tokens.length > 4)

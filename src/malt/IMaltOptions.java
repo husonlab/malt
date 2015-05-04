@@ -1,9 +1,12 @@
 package malt;
 
-import megan.util.BlastMode;
+
+import megan.parsers.blast.BlastMode;
 
 /**
- * Created by huson on 10/17/14.
+ * malt options
+ *
+ * Daniel Huson, 4.2015
  */
 public interface IMaltOptions {
 

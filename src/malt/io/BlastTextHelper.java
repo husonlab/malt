@@ -1,6 +1,7 @@
 package malt.io;
 
-import megan.util.BlastMode;
+
+import megan.parsers.blast.BlastMode;
 
 /**
  * some methods to help generate BLAST text output

@@ -9,9 +9,7 @@ import malt.align.ProteinScoringMatrix;
 import malt.data.SequenceType;
 import malt.mapping.MappingHelper;
 import malt.sequence.*;
-import megan.main.LicensedSoftware;
-import megan.main.MeganProperties;
-import megan.util.BlastMode;
+import megan.parsers.blast.BlastMode;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +23,7 @@ import java.util.concurrent.Executors;
  * <p/>
  * Daniel Huson, August 2014
  */
-public class MaltRun2 extends LicensedSoftware {
+public class MaltRun2 {
     /**
      * run the program
      *
@@ -43,8 +41,6 @@ public class MaltRun2 extends LicensedSoftware {
             ProgramProperties.setProgramVersion(Version.SHORT_DESCRIPTION);
 
             program.run(args);
-            if (!program.hasValidLicense())
-                throw new IOException("Failed to verify license");
 
             System.err.println("Total time: " + ((System.currentTimeMillis() - start) / 1000) + "s");
             System.err.println("Memory use: " + PeakMemoryUsageMonitor.getPeakUsageString());
@@ -70,8 +66,6 @@ public class MaltRun2 extends LicensedSoftware {
      * @throws java.io.IOException
      */
     public void run(String[] args) throws UsageException, IOException, CanceledException, InterruptedException {
-        loadPublicKey();
-
         final MaltOptions2 maltOptions = new MaltOptions2();
         final AlignerOptions alignerOptions = new AlignerOptions();
 
@@ -164,10 +158,6 @@ public class MaltRun2 extends LicensedSoftware {
         alignerOptions.setUngappedMinRawScore(options.getOption("-sfUMS", "sfUngappedMinScore", "Min raw score for ungapped alignment (0: use default", alignerOptions.getUngappedMinRawScore(maltOptions.getMode())));
         alignerOptions.setUngappedXDrop(options.getOption("-sfUX", "sfUngappedXDrop", "Set the ungapped alignment xdrop (0: use default)", alignerOptions.getUngappedXDrop(maltOptions.getMode())));
 
-        options.comment("Properties and license:");
-        if (!loadPropertiesAndLicense(options))
-            throw new IOException("License file not found: " + ProgramProperties.get(MeganProperties.LICENSE_FILE));
-
         options.comment(ArgsOptions.OTHER);
         final int replicateQueryCacheBits;
         if (maltOptions.isUseReplicateQueryCaching() || options.isDoHelp())
@@ -179,9 +169,6 @@ public class MaltRun2 extends LicensedSoftware {
 
         Basic.setDebugMode(options.isVerbose());
 
-        verifyLicense();
-        if (hasValidLicense())
-            System.err.println("\nMEGAN5 license certificate:\n" + license.toString());
 
         malt.util.Utilities.checkFileExists(new File(indexDirectory, "malt.idx"));
         malt.util.Utilities.checkFileExists(new File(indexDirectory, "ref.idx"));
@@ -200,10 +187,6 @@ public class MaltRun2 extends LicensedSoftware {
         final Alphabet queryAlphabet;
 
         final QueryStore.SequenceType queryType;
-
-        // terminate if invalid license:
-        if (licenseInvalid)
-            return;
 
         switch (maltOptions.getMode()) {
             case BlastN:
@@ -294,10 +277,6 @@ public class MaltRun2 extends LicensedSoftware {
         final ExecutorService threadPool = Executors.newFixedThreadPool(maltOptions.getNumberOfThreads());
 
         int numberOfJobs = 0;
-
-        // terminate if no valid license:
-        if (!licenseValid)
-            return;
 
         // process each input file
         for (String inFile : inputFileNames) {

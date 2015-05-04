@@ -17,9 +17,7 @@ import malt.mapping.MappingHelper;
 import malt.mapping.TaxonMapping;
 import malt.util.ProfileUtilities;
 import malt.util.Utilities;
-import megan.main.LicensedSoftware;
-import megan.main.MeganProperties;
-import megan.util.BlastMode;
+import megan.parsers.blast.BlastMode;
 
 import javax.xml.bind.JAXBException;
 import java.io.*;
@@ -37,7 +35,7 @@ import java.util.concurrent.Executors;
  * the MALT metagenome alignment tool
  * Daniel Huson, 8.2014
  */
-public class MaltRun extends LicensedSoftware {
+public class MaltRun {
     public static String version;
 
     private long totalReads = 0;
@@ -61,8 +59,7 @@ public class MaltRun extends LicensedSoftware {
             ProgramProperties.setProgramVersion(Version.SHORT_DESCRIPTION);
 
             program.run(args);
-            if (!program.hasValidLicense())
-                throw new IOException("Failed to verify license");
+
             System.err.println("Total time: " + ((System.currentTimeMillis() - start) / 1000) + "s");
             System.err.println("Memory use: " + PeakMemoryUsageMonitor.getPeakUsageString());
             if (!ArgsOptions.hasMessageWindow())
@@ -87,7 +84,6 @@ public class MaltRun extends LicensedSoftware {
      * @throws java.io.IOException
      */
     public void run(final String[] args) throws UsageException, IOException, CanceledException, JAXBException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
-        loadPublicKey();
         version = Basic.getVersion(this.getClass());
         final MaltOptions maltOptions = new MaltOptions();
         final AlignerOptions alignerOptions = new AlignerOptions();
@@ -191,10 +187,6 @@ public class MaltRun extends LicensedSoftware {
         alignerOptions.setGapExtensionPenalty(options.getOption("ge", "gapExtend", "Gap extension penalty", referenceSequenceType == SequenceType.DNA ? 3 : 1));
         alignerOptions.setBand(options.getOption("bd", "band", "Band width/2 for banded alignment", alignerOptions.getBand()));
 
-        options.comment("Properties and license:");
-        if (!loadPropertiesAndLicense(options))
-            throw new IOException("License file not found: " + ProgramProperties.get(MeganProperties.LICENSE_FILE));
-
         options.comment(ArgsOptions.OTHER);
         int replicateQueryCacheBits = options.getOption("rqcb", "replicateQueryCacheBits", "Bits used for caching replicate queries (size is then 2^bits)", 20);
         final boolean showAPart = options.getOption("xP", "xPart", "Show part of the table in human readable form for debugging", false);
@@ -216,18 +208,12 @@ public class MaltRun extends LicensedSoftware {
                 throw new IOException("--mode " + maltOptions.getMode() + " not compatible with index containing sequences of type: " + indexSequencesType);
         }
 
-        verifyLicense();
-
         if (querySequenceType == SequenceType.Protein) {
             maltOptions.setQueryAlphabet(ProteinAlphabet.getInstance());
         } else if (querySequenceType == SequenceType.DNA) {
             maltOptions.setQueryAlphabet(DNA5.getInstance());
         } else
             throw new UsageException("Undefined query sequence type: " + querySequenceType);
-
-        if (hasValidLicense()) {
-            System.err.println("\nMEGAN5 license certificate:\n" + license.toString());
-        }
 
         if (referenceSequenceType == SequenceType.Protein) {
             alignerOptions.setScoringMatrix(ProteinScoringMatrix.create(nameOfProteinScoringMatrix));
@@ -294,10 +280,6 @@ public class MaltRun extends LicensedSoftware {
             geneTableAccess = new GeneTableAccess(new File(indexDirectory, "gene-table.idx"));
         else
             geneTableAccess = null;
-
-        // terminate if no valid license:
-        if (!licenseValid)
-            return;
 
         // run alignment for each input file:
         int fileNumber = 0;

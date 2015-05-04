@@ -9,7 +9,7 @@ import malt.data.DNA5;
 import malt.data.Row;
 import malt.data.Translator;
 import malt.util.Utilities;
-import megan.util.BlastMode;
+import megan.parsers.blast.BlastMode;
 
 import java.io.IOException;
 

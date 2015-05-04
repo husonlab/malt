@@ -7,7 +7,7 @@ import malt.data.DNA5;
 import malt.io.SAMHelper;
 import malt.util.ReusableByteBuffer;
 import malt.util.Utilities;
-import megan.util.BlastMode;
+import megan.parsers.blast.BlastMode;
 
 import java.io.IOException;
 

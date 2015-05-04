@@ -6,7 +6,9 @@ import jloda.util.UsageException;
 import malt.data.ReadMatch;
 import malt.data.Row;
 import malt.data.SequenceType;
-import megan.util.BlastMode;
+import megan.classification.IdMapper;
+import megan.classification.commandtemplates.LoadMappingFileCommand;
+import megan.parsers.blast.BlastMode;
 
 import java.io.*;
 import java.util.Random;
@@ -562,5 +564,30 @@ public class Utilities {
                 return file;
         }
         return null;
+    }
+
+    /**
+     * is one of the three names non null and of length>0?
+     *
+     * @param fileA
+     * @param fileB
+     * @param fileC
+     * @return true, if a file is specified
+     */
+    public static boolean hasAMapping(String fileA, String fileB, String fileC) {
+        return fileA != null && fileA.length() > 0 || fileB != null && fileB.length() > 0 || fileC != null && fileC.length() > 0;
+    }
+
+    /**
+     * load a mapping file
+     *
+     * @param fileName
+     * @param mapType
+     * @param fName
+     * @throws Exception
+     */
+    public static void loadMapping(String fileName, IdMapper.MapType mapType, String fName) throws Exception {
+        if (fileName.length() > 0)
+            (new LoadMappingFileCommand()).apply("load mapFile='" + fileName + "' mapType=" + mapType.toString() + " fName=" + fName + ";");
     }
 }

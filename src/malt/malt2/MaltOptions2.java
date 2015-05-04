@@ -1,7 +1,7 @@
 package malt.malt2;
 
 import malt.IMaltOptions;
-import megan.util.BlastMode;
+import megan.parsers.blast.BlastMode;
 
 /**
  * maintains the set of Malt options

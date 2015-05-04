@@ -9,11 +9,11 @@ import malt.mapping.KeggMapping;
 import malt.mapping.SeedMapping;
 import malt.mapping.TaxonMapping;
 import malt.sequence.*;
-import megan.access.ClassificationHelper;
-import megan.access.ClassificationMapper;
-import megan.cogviewer.data.CogData;
-import megan.main.LicensedSoftware;
-import megan.main.MeganProperties;
+import malt.util.Utilities;
+import megan.classification.Classification;
+import megan.classification.ClassificationManager;
+import megan.classification.IdMapper;
+import megan.classification.IdParser;
 import megan.mainviewer.data.TaxonomyData;
 
 import java.io.File;
@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
  * build MALT index
  * Daniel Huson, 8.2014
  */
-public class MaltBuild2 extends LicensedSoftware {
+public class MaltBuild2 {
     // use lots of locks so that threads don't get in each others way
     private final int NUMBER_OF_SYNC_OBJECTS = (1 << 10);
     private final int SYNC_MASK = (NUMBER_OF_SYNC_OBJECTS - 1);
@@ -58,9 +58,6 @@ public class MaltBuild2 extends LicensedSoftware {
 
             program.run(args);
 
-            if (!program.hasValidLicense())
-                throw new IOException("Failed to verify license");
-
             System.err.println("Total time: " + ((System.currentTimeMillis() - start) / 1000) + "s");
             System.err.println("Memory use: " + PeakMemoryUsageMonitor.getPeakUsageString());
             if (!ArgsOptions.hasMessageWindow())
@@ -84,9 +81,7 @@ public class MaltBuild2 extends LicensedSoftware {
      * @throws jloda.util.UsageException
      * @throws java.io.IOException
      */
-    public void run(String[] args) throws UsageException, IOException, CanceledException, InterruptedException {
-        loadPublicKey();
-
+    public void run(String[] args) throws Exception {
         // parse commandline options:
         final ArgsOptions options = new ArgsOptions(args, this, "Builds the MALT index");
         options.setAuthors("Daniel H. Huson");
@@ -142,25 +137,8 @@ public class MaltBuild2 extends LicensedSoftware {
 
         final String geneTableFile = options.getOption("-gif", "-geneInfoFile", "File containing gene information", "");
 
-        options.comment("Additional files:");
-        final String taxTreeFile = options.getOption("-tre", "taxTree", "NCBI tree file (ncbi.tre as used by MEGAN)", null, "",
-                ClassificationHelper.hasAMapping(synonyms2TaxaFile, refSeq2TaxaFile, gi2TaxaFile) || geneTableFile.length() > 0);
-        final String taxMapFile = options.getOption("-map", "taxMap", "NCBI map file (ncbi.map as used by MEGAN)", null, "",
-                ClassificationHelper.hasAMapping(synonyms2TaxaFile, refSeq2TaxaFile, gi2TaxaFile) || geneTableFile.length() > 0);
-
-        final String cogMapFile = options.getOption("-cmf", "cogMappingFile", "COG mapping file (cog.map file as used by MEGAN)", null, "",
-                (gi2CogFile.length() > 0 || refSeq2CogFile.length() > 0 || synonyms2CogFile.length() > 0));
-
-        options.comment("Properties and license:");
-        if (!loadPropertiesAndLicense(options))
-            throw new IOException("License file not found: " + ProgramProperties.get(MeganProperties.LICENSE_FILE));
-
         options.done();
         Basic.setDebugMode(options.isVerbose());
-
-        verifyLicense();
-        if (hasValidLicense())
-            System.err.println("\nMEGAN5 license certificate:\n" + license.toString());
 
         System.err.println("Reference sequence type set to: " + sequenceType.toString());
         final SeedShape2[] seedShapes;
@@ -200,9 +178,6 @@ public class MaltBuild2 extends LicensedSoftware {
         System.err.println("Seed shape(s):\n\t" + Basic.toString(shapes, "\t\n"));
 
         // terminate if invalid license:
-        if (licenseInvalid)
-            return;
-
         final File indexDirectory = new File(indexDirectoryName);
 
         if (indexDirectory.exists()) {
@@ -227,55 +202,49 @@ public class MaltBuild2 extends LicensedSoftware {
         index.setSeedCounts(refStoreBuilder.getSeedCounts());
         index.setSeedShapes(seedShapes);
 
-        // terminate if no valid license:
-        if (!licenseValid)
-            return;
-
-        final ClassificationMapper mapper = new ClassificationMapper();
         // build classification index files, if requested
-        if (ClassificationHelper.hasAMapping(synonyms2TaxaFile, refSeq2TaxaFile, gi2TaxaFile) || geneTableFile.length() > 0) {
+        if (malt.util.Utilities.hasAMapping(synonyms2TaxaFile, refSeq2TaxaFile, gi2TaxaFile) || geneTableFile.length() > 0) {
             final File indexTreeFile = new File(indexDirectory, "taxonomy.tre");
             final File indexMapFile = new File(indexDirectory, "taxonomy.map");
-            if (!indexTreeFile.equals(new File(taxTreeFile)))
-                Basic.copyFileUncompressed(new File(taxTreeFile), indexTreeFile);
-            if (!indexMapFile.equals(new File(taxMapFile)))
-                Basic.copyFileUncompressed(new File(taxMapFile), indexMapFile);
+            Basic.writeStreamToFile(ResourceManager.getFileAsStream("ncbi.tre"), indexTreeFile);
+            Basic.writeStreamToFile(ResourceManager.getFileAsStream("ncbi.map"), indexMapFile);
+            TaxonomyData.getName2IdMap().loadFromFile("ncbi.tre");
+            TaxonomyData.getTree().loadFromFile("ncbi.map");
 
-            TaxonomyData.getName2IdMap().loadFromFile(taxMapFile);
-            TaxonomyData.getTree().loadFromFile(taxTreeFile);
+            malt.util.Utilities.loadMapping(synonyms2TaxaFile, IdMapper.MapType.Synonyms, Classification.Taxonomy);
+            Utilities.loadMapping(refSeq2TaxaFile, IdMapper.MapType.RefSeq, Classification.Taxonomy);
+            Utilities.loadMapping(gi2TaxaFile, IdMapper.MapType.GI, Classification.Taxonomy);
 
-            ClassificationHelper.loadTaxonMapping(synonyms2TaxaFile, refSeq2TaxaFile, gi2TaxaFile, mapper);
-            final TaxonMapping taxonMapping = TaxonMapping.create(refStoreBuilder, mapper, new ProgressPercentage("Building taxon-mapping..."));
+            final IdParser idParser = ClassificationManager.get(Classification.Taxonomy).getIdMapper().createIdParser();
+            final TaxonMapping taxonMapping = TaxonMapping.create(refStoreBuilder, idParser, new ProgressPercentage("Building taxon-mapping..."));
             taxonMapping.save(new File(indexDirectory, "taxonomy.idx"));
             index.setDoTaxonomy(true);
         }
-        if (ClassificationHelper.hasAMapping(synonyms2KeggFile, refSeq2KeggFile, gi2KeggFile)) {
-            ClassificationHelper.loadKeggMapping(synonyms2KeggFile, refSeq2KeggFile, gi2KeggFile, mapper);
-            final KeggMapping keggMapping = KeggMapping.create(refStoreBuilder, mapper, new ProgressPercentage("Building KEGG-mapping..."));
+        if (malt.util.Utilities.hasAMapping(synonyms2KeggFile, refSeq2KeggFile, gi2KeggFile)) {
+            Utilities.loadMapping(synonyms2KeggFile, IdMapper.MapType.Synonyms, "KEGG");
+            Utilities.loadMapping(refSeq2KeggFile, IdMapper.MapType.RefSeq, "KEGG");
+            Utilities.loadMapping(gi2KeggFile, IdMapper.MapType.GI, "KEGG");
+            final IdParser idParser = ClassificationManager.get("KEGG").getIdMapper().createIdParser();
+            final KeggMapping keggMapping = KeggMapping.create(refStoreBuilder, idParser, new ProgressPercentage("Building KEGG-mapping..."));
             keggMapping.save(new File(indexDirectory, "kegg.idx"));
             index.setDoKegg(true);
         }
-        if (ClassificationHelper.hasAMapping(synonyms2SeedFile, refSeq2SeedFile, gi2SeedFile)) {
-            ClassificationHelper.loadSeedMapping(synonyms2SeedFile, refSeq2SeedFile, gi2SeedFile, mapper);
-            SeedMapping seedMapping = SeedMapping.create(refStoreBuilder, mapper, new ProgressPercentage("Building SEED-mapping..."));
+        if (malt.util.Utilities.hasAMapping(synonyms2SeedFile, refSeq2SeedFile, gi2SeedFile)) {
+            Utilities.loadMapping(synonyms2SeedFile, IdMapper.MapType.Synonyms, "SEED");
+            Utilities.loadMapping(refSeq2SeedFile, IdMapper.MapType.RefSeq, "SEED");
+            Utilities.loadMapping(gi2SeedFile, IdMapper.MapType.GI, "SEED");
+            final IdParser idParser = ClassificationManager.get("SEED").getIdMapper().createIdParser();
+            SeedMapping seedMapping = SeedMapping.create(refStoreBuilder, idParser, new ProgressPercentage("Building SEED-mapping..."));
             seedMapping.save(new File(indexDirectory, "seed.idx"));
             index.setDoSeed(true);
         }
-        if (ClassificationHelper.hasAMapping(synonyms2CogFile, refSeq2CogFile, gi2CogFile)) {
-            CogData.getName2IdMap().loadFromFile(cogMapFile);
-            if (synonyms2CogFile.length() > 0) {
-                ClassificationMapper.loadMappingFile(CogData.getName2IdMap().getName2Id(), ClassificationMapper.Classification.COG, ClassificationMapper.MapType.SYNONYMS_MAP, synonyms2CogFile, new ProgressPercentage("Reading file: " + synonyms2CogFile), true);
-                mapper.setActive(ClassificationMapper.Classification.COG, ClassificationMapper.MapType.SYNONYMS_MAP, true);
-            }
-            if (gi2CogFile.length() > 0) {
-                ClassificationMapper.loadMappingFile(CogData.getName2IdMap().getName2Id(), ClassificationMapper.Classification.COG, ClassificationMapper.MapType.GI_MAP, gi2CogFile, new ProgressPercentage("Reading file: " + gi2CogFile), true);
-                mapper.setActive(ClassificationMapper.Classification.COG, ClassificationMapper.MapType.GI_MAP, true);
-            }
-            if (refSeq2CogFile.length() > 0) {
-                ClassificationMapper.loadMappingFile(CogData.getName2IdMap().getName2Id(), ClassificationMapper.Classification.COG, ClassificationMapper.MapType.REFSEQ_MAP, refSeq2CogFile, new ProgressPercentage("Reading file: " + refSeq2CogFile), true);
-                mapper.setActive(ClassificationMapper.Classification.COG, ClassificationMapper.MapType.REFSEQ_MAP, true);
-            }
-            final CogMapping cogMapping = CogMapping.create(refStoreBuilder, mapper, new ProgressPercentage("Building COG-mapping..."));
+        if (malt.util.Utilities.hasAMapping(synonyms2CogFile, refSeq2CogFile, gi2CogFile)) {
+            Utilities.loadMapping(synonyms2CogFile, IdMapper.MapType.Synonyms, "COG");
+            Utilities.loadMapping(refSeq2CogFile, IdMapper.MapType.RefSeq, "COG");
+            Utilities.loadMapping(gi2CogFile, IdMapper.MapType.GI, "COG");
+
+            final IdParser idParser = ClassificationManager.get("COG").getIdMapper().createIdParser();
+            final CogMapping cogMapping = CogMapping.create(refStoreBuilder, idParser, new ProgressPercentage("Building COG-mapping..."));
             cogMapping.save(new File(indexDirectory, "cog.idx"));
             index.setDoCog(true);
         }
@@ -414,4 +383,5 @@ public class MaltBuild2 extends LicensedSoftware {
                 System.err.println("No mask file written");
         }
     }
+
 }

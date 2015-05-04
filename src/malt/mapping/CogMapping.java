@@ -7,7 +7,7 @@ import jloda.util.ProgressPercentage;
 import malt.data.ISequenceAccessor;
 import malt.data.RefIndex2ClassId;
 import malt.data.ReferencesDBBuilder;
-import megan.access.ClassificationMapper;
+import megan.classification.IdParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,15 +34,15 @@ public class CogMapping extends RefIndex2ClassId {
      * @param referencesDB
      * @param progress
      */
-    public static CogMapping create(final ISequenceAccessor referencesDB, ClassificationMapper classificationMapper, ProgressListener progress) throws CanceledException {
+    public static CogMapping create(final ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException {
         CogMapping mapping = new CogMapping(referencesDB.getNumberOfSequences());
 
         progress.setMaximum(referencesDB.getNumberOfSequences());
         progress.setProgress(0);
         for (int i = 0; i < referencesDB.getNumberOfSequences(); i++) {
             String header = Basic.toString(referencesDB.getHeader(i));
-            Integer classId = classificationMapper.getCogIdFromHeaderLine(header);
-            if (classId != null) {
+            Integer classId = classificationMapper.getIdFromHeaderLine(header);
+            if (classId != 0) {
                 mapping.put(i, classId);
                 referencesDB.extendHeader(i, ReferencesDBBuilder.COG_TAG, classId);
             }

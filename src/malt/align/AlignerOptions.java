@@ -1,7 +1,7 @@
 package malt.align;
 
 import jloda.util.Pair;
-import megan.util.BlastMode;
+import megan.parsers.blast.BlastMode;
 
 /**
  * all options required by an aligner

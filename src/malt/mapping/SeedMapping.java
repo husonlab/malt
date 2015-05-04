@@ -7,7 +7,7 @@ import jloda.util.ProgressPercentage;
 import malt.data.ISequenceAccessor;
 import malt.data.RefIndex2ClassId;
 import malt.data.ReferencesDBBuilder;
-import megan.access.ClassificationMapper;
+import megan.classification.IdParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,14 +34,14 @@ public class SeedMapping extends RefIndex2ClassId {
      * @param referencesDB
      * @param progress
      */
-    public static SeedMapping create(ISequenceAccessor referencesDB, ClassificationMapper classificationMapper, ProgressListener progress) throws CanceledException {
+    public static SeedMapping create(ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException {
         SeedMapping mapping = new SeedMapping(referencesDB.getNumberOfSequences());
 
         progress.setMaximum(referencesDB.getNumberOfSequences());
         progress.setProgress(0);
         for (int i = 0; i < referencesDB.getNumberOfSequences(); i++) {
             String header = Basic.toString(referencesDB.getHeader(i));
-            Integer classId = classificationMapper.getSeedIdFromHeaderLine(header);
+            Integer classId = classificationMapper.getIdFromHeaderLine(header);
             if (classId != null) {
                 mapping.put(i, classId);
                 referencesDB.extendHeader(i, ReferencesDBBuilder.SEED_TAG, classId);

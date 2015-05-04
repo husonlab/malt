@@ -7,7 +7,7 @@ import jloda.util.ProgressPercentage;
 import malt.data.ISequenceAccessor;
 import malt.data.RefIndex2ClassId;
 import malt.data.ReferencesDBBuilder;
-import megan.access.ClassificationMapper;
+import megan.classification.IdParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class TaxonMapping extends RefIndex2ClassId {
      * @param referencesDB
      * @param progress
      */
-    public static TaxonMapping create(final ISequenceAccessor referencesDB, ClassificationMapper classificationMapper, ProgressListener progress) throws CanceledException {
+    public static TaxonMapping create(final ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException {
         TaxonMapping mapping = new TaxonMapping(referencesDB.getNumberOfSequences());
 
         int countIdentified = 0;
@@ -44,9 +44,9 @@ public class TaxonMapping extends RefIndex2ClassId {
         for (int i = 0; i < referencesDB.getNumberOfSequences(); i++) {
             String header = Basic.toString(referencesDB.getHeader(i));
             // System.err.println("Header="+header);
-            Integer taxonId = classificationMapper.getTaxonIdFromHeaderLine(header);
+            Integer taxonId = classificationMapper.getIdFromHeaderLine(header);
             // System.err.println("taxId="+taxonId);
-            if (taxonId != null && taxonId > 0) {
+            if (taxonId > 0) {
                 mapping.put(i, taxonId);
                 countIdentified++;
                 referencesDB.extendHeader(i, ReferencesDBBuilder.TAXON_TAG, taxonId);

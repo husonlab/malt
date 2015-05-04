@@ -1,6 +1,7 @@
 package malt.next;
 
-import megan.util.BlastMode;
+
+import megan.parsers.blast.BlastMode;
 
 /**
  * maintains the set of Malt options
