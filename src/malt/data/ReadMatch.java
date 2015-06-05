@@ -19,7 +19,7 @@ class ReadMatch {
     private float bitScore;
     private float expected;
     private int percentIdentity;
-    private int refId;
+    private int referenceId;
     private byte[] text;      // match text
     private byte[] rma3Text;
 
@@ -39,21 +39,21 @@ class ReadMatch {
      * @return copy
      */
     public ReadMatch getCopy() {
-        return new ReadMatch(bitScore, expected, percentIdentity, refId, text, rma3Text, startRef, endRef);
+        return new ReadMatch(bitScore, expected, percentIdentity, referenceId, text, rma3Text, startRef, endRef);
     }
 
     /**
      * constructor
      *
      * @param bitScore
-     * @param refId
+     * @param referenceId
      * @param text
      */
-    public ReadMatch(float bitScore, float expected, int percentIdentity, int refId, byte[] text, byte[] rma3Text, int startRef, int endRef) {
+    public ReadMatch(float bitScore, float expected, int percentIdentity, int referenceId, byte[] text, byte[] rma3Text, int startRef, int endRef) {
         this.bitScore = bitScore;
         this.expected = expected;
         this.percentIdentity = percentIdentity;
-        this.refId = refId;
+        this.referenceId = referenceId;
         this.entryNumber = ++numberOfEntries;
         this.text = text;
         this.rma3Text = rma3Text;
@@ -65,12 +65,12 @@ class ReadMatch {
      * reuse this object
      *
      * @param score
-     * @param refId
+     * @param referenceId
      * @param text
      */
-    public void set(float score, int refId, byte[] text, byte[] rma3Text, int startRef, int endRef) {
+    public void set(float score, int referenceId, byte[] text, byte[] rma3Text, int startRef, int endRef) {
         this.bitScore = score;
-        this.refId = refId;
+        this.referenceId = referenceId;
         this.entryNumber = ++numberOfEntries;
         this.text = text;
         this.rma3Text = rma3Text;
@@ -90,8 +90,8 @@ class ReadMatch {
         return percentIdentity;
     }
 
-    public int getRefId() {
-        return refId;
+    public int getReferenceId() {
+        return referenceId;
     }
 
     public byte[] getText() {
@@ -111,7 +111,7 @@ class ReadMatch {
     }
 
     public String toString() {
-        return "RefId=" + refId + " bitScore=" + bitScore + " start=" + startRef + " end=" + endRef + " text=" + (text == null ? "null" : Basic.toString(text));
+        return "RefId=" + referenceId + " bitScore=" + bitScore + " start=" + startRef + " end=" + endRef + " text=" + (text == null ? "null" : Basic.toString(text));
     }
 
     /**
@@ -124,9 +124,9 @@ class ReadMatch {
                     return -1;
                 else if (a.bitScore > b.bitScore)
                     return 1;
-                else if (a.refId < b.refId)
+                else if (a.referenceId < b.referenceId)
                     return 1;
-                else if (a.refId > b.refId)
+                else if (a.referenceId > b.referenceId)
                     return -1;
                 else if (a.entryNumber < b.entryNumber)
                     return -1;

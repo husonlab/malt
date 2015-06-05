@@ -194,7 +194,7 @@ public class FastAReader {
             value = inputStream.read();
             position++;
             if (length >= aline.length) {  // need to grow buffer
-                aline = fastARecord.sequence = grow(aline);
+                aline = fastARecord.qualityValues = grow(aline);
             }
         }
         aline[length] = 0;

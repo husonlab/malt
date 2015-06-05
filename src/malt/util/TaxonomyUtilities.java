@@ -24,8 +24,8 @@ public class TaxonomyUtilities {
         Node v = TaxonomyData.getTree().getTaxon2Node(taxonId);
         while (v != null) {
             taxonId = (Integer) v.getInfo();
-            Byte level = TaxonomyData.getName2IdMap().getTaxonomicRank(taxonId);
-            if (level != null && level == TaxonomicLevels.getSpeciesId())
+            byte level = TaxonomyData.getName2IdMap().getRank(taxonId);
+            if (level == TaxonomicLevels.getSpeciesId())
                 return TaxonomyData.getName2IdMap().get(taxonId);
             if (v.getInDegree() > 0)
                 v = v.getFirstInEdge().getSource();
@@ -45,8 +45,8 @@ public class TaxonomyUtilities {
         Node v = TaxonomyData.getTree().getTaxon2Node(taxonId);
         while (v != null) {
             taxonId = (Integer) v.getInfo();
-            Byte level = TaxonomyData.getName2IdMap().getTaxonomicRank(taxonId);
-            if (level != null && level.equals(TaxonomicLevels.getGenusId()))
+            byte level = TaxonomyData.getName2IdMap().getRank(taxonId);
+            if (level == TaxonomicLevels.getGenusId())
                 return TaxonomyData.getName2IdMap().get(taxonId);
             if (v.getInDegree() > 0)
                 v = v.getFirstInEdge().getSource();
@@ -72,12 +72,12 @@ public class TaxonomyUtilities {
             String name = TaxonomyData.getName2IdMap().get(taxonId);
             if (name != null && (name.equals("root") || name.equals("cellular organisms")))
                 break;
-            Byte level = TaxonomyData.getName2IdMap().getTaxonomicRank(taxonId);
-            if (level != null && level > speciesId)
+            byte level = TaxonomyData.getName2IdMap().getRank(taxonId);
+            if (level > speciesId)
                 break;
-            if (level != null && level > subspeciesId)
+            if (level > subspeciesId)
                 break;
-            if (level == null || level != subspeciesId)
+            if (level != subspeciesId)
                 break;
         }
         return null;
@@ -100,7 +100,7 @@ public class TaxonomyUtilities {
 
         while (v != null) {
             taxonId = (Integer) v.getInfo();
-            if (TaxonomyData.getName2IdMap().getTaxonomicRank(taxonId) != 0) // ignore unranked nodes
+            if (TaxonomyData.getName2IdMap().getRank(taxonId) != 0) // ignore unranked nodes
                 path.add(taxonId);
             if (v.getInDegree() > 0)
                 v = v.getFirstInEdge().getSource();
@@ -118,8 +118,8 @@ public class TaxonomyUtilities {
                     buf.append("; ");
                 buf.append(TaxonomyData.getName2IdMap().get(path.get(i)));
             }
-            Byte level = TaxonomyData.getName2IdMap().getTaxonomicRank(path.get(path.size() - 1));
-            if (level != null && level == genus)
+            byte level = TaxonomyData.getName2IdMap().getRank(path.get(path.size() - 1));
+            if (level == genus)
                 buf.append(".");
         }
         return buf.toString();

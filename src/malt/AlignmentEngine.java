@@ -10,7 +10,7 @@ import malt.io.FastAReader;
 import malt.io.FastARecord;
 import malt.io.FileWriterRanked;
 import malt.malt2.Malt2RMA3Writer;
-import malt.mapping.TaxonMapping;
+import malt.mapping.MappingHelper;
 import malt.util.FixedSizePriorityQueue;
 import malt.util.Utilities;
 import megan.parsers.blast.BlastMode;
@@ -81,7 +81,6 @@ public class AlignmentEngine {
     /**
      * construct an instance of the alignment engine. Each instance is run in a separate thread
      *
-     * @param taxonMapping
      * @param maltOptions
      * @param alignerOptions
      * @param referencesDB
@@ -92,7 +91,7 @@ public class AlignmentEngine {
      * @param unalignedReadsWriter
      * @throws IOException
      */
-    public AlignmentEngine(final int threadNumber, final MaltOptions maltOptions, AlignerOptions alignerOptions, final ReferencesDBAccess referencesDB, final TaxonMapping taxonMapping,
+    public AlignmentEngine(final int threadNumber, final MaltOptions maltOptions, AlignerOptions alignerOptions, final ReferencesDBAccess referencesDB,
                            final ReferencesHashTableAccess[] tables, final FastAReader fastAReader,
                            final FileWriterRanked matchesWriter, final Malt2RMA3Writer malt2RMA3Writer, final OutputStream organismsOutStream,
                            final FileWriterRanked alignedReadsWriter, final FileWriterRanked unalignedReadsWriter) throws IOException {
@@ -134,7 +133,7 @@ public class AlignmentEngine {
             readMatchesForRefIndex[i] = new ReadMatch();
 
         if (organismsOutStream != null) {
-            organismsProfile = new OrganismsProfile(taxonMapping);
+            organismsProfile = new OrganismsProfile(MappingHelper.getTaxonMapping());
             organismsProfile.setTopPercent(maltOptions.getTopPercentLCA());
         } else
             organismsProfile = null;
@@ -420,8 +419,8 @@ public class AlignmentEngine {
                         strings[0] = BlastTextHelper.makeQueryLine(query);
                         for (int i = 0; i < numberOfMatches; i++) {
                             final ReadMatch readMatch = matchesArray[i];
-                            strings[3 * i + 1] = referencesDB.getHeader(readMatch.getRefId());
-                            strings[3 * i + 2] = String.format("\tLength=%d\n", referencesDB.getSequenceLength(readMatch.getRefId())).getBytes();
+                            strings[3 * i + 1] = referencesDB.getHeader(readMatch.getReferenceId());
+                            strings[3 * i + 2] = String.format("\tLength=%d\n", referencesDB.getSequenceLength(readMatch.getReferenceId())).getBytes();
                             strings[3 * i + 3] = readMatch.getText();
                         }
                         matchesWriter.writeByRank(threadNumber, query.getId(), strings);
@@ -448,7 +447,7 @@ public class AlignmentEngine {
             if (alignedReferenceIds != null) {
                 for (int i = 0; i < numberOfMatches; i++) {
                     final ReadMatch readMatch = matchesArray[i];
-                    alignedReferenceIds.set(readMatch.getRefId());
+                    alignedReferenceIds.set(readMatch.getReferenceId());
                 }
             }
 

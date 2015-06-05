@@ -1,5 +1,6 @@
 package malt.mapping;
 
+import jloda.util.Basic;
 import jloda.util.CanceledException;
 import megan.mainviewer.data.TaxonomyData;
 
@@ -28,16 +29,12 @@ public class MappingHelper {
     public static TaxonMapping loadTaxonMapping(boolean load, String indexDirectory) throws IOException, CanceledException {
         try {
             if (load) {
-                final File ncbiTreeFile = new File(indexDirectory, "taxonomy.tre");
-                final File ncbiMapFile = new File(indexDirectory, "taxonomy.map");
-                if (ncbiMapFile.exists()) {
-                    TaxonomyData.getName2IdMap().loadFromFile(ncbiMapFile.getPath());
-                    TaxonomyData.getTree().loadFromFile(ncbiTreeFile.getPath());
+                TaxonomyData.load();
                     final File ref2taxonomyFile = new File(indexDirectory, "taxonomy.idx");
                     return taxonMapping = new TaxonMapping(ref2taxonomyFile);
-                }
             }
         } catch (Exception ex) {
+            Basic.caught(ex);
         }
         return null;
     }

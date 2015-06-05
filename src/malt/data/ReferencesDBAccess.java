@@ -1,10 +1,14 @@
 package malt.data;
 
 import jloda.map.ByteFileGetter;
+import jloda.map.IByteGetter;
+import jloda.map.ILongGetter;
 import jloda.map.LongFileGetter;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.FileInputIterator;
+import malt.io.ByteFileGetterInMemory;
+import malt.io.LongFileGetterInMemory;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +27,8 @@ public class ReferencesDBAccess {
     private static final int SYNC_BITMASK = 1023;//  length of vector must be SYNC_BITMASK+1
     private final Object[] syncObjects;
 
-    private final LongFileGetter refIndex;
-    private final ByteFileGetter refDB;
+    private final ILongGetter refIndex;
+    private final IByteGetter refDB;
 
 
     /**
@@ -33,16 +37,14 @@ public class ReferencesDBAccess {
      * @param refIndexFile
      * @throws java.io.IOException
      */
-    public ReferencesDBAccess(File refIndexFile, File refDBFile, File refInfFile) throws IOException, CanceledException {
+    public ReferencesDBAccess(boolean useMemoryMapping, File refIndexFile, File refDBFile, File refInfFile) throws IOException, CanceledException {
         syncObjects = new Object[SYNC_BITMASK + 1];
         for (int i = 0; i < syncObjects.length; i++) {
             syncObjects[i] = new Object();
         }
 
-        System.err.println("Opening file: " + refIndexFile);
-        System.err.println("Opening file: " + refDBFile);
-        refIndex = new LongFileGetter(refIndexFile);
-        refDB = new ByteFileGetter(refDBFile);
+        refIndex = (useMemoryMapping ? new LongFileGetter(refIndexFile) : new LongFileGetterInMemory(refIndexFile));
+        refDB = (useMemoryMapping ? new ByteFileGetter(refDBFile) : new ByteFileGetterInMemory(refDBFile));
 
         FileInputIterator it = new FileInputIterator(refInfFile);
         while (it.hasNext()) {

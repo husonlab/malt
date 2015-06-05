@@ -9,11 +9,11 @@ import malt.Version;
 import malt.data.ReadMatch;
 import malt.mapping.MappingHelper;
 import megan.algorithms.MinSupportFilter;
+import megan.classification.IdMapper;
 import megan.core.ClassificationType;
 import megan.core.SampleAttributeTable;
 import megan.data.TextStoragePolicy;
 import megan.io.OutputWriter;
-import megan.mainviewer.data.TaxonomyName2IdMap;
 import megan.parsers.blast.BlastMode;
 import megan.parsers.sam.SAMMatch;
 import megan.rma3.*;
@@ -53,10 +53,10 @@ public class Malt2RMA3Writer {
     private final ReadLineRMA3 readLine = new ReadLineRMA3(TextStoragePolicy.Embed, true);
     private final MatchLineRMA3[] matches;
 
-    private final Map<Integer, ListOfLongs> tax2Location = new HashMap<Integer, ListOfLongs>(1000);
-    private final Map<Integer, ListOfLongs> kegg2Location = new HashMap<Integer, ListOfLongs>(1000);
-    private final Map<Integer, ListOfLongs> seed2Location = new HashMap<Integer, ListOfLongs>(1000);
-    private final Map<Integer, ListOfLongs> cog2Location = new HashMap<Integer, ListOfLongs>(1000);
+    private final Map<Integer, ListOfLongs> tax2Location = new HashMap<>(1000);
+    private final Map<Integer, ListOfLongs> kegg2Location = new HashMap<>(1000);
+    private final Map<Integer, ListOfLongs> seed2Location = new HashMap<>(1000);
+    private final Map<Integer, ListOfLongs> cog2Location = new HashMap<>(1000);
 
     private final String rma3FileName;
     private int totalAlignedReads;
@@ -80,6 +80,7 @@ public class Malt2RMA3Writer {
         this.maltOptions = maltOptions;
 
         writer = new OutputWriter(new File(rma3FileName));
+        System.err.println("Opening: " + rma3FileName);
 
         minSupportPercent = maltOptions.getMinSupportPercentLCA();
         minSupport = maltOptions.getMinSupportLCA();
@@ -219,13 +220,13 @@ public class Malt2RMA3Writer {
                 totalAlignedReads++;
             } else {
                 if (doTaxonomy)
-                    addTo(tax2Location, TaxonomyName2IdMap.NOHITS_TAXONID, location);
+                    addTo(tax2Location, IdMapper.NOHITS_ID, location);
                 if (doKegg)
-                    addTo(kegg2Location, TaxonomyName2IdMap.NOHITS_TAXONID, location);
+                    addTo(kegg2Location, IdMapper.NOHITS_ID, location);
                 if (doSeed)
-                    addTo(seed2Location, TaxonomyName2IdMap.NOHITS_TAXONID, location);
+                    addTo(seed2Location, IdMapper.NOHITS_ID, location);
                 if (doCog)
-                    addTo(cog2Location, TaxonomyName2IdMap.NOHITS_TAXONID, location);
+                    addTo(cog2Location, IdMapper.NOHITS_ID, location);
 
                 totalUnalignedReads++;
             }
@@ -277,16 +278,16 @@ public class Malt2RMA3Writer {
             matchLine.setPercentId(match.getPercentIdentity());
 
             if (doTaxonomy)
-                matchLine.setTaxId(MappingHelper.getTaxonMapping().get(match.getRefId()));
+                matchLine.setTaxId(MappingHelper.getTaxonMapping().get(match.getReferenceId()));
 
             if (doKegg)
-                matchLine.setKeggId(MappingHelper.getKeggMapping().get(match.getRefId()));
+                matchLine.setKeggId(MappingHelper.getKeggMapping().get(match.getReferenceId()));
 
             if (doSeed)
-                matchLine.setSeedId(MappingHelper.getSeedMapping().get(match.getRefId()));
+                matchLine.setSeedId(MappingHelper.getSeedMapping().get(match.getReferenceId()));
 
             if (doCog)
-                matchLine.setCogId(MappingHelper.getCogMapping().get(match.getRefId()));
+                matchLine.setCogId(MappingHelper.getCogMapping().get(match.getReferenceId()));
             if (countMatches++ > matchesFooter.getMaxMatchesPerRead()) {
                 break;
             }
@@ -306,13 +307,13 @@ public class Malt2RMA3Writer {
             totalAlignedReads++;
         } else {
             if (doTaxonomy)
-                addTo(tax2Location, TaxonomyName2IdMap.NOHITS_TAXONID, location);
+                addTo(tax2Location, IdMapper.NOHITS_ID, location);
             if (doKegg)
-                addTo(kegg2Location, TaxonomyName2IdMap.NOHITS_TAXONID, location);
+                addTo(kegg2Location, IdMapper.NOHITS_ID, location);
             if (doSeed)
-                addTo(seed2Location, TaxonomyName2IdMap.NOHITS_TAXONID, location);
+                addTo(seed2Location, IdMapper.NOHITS_ID, location);
             if (doCog)
-                addTo(cog2Location, TaxonomyName2IdMap.NOHITS_TAXONID, location);
+                addTo(cog2Location, IdMapper.NOHITS_ID, location);
 
             totalUnalignedReads++;
         }

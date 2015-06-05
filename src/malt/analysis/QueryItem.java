@@ -21,7 +21,7 @@ public class QueryItem {
         this.readMatchItems = new ReadMatchItem[length];
         for (int i = 0; i < length; i++) {
             ReadMatch readMatch = readMatches[i];
-            this.readMatchItems[i] = new ReadMatchItem(readMatch.getRefId(), (float) readMatch.getBitScore(), readMatch.getStartRef(), readMatch.getEndRef());
+            this.readMatchItems[i] = new ReadMatchItem(readMatch.getReferenceId(), (float) readMatch.getBitScore(), readMatch.getStartRef(), readMatch.getEndRef());
         }
     }
 

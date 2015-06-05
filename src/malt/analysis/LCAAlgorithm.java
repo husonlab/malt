@@ -1,9 +1,9 @@
 package malt.analysis;
 
 import jloda.util.Basic;
+import megan.algorithms.LCAAddressing;
+import megan.classification.IdMapper;
 import megan.mainviewer.data.TaxonomyData;
-import megan.mainviewer.data.TaxonomyName2IdMap;
-import megan.mainviewer.data.TaxonomyTree;
 
 import java.util.BitSet;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class LCAAlgorithm {
      */
     public int computeNaiveLCA(final int[] taxonIds, final int length) {
         if (length == 0)
-            return TaxonomyName2IdMap.NOHITS_TAXONID;
+            return IdMapper.NOHITS_ID;
         else if (length == 1)
             return taxonIds[0];
 
@@ -40,7 +40,7 @@ public class LCAAlgorithm {
         for (int i = 0; i < length; i++) {
             int taxonId = taxonIds[i];
             if (!TaxonomyData.isTaxonDisabled(taxonId)) {
-                String address = TaxonomyTree.taxId2Address.get(taxonId);
+                String address = TaxonomyData.getAddress(taxonId);
                 if (address != null) {
                     addresses[countKnownTaxa++] = address;
                 }
@@ -60,12 +60,12 @@ public class LCAAlgorithm {
 
         // compute LCA using addresses:
         if (countKnownTaxa > 0) {
-            final String address = TaxonomyData.getCommonPrefix(addresses, countKnownTaxa);
-            return TaxonomyTree.address2TaxId.get(address);
+            final String address = LCAAddressing.getCommonPrefix(addresses, countKnownTaxa);
+            return TaxonomyData.getAddress2Id(address);
         }
 
         // although we had some hits, couldn't make an assignment
-        return TaxonomyName2IdMap.UNASSIGNED_TAXONID;
+        return IdMapper.UNASSIGNED_ID;
     }
 
 
@@ -77,7 +77,7 @@ public class LCAAlgorithm {
      */
     public int computeWeightedLCA(final Map<Integer, Integer> tax2weight, final double proportionOfWeightToCover) {
         if (tax2weight.size() == 0)
-            return TaxonomyName2IdMap.UNASSIGNED_TAXONID;
+            return IdMapper.NOHITS_ID;
         if (tax2weight.size() == 1)
             return tax2weight.keySet().iterator().next();
 
@@ -91,7 +91,7 @@ public class LCAAlgorithm {
         int totalWeight = 0;
         for (Integer taxonId : tax2weight.keySet()) {
             if (taxonId > 0) {
-                String address = TaxonomyTree.taxId2Address.get(taxonId);
+                String address = TaxonomyData.getAddress(taxonId);
                 Integer weight = tax2weight.get(taxonId);
                 if (address != null && weight != null) {
                     addresses[length] = address;
@@ -108,14 +108,14 @@ public class LCAAlgorithm {
             }
         }
         if (length == 0)
-            return TaxonomyName2IdMap.UNASSIGNED_TAXONID;
+            return IdMapper.UNASSIGNED_ID;
         else if (length == 1)
             return aTaxon;
         try {
             final int weightToCover = Math.min(totalWeight, (int) Math.ceil(proportionOfWeightToCover * totalWeight));
             final String address = getCommonPrefix(weightToCover, addresses, weights, length);
             if (address != null) {
-                return TaxonomyTree.address2TaxId.get(address);
+                return TaxonomyData.getAddress2Id(address);
                 /*
                                 int result=TaxonomyTree.address2TaxId.get(address);
                 if(result==77643) {

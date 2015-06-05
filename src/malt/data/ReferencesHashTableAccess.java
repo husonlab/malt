@@ -1,11 +1,14 @@
 package malt.data;
 
+import jloda.map.IIntGetter;
 import jloda.map.ILongGetter;
 import jloda.map.IntFileGetter;
 import jloda.map.LongFileGetter;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressPercentage;
+import malt.io.IntFileGetterInMemory;
+import malt.io.LongFileGetterInMemory;
 import malt.util.MurmurHash3;
 import malt.util.Utilities;
 
@@ -30,14 +33,14 @@ public class ReferencesHashTableAccess {
     private final IAlphabet seedAlphabet;  // alphabet used by seeds
     private final SeedShape seedShape; //  seed shape that is saved and loaded from index
 
-    private IntFileGetter tableDataGetter; // used for memory mapping
+    private IIntGetter tableDataGetter; // used for memory mapping
 
     /**
      * construct the table from the given directory
      *
      * @param indexDirectory
      */
-    public ReferencesHashTableAccess(String indexDirectory, int tableNumber) throws IOException, CanceledException {
+    public ReferencesHashTableAccess(boolean useMemoryMapping, String indexDirectory, int tableNumber) throws IOException, CanceledException {
         final File indexFile = new File(indexDirectory, "index" + tableNumber + ".idx");
         final File tableIndexFile = new File(indexDirectory, "table" + tableNumber + ".idx");
         final File tableDataFile = new File(indexDirectory, "table" + tableNumber + ".db");
@@ -80,8 +83,8 @@ public class ReferencesHashTableAccess {
             progress.reportTaskCompleted();
         }
 
-        tableIndexGetter = loadTableIndex(tableIndexFile);
-        tableDataGetter = loadTableData(tableDataFile);
+        tableIndexGetter = loadTableIndex(useMemoryMapping, tableIndexFile);
+        tableDataGetter = loadTableData(useMemoryMapping, tableDataFile);
     }
 
     /**
@@ -91,9 +94,8 @@ public class ReferencesHashTableAccess {
      * @return long buffer to access file
      * @throws IOException
      */
-    private LongFileGetter loadTableIndex(final File tableIndexFile) throws IOException {
-        System.err.println("Opening file: " + tableIndexFile);
-        return new LongFileGetter(tableIndexFile);
+    private ILongGetter loadTableIndex(boolean useMemoryMapping, final File tableIndexFile) throws IOException {
+        return (useMemoryMapping ? new LongFileGetter(tableIndexFile) : new LongFileGetterInMemory(tableIndexFile));
     }
 
     /**
@@ -103,9 +105,8 @@ public class ReferencesHashTableAccess {
      * @return input reader to access file
      * @throws IOException
      */
-    private IntFileGetter loadTableData(final File tableDataFile) throws IOException {
-        System.err.println("Opening file: " + tableDataFile);
-        return new IntFileGetter(tableDataFile);
+    private IIntGetter loadTableData(boolean useMemoryMapping, final File tableDataFile) throws IOException {
+        return (useMemoryMapping ? new IntFileGetter(tableDataFile) : new IntFileGetterInMemory(tableDataFile));
     }
 
     /**

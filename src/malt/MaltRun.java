@@ -14,7 +14,6 @@ import malt.io.FileWriterRanked;
 import malt.io.SAMHelper;
 import malt.malt2.Malt2RMA3Writer;
 import malt.mapping.MappingHelper;
-import malt.mapping.TaxonMapping;
 import malt.util.ProfileUtilities;
 import malt.util.Utilities;
 import megan.parsers.blast.BlastMode;
@@ -137,6 +136,7 @@ public class MaltRun {
 
         options.comment("Performance:");
         maltOptions.setNumberOfThreads(options.getOption("t", "numThreads", "Number of worker threads", Runtime.getRuntime().availableProcessors()));
+        final boolean useMemoryMapping = options.getOption("mem", "memoryMapping", "Use memory mapping rather than loading all indices into memory", true);
         final int maxNumberOfSeedShapes = options.getOption("mt", "maxTables", "Set the maximum number of seed tables to use (0=all)", 0);
         maltOptions.setUseReplicateQueryCaching(options.getOption("rqc", "replicateQueryCache", "Cache results for replicated queries", false));
 
@@ -252,7 +252,7 @@ public class MaltRun {
         // load the index:
         System.err.println("--- LOADING ---:");
         // load the reference file:
-        final ReferencesDBAccess referencesDB = new ReferencesDBAccess(new File(indexDirectory, "ref.idx"), new File(indexDirectory, "ref.db"), new File(indexDirectory, "ref.inf"));
+        final ReferencesDBAccess referencesDB = new ReferencesDBAccess(useMemoryMapping, new File(indexDirectory, "ref.idx"), new File(indexDirectory, "ref.db"), new File(indexDirectory, "ref.inf"));
         alignerOptions.setReferenceDatabaseLength(referencesDB.getNumberOfLetters());
 
         int numberOfTables = ReferencesHashTableAccess.determineNumberOfTables(indexDirectory);
@@ -265,7 +265,7 @@ public class MaltRun {
         final ReferencesHashTableAccess[] hashTables = new ReferencesHashTableAccess[numberOfTables];
         for (int t = 0; t < numberOfTables; t++) {
             System.err.println("LOADING table (" + t + ") ...");
-            hashTables[t] = new ReferencesHashTableAccess(indexDirectory, t);
+            hashTables[t] = new ReferencesHashTableAccess(useMemoryMapping, indexDirectory, t);
             System.err.println("Table size: " + hashTables[t].size());
             if (showAPart)
                 hashTables[t].showAPart();
@@ -274,7 +274,14 @@ public class MaltRun {
 
         // load taxonomy files if they exist:
         final boolean loadMappings = (outputRMAFileNames.size() > 0);
-        final TaxonMapping taxonMapping = MappingHelper.loadTaxonMapping(loadMappings, indexDirectory);
+        if (loadMappings) {
+            MappingHelper.loadTaxonMapping(true, indexDirectory);
+            MappingHelper.loadKeggMapping(true, indexDirectory);
+            MappingHelper.loadSeedMapping(true, indexDirectory);
+            MappingHelper.loadCogMapping(true, indexDirectory);
+        }
+
+
         final GeneTableAccess geneTableAccess;
         if (outputOrganismFileNames.size() > 0 && (new File(indexDirectory, "gene-table.idx")).exists())
             geneTableAccess = new GeneTableAccess(new File(indexDirectory, "gene-table.idx"));
@@ -297,7 +304,7 @@ public class MaltRun {
                     String alignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputAlignedFileNames, "-aligned.fna", maltOptions.isGzipAlignedReads());
                     String unalignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputUnAlignedFileNames, "-unaligned.fna", maltOptions.isGzipUnalignedReads());
                     launchAlignmentThreads(alignerOptions, maltOptions, inFile, rmaOutputFile, matchesOutputFile, organismProfileOutputFile,
-                            alignedReadsOutputFile, unalignedReadsOutputFile, referencesDB, hashTables, taxonMapping, geneTableAccess);
+                            alignedReadsOutputFile, unalignedReadsOutputFile, referencesDB, hashTables, geneTableAccess);
                 } else {
                     System.err.println("File not found: '" + inFile + "', skipped");
                 }
@@ -332,7 +339,7 @@ public class MaltRun {
                                        final String matchesOutputFile, final String organismProfileOutputFile,
                                        final String alignedReadsOutputFile, final String unalignedReadsOutputFile,
                                        final ReferencesDBAccess referencesDB, final ReferencesHashTableAccess[] tables,
-                                       final TaxonMapping taxonMapping, final GeneTableAccess geneTableAccess) throws IOException, JAXBException {
+                                       final GeneTableAccess geneTableAccess) throws IOException, JAXBException {
 
         final ExecutorService executor = Executors.newFixedThreadPool(maltOptions.getNumberOfThreads());
         final CountDownLatch countDownLatch = new CountDownLatch(maltOptions.getNumberOfThreads());
@@ -375,7 +382,7 @@ public class MaltRun {
             executor.execute(new Runnable() {
                 public void run() {
                     try {
-                        alignmentEngines[threadNumber] = new AlignmentEngine(threadNumber, maltOptions, alignerOptions, referencesDB, taxonMapping, tables, fastAReader,
+                        alignmentEngines[threadNumber] = new AlignmentEngine(threadNumber, maltOptions, alignerOptions, referencesDB, tables, fastAReader,
                                 matchesWriter, rma3Writer, organismOutStream, alignedReadsWriter, unalignedReadsWriter);
                         alignmentEngines[threadNumber].runOuterLoop();
                         alignmentEngines[threadNumber].finish();
@@ -452,7 +459,7 @@ public class MaltRun {
         }
 
         if (organismOutStream != null) {
-            OrganismsProfileMerger organismsProfileMerger = new OrganismsProfileMerger(taxonMapping, geneTableAccess);
+            OrganismsProfileMerger organismsProfileMerger = new OrganismsProfileMerger(MappingHelper.getTaxonMapping(), geneTableAccess);
             organismsProfileMerger.setName(Basic.getFileBaseName(Basic.getFileNameWithoutPath(infile)));
             organismsProfileMerger.mergeAndCompute(ProfileUtilities.getOrganismsProfiles(alignmentEngines));
             organismsProfileMerger.write(organismOutStream);

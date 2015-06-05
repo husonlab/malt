@@ -92,7 +92,6 @@ public class MaltBuild {
         else
             proteinReduction = "";
 
-
         options.comment("Classification support:");
 
         final String gi2TaxaFile = options.getOption("-g2t", "gi2taxa", "GI-to-Taxonomy mapping file", "");
@@ -186,15 +185,14 @@ public class MaltBuild {
         }
 
         // build classification index files, if requested
-        if (malt.util.Utilities.hasAMapping(synonyms2TaxaFile, refSeq2TaxaFile, gi2TaxaFile) || geneTableFile.length() > 0) {
+        if (Utilities.hasAMapping(synonyms2TaxaFile, refSeq2TaxaFile, gi2TaxaFile) || geneTableFile.length() > 0) {
+            TaxonomyData.load();
             final File indexTreeFile = new File(indexDirectory, "taxonomy.tre");
             final File indexMapFile = new File(indexDirectory, "taxonomy.map");
-            Basic.writeStreamToFile(ResourceManager.getFileAsStream("ncbi.tre"), indexTreeFile);
             Basic.writeStreamToFile(ResourceManager.getFileAsStream("ncbi.map"), indexMapFile);
-            TaxonomyData.getName2IdMap().loadFromFile("ncbi.tre");
-            TaxonomyData.getTree().loadFromFile("ncbi.map");
+            Basic.writeStreamToFile(ResourceManager.getFileAsStream("ncbi.tre"), indexTreeFile);
 
-            malt.util.Utilities.loadMapping(synonyms2TaxaFile, IdMapper.MapType.Synonyms, Classification.Taxonomy);
+            Utilities.loadMapping(synonyms2TaxaFile, IdMapper.MapType.Synonyms, Classification.Taxonomy);
             Utilities.loadMapping(refSeq2TaxaFile, IdMapper.MapType.RefSeq, Classification.Taxonomy);
             Utilities.loadMapping(gi2TaxaFile, IdMapper.MapType.GI, Classification.Taxonomy);
 
@@ -202,7 +200,7 @@ public class MaltBuild {
             final TaxonMapping taxonMapping = TaxonMapping.create(referencesDB, idParser, new ProgressPercentage("Building taxon-mapping..."));
             taxonMapping.save(new File(indexDirectory, "taxonomy.idx"));
         }
-        if (malt.util.Utilities.hasAMapping(synonyms2KeggFile, refSeq2KeggFile, gi2KeggFile)) {
+        if (Utilities.hasAMapping(synonyms2KeggFile, refSeq2KeggFile, gi2KeggFile)) {
             Utilities.loadMapping(synonyms2KeggFile, IdMapper.MapType.Synonyms, "KEGG");
             Utilities.loadMapping(refSeq2KeggFile, IdMapper.MapType.RefSeq, "KEGG");
             Utilities.loadMapping(gi2KeggFile, IdMapper.MapType.GI, "KEGG");
@@ -210,7 +208,7 @@ public class MaltBuild {
             final KeggMapping keggMapping = KeggMapping.create(referencesDB, idParser, new ProgressPercentage("Building KEGG-mapping..."));
             keggMapping.save(new File(indexDirectory, "kegg.idx"));
         }
-        if (malt.util.Utilities.hasAMapping(synonyms2SeedFile, refSeq2SeedFile, gi2SeedFile)) {
+        if (Utilities.hasAMapping(synonyms2SeedFile, refSeq2SeedFile, gi2SeedFile)) {
             Utilities.loadMapping(synonyms2SeedFile, IdMapper.MapType.Synonyms, "SEED");
             Utilities.loadMapping(refSeq2SeedFile, IdMapper.MapType.RefSeq, "SEED");
             Utilities.loadMapping(gi2SeedFile, IdMapper.MapType.GI, "SEED");
@@ -218,7 +216,7 @@ public class MaltBuild {
             SeedMapping seedMapping = SeedMapping.create(referencesDB, idParser, new ProgressPercentage("Building SEED-mapping..."));
             seedMapping.save(new File(indexDirectory, "seed.idx"));
         }
-        if (malt.util.Utilities.hasAMapping(synonyms2CogFile, refSeq2CogFile, gi2CogFile)) {
+        if (Utilities.hasAMapping(synonyms2CogFile, refSeq2CogFile, gi2CogFile)) {
             Utilities.loadMapping(synonyms2CogFile, IdMapper.MapType.Synonyms, "COG");
             Utilities.loadMapping(refSeq2CogFile, IdMapper.MapType.RefSeq, "COG");
             Utilities.loadMapping(gi2CogFile, IdMapper.MapType.GI, "COG");

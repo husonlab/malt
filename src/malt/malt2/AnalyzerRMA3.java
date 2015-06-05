@@ -2,7 +2,6 @@ package malt.malt2;
 
 import megan.algorithms.TaxonAssignmentUsingLCA;
 import megan.classification.IdMapper;
-import megan.mainviewer.data.TaxonomyName2IdMap;
 import megan.rma3.MatchLineRMA3;
 
 import java.util.HashSet;
@@ -42,7 +41,7 @@ public class AnalyzerRMA3 {
      */
     public int getLCA(MatchLineRMA3[] matches, int numberOfMatches) {
         if (numberOfMatches == 0)
-            return TaxonomyName2IdMap.NOHITS_TAXONID;
+            return IdMapper.NOHITS_ID;
         float minScore = this.minScore;
         for (int i = 0; i < numberOfMatches; i++) {
             final MatchLineRMA3 matchLine = matches[i];
@@ -57,7 +56,7 @@ public class AnalyzerRMA3 {
             }
         }
         if (taxIds.size() == 0)
-            return TaxonomyName2IdMap.UNASSIGNED_TAXONID;
+            return IdMapper.NOHITS_ID;
         else if (taxIds.size() == 1)
             return taxIds.iterator().next();
         else

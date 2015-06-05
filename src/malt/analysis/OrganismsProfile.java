@@ -53,7 +53,7 @@ public class OrganismsProfile {
             addNoHitsRead();
         } else if (numberOfMatches == 1) {   // exactly one hit, will use this
             ReadMatch match = readMatches[0];
-            int refId = match.getRefId();
+            int refId = match.getReferenceId();
             Integer weight = refIndex2weight.get(refId);  // increment reference sequence weight
             if (weight == null)
                 refIndex2weight.put(refId, 1);
@@ -79,7 +79,7 @@ public class OrganismsProfile {
                 ReadMatch match = readMatches[i];
                 if (match.getBitScore() < minScore)
                     break;
-                final int refId = match.getRefId();
+                final int refId = match.getReferenceId();
                 final int taxId = taxonMapping.get(refId);
                 if (taxId > 0 && numberOfMatchesToUse < refIds.length) {
                     if (!refIdAlreadySeenInAddRead.contains(refId)) {   // don't use more than one match to the same reference

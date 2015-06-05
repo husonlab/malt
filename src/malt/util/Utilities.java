@@ -583,11 +583,11 @@ public class Utilities {
      *
      * @param fileName
      * @param mapType
-     * @param fName
+     * @param cName
      * @throws Exception
      */
-    public static void loadMapping(String fileName, IdMapper.MapType mapType, String fName) throws Exception {
+    public static void loadMapping(String fileName, IdMapper.MapType mapType, String cName) throws Exception {
         if (fileName.length() > 0)
-            (new LoadMappingFileCommand()).apply("load mapFile='" + fileName + "' mapType=" + mapType.toString() + " fName=" + fName + ";");
+            (new LoadMappingFileCommand()).apply("load mapFile='" + fileName + "' mapType=" + mapType.toString() + " cName=" + cName + ";");
     }
 }
