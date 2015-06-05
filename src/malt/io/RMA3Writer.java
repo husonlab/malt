@@ -1,4 +1,4 @@
-package malt.malt2;
+package malt.io;
 
 import jloda.util.Basic;
 import jloda.util.CanceledException;
@@ -7,7 +7,6 @@ import jloda.util.ProgressPercentage;
 import malt.IMaltOptions;
 import malt.Version;
 import malt.data.ReadMatch;
-import malt.io.AnalyzerRMA3;
 import malt.mapping.MappingHelper;
 import megan.algorithms.MinSupportFilter;
 import megan.classification.IdMapper;
@@ -15,8 +14,6 @@ import megan.core.ClassificationType;
 import megan.core.SampleAttributeTable;
 import megan.data.TextStoragePolicy;
 import megan.io.OutputWriter;
-import megan.parsers.blast.BlastMode;
-import megan.parsers.sam.SAMMatch;
 import megan.rma3.*;
 
 import java.io.File;
@@ -28,7 +25,7 @@ import java.util.Map;
  * Create an RMA3 file from SAM data in Malt2
  * Created by huson on 5/13/14.
  */
-public class Malt2RMA3Writer {
+public class RMA3Writer {
     public static boolean debug = false;
 
     private final FileFooterRMA3 fileFooter;
@@ -76,7 +73,7 @@ public class Malt2RMA3Writer {
      * @param rma3FileName
      * @throws IOException
      */
-    public Malt2RMA3Writer(final IMaltOptions maltOptions, String rma3FileName) throws IOException {
+    public RMA3Writer(final IMaltOptions maltOptions, String rma3FileName) throws IOException {
         this.rma3FileName = rma3FileName;
         this.maltOptions = maltOptions;
 
@@ -139,114 +136,6 @@ public class Malt2RMA3Writer {
         totalAlignedReads = 0;
         totalUnalignedReads = 0;
         totalMatches = 0;
-    }
-
-    /**
-     * process a batch of reads and alignments
-     *
-     * @param queryStore
-     * @param matchStore
-     * @throws java.io.IOException
-     */
-    public void processBatch(final QueryStore queryStore, final MatchStore matchStore) throws IOException {
-        final ProgressPercentage progress = new ProgressPercentage("Writing to file: " + rma3FileName, queryStore.getNumberOfSequences());
-
-        final SAMMatch samMatch = new SAMMatch(BlastMode.valueOf(fileFooter.getBlastMode()), null, null);
-
-        String firstSAMLineForCurrentRead = null;
-
-        progress.setMaximum(queryStore.getNumberOfSequences());
-        progress.setProgress(0);
-
-        for (int q = 0; q < queryStore.getNumberOfSequences(); q++) {
-            if (debug)
-                System.err.println("------- Processing query " + q);
-            byte[] name = queryStore.getName(q);
-            final long location = writer.getPosition();
-            readLine.setReadUid(location);
-            readLine.setText(Basic.toString(queryStore.getHeader(q), '\n', queryStore.getOriginalSequence(q)));
-
-            int countMatches = 0;
-            for (AMatch aMatch = matchStore.get(q); aMatch != null; aMatch = aMatch.getNext()) {
-                final String aLine = Basic.toString(name, '\t', aMatch.getText());
-                samMatch.parse(aLine);
-
-                final MatchLineRMA3 matchLine = matches[countMatches];
-                if (countMatches == 0) {
-                    matchLine.setText(aLine);
-                    firstSAMLineForCurrentRead = aLine;
-                } else
-                    matchLine.setText(SAMCompress.deflate(firstSAMLineForCurrentRead, aLine)); // deflate SAM line before saving
-
-                matchLine.setExpected(samMatch.getExpected());
-                matchLine.setBitScore(samMatch.getBitScore());
-                matchLine.setPercentId(samMatch.getPercentIdentity());
-
-                if (doTaxonomy)
-                    matchLine.setTaxId(MappingHelper.getTaxonMapping().get(aMatch.getReferenceId()));
-
-                if (doKegg)
-                    matchLine.setKeggId(MappingHelper.getKeggMapping().get(aMatch.getReferenceId()));
-
-                if (doSeed)
-                    matchLine.setSeedId(MappingHelper.getSeedMapping().get(aMatch.getReferenceId()));
-
-                if (doCog)
-                    matchLine.setCogId(MappingHelper.getCogMapping().get(aMatch.getReferenceId()));
-                countMatches++;
-                if (countMatches > matchesFooter.getMaxMatchesPerRead()) {
-                    int count = countMatches;
-                    while (aMatch != null) {
-                        aMatch = aMatch.getNext();
-                        count++;
-                    }
-                    System.err.println("Number of matches exceeded: " + count);
-                    break;
-                }
-            }
-            if (countMatches > 0) {
-                totalMatches += countMatches;
-
-                if (doTaxonomy)
-                    addTo(tax2Location, rma3Analyzer.getLCA(matches, countMatches), location);
-                if (doKegg)
-                    addTo(kegg2Location, rma3Analyzer.getKeggId(matches, countMatches), location);
-                if (doSeed)
-                    addTo(seed2Location, rma3Analyzer.getSeedId(matches, countMatches), location);
-                if (doCog)
-                    addTo(cog2Location, rma3Analyzer.getCogId(matches, countMatches), location);
-                if (doCog)
-                    addTo(cog2Location, rma3Analyzer.getCogId(matches, countMatches), location);
-
-                totalAlignedReads++;
-            } else {
-                if (doTaxonomy)
-                    addTo(tax2Location, IdMapper.NOHITS_ID, location);
-                if (doKegg)
-                    addTo(kegg2Location, IdMapper.NOHITS_ID, location);
-                if (doSeed)
-                    addTo(seed2Location, IdMapper.NOHITS_ID, location);
-                if (doCog)
-                    addTo(cog2Location, IdMapper.NOHITS_ID, location);
-
-                totalUnalignedReads++;
-            }
-            readLine.setNumberOfMatches(countMatches);
-            readLine.write(writer);
-            if (debug) {
-                System.err.println("readLine:\n" + readLine.toString());
-                System.err.println("Number of matches: " + countMatches);
-            }
-
-            for (int i = 0; i < countMatches; i++) {
-                matches[i].write(writer);
-                if (debug)
-                    System.err.println("matches[" + i + "]:\n" + matches[i].toString());
-            }
-
-            progress.setProgress(q);
-        }
-        progress.close();
     }
 
     /**
@@ -457,7 +346,7 @@ public class Malt2RMA3Writer {
                 maltOptions.getMaxExpected(), maltOptions.getTopPercentLCA(), maltOptions.getMinSupportPercentLCA(), minSupport);
 
         if (debug)
-        System.err.println(userState);
+            System.err.println(userState);
 
         Map<String, byte[]> label2data = new HashMap<String, byte[]>();
         label2data.put(SampleAttributeTable.USER_STATE, userState.getBytes());

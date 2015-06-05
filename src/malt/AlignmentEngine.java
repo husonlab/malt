@@ -5,11 +5,7 @@ import malt.align.AlignerOptions;
 import malt.align.BandedAligner;
 import malt.analysis.OrganismsProfile;
 import malt.data.*;
-import malt.io.BlastTextHelper;
-import malt.io.FastAReader;
-import malt.io.FastARecord;
-import malt.io.FileWriterRanked;
-import malt.malt2.Malt2RMA3Writer;
+import malt.io.*;
 import malt.mapping.MappingHelper;
 import malt.util.FixedSizePriorityQueue;
 import malt.util.Utilities;
@@ -45,13 +41,17 @@ public class AlignmentEngine {
     private final FileWriterRanked matchesWriter;
     private final FileWriterRanked alignedReadsWriter;
     private final FileWriterRanked unalignedReadsWriter;
-    private final Malt2RMA3Writer malt2RMA3Writer;
+    private final RMA3Writer RMA3Writer;
 
     // parameters
     private final double minRawScore;
     private final double minBitScore;
     private final double maxExpected;
     private final double percentIdentity;
+
+    // xdrop heuristic:
+    private final int xDrop;
+    private final int minUngappedRawScore;
 
     // keep track of all used references:
     private final BitSet alignedReferenceIds;
@@ -93,7 +93,7 @@ public class AlignmentEngine {
      */
     public AlignmentEngine(final int threadNumber, final MaltOptions maltOptions, AlignerOptions alignerOptions, final ReferencesDBAccess referencesDB,
                            final ReferencesHashTableAccess[] tables, final FastAReader fastAReader,
-                           final FileWriterRanked matchesWriter, final Malt2RMA3Writer malt2RMA3Writer, final OutputStream organismsOutStream,
+                           final FileWriterRanked matchesWriter, final RMA3Writer RMA3Writer, final OutputStream organismsOutStream,
                            final FileWriterRanked alignedReadsWriter, final FileWriterRanked unalignedReadsWriter) throws IOException {
         this.threadNumber = threadNumber;
         this.maltOptions = maltOptions;
@@ -102,7 +102,7 @@ public class AlignmentEngine {
         this.fastAReader = fastAReader;
         this.matchOutputFormat = maltOptions.getMatchOutputFormat();
         this.matchesWriter = matchesWriter;
-        this.malt2RMA3Writer = malt2RMA3Writer;
+        this.RMA3Writer = RMA3Writer;
         this.organismsOutStream = organismsOutStream;
         this.alignedReadsWriter = alignedReadsWriter;
         this.unalignedReadsWriter = unalignedReadsWriter;
@@ -123,6 +123,11 @@ public class AlignmentEngine {
         minBitScore = maltOptions.getMinBitScore();
         maxExpected = maltOptions.getMaxExpected();
         percentIdentity = maltOptions.getMinProportionIdentity();
+
+        // ungapped alignment parameters:
+        xDrop = alignerOptions.getUngappedXDrop(maltOptions.getMode());
+        minUngappedRawScore = alignerOptions.getUngappedMinRawScore(maltOptions.getMode());
+
 
         // data structures used in inner loop:
         matchesQueue = new FixedSizePriorityQueue<>(maltOptions.getMaxAlignmentsPerQuery(), ReadMatch.createComparator());
@@ -262,9 +267,10 @@ public class AlignmentEngine {
                                                 set = seedArrays[seedArraysLength++];
                                                 refIndex2ASeedMatches.put(refIndex, set);
                                             }
-                                            if (set.size() < maltOptions.getMaxSeedsPerReference())
-                                                set.setNext(qOffset, refOffset, s);
-                                            // else System.err.println("SKIPPED");
+                                            if (set.size() < maltOptions.getMaxSeedsPerReference()) {
+                                                set.setNext(qOffset, refOffset, s, seedShapes[t].getLength());
+                                                // else System.err.println("SKIPPED");
+                                            }
                                         } else
                                             countHashSeedMismatches++;
                                     } catch (Exception ex) {
@@ -296,7 +302,7 @@ public class AlignmentEngine {
                                 int length = dataForInnerLoop.frameSequenceLength[seedMatch.getRank()];
 
                                 if (aligner.quickCheck(sequence, length, referenceSequence, referenceSequence.length, seedMatch.getQueryOffset(), seedMatch.getReferenceOffset())) {
-                                    aligner.computeAlignment(sequence, length, referenceSequence, referenceSequence.length, seedMatch.getQueryOffset(), seedMatch.getReferenceOffset());
+                                    aligner.computeAlignment(sequence, length, referenceSequence, referenceSequence.length, seedMatch.getQueryOffset(), seedMatch.getReferenceOffset(), seedMatch.getSeedLength());
 
                                     if (aligner.getRawScore() >= minRawScore) {  // have found match with sufficient rawScore
                                         // compute bitscore and expected score
@@ -363,13 +369,13 @@ public class AlignmentEngine {
                                                         }
                                                     }
                                                 }
-                                                if (malt2RMA3Writer != null && rma3Text == null) {
+                                                if (RMA3Writer != null && rma3Text == null) {
                                                     rma3Text = aligner.getAlignmentSAM(dataForInnerLoop, null, query.getSequence(), referencesDB.getHeader(refIndex), seedMatch.getRank()); // don't pass queryHeader, it is added below
                                                 }
                                                 if (percentIdentity > 0) // need to filter by percent identity. Can't do this earlier because number of matches not known until alignment has been computed
                                                 {
                                                     if (text == null && rma3Text == null)  // haven't computed alignment, so number of matches not yet computed
-                                                        aligner.getAlignmentByTraceBack(); // compute number of matches
+                                                        aligner.computeAlignmentByTraceBack(); // compute number of matches
                                                     if (aligner.getIdentities() < percentIdentity * aligner.getAlignmentLength()) {  // too few identities
                                                         if (incrementedNumberOfReadMatchesForRefIndex)
                                                             numberOfReadMatchesForRefIndex--; // undo increment, won't be saving this match
@@ -440,8 +446,8 @@ public class AlignmentEngine {
                     }
                 }
             }
-            if (malt2RMA3Writer != null) {
-                malt2RMA3Writer.processMatches(query.getHeaderString(), query.getSequenceString(), matchesArray, numberOfMatches);
+            if (RMA3Writer != null) {
+                RMA3Writer.processMatches(query.getHeaderString(), query.getSequenceString(), matchesArray, numberOfMatches);
             }
 
             if (alignedReferenceIds != null) {
@@ -473,8 +479,8 @@ public class AlignmentEngine {
                         break;
                 }
             }
-            if (malt2RMA3Writer != null) {
-                malt2RMA3Writer.processMatches(query.getHeaderString(), query.getSequenceString(), matchesArray, 0);
+            if (RMA3Writer != null) {
+                RMA3Writer.processMatches(query.getHeaderString(), query.getSequenceString(), matchesArray, 0);
             }
             if (organismsOutStream != null) {
                 organismsProfile.addNoHitsRead();
@@ -608,8 +614,8 @@ public class AlignmentEngine {
             return matches[i];
         }
 
-        public SeedMatch setNext(int queryOffset, int referenceOffset, int rank) {
-            return matches[size++].set(queryOffset, referenceOffset, rank);
+        public SeedMatch setNext(int queryOffset, int referenceOffset, int rank, int seedLength) {
+            return matches[size++].set(queryOffset, referenceOffset, rank, seedLength);
         }
 
         public void clear() {

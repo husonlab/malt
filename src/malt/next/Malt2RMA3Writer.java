@@ -5,7 +5,7 @@ import jloda.util.CanceledException;
 import jloda.util.ListOfLongs;
 import jloda.util.ProgressPercentage;
 import malt.Version;
-import malt.malt2.AnalyzerRMA3;
+import malt.io.AnalyzerRMA3;
 import malt.mapping.MappingHelper;
 import megan.algorithms.MinSupportFilter;
 import megan.core.ClassificationType;

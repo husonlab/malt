@@ -14,6 +14,7 @@ public class SeedMatch {
     private int queryOffset;
     private int referenceOffset;
     private int rank;     // rank of frame. Frame is given by frame[rank]
+    private int seedLength;
 
     static private Comparator<SeedMatch> comparator = new Comparator<SeedMatch>() {
         public int compare(SeedMatch a, SeedMatch b) {
@@ -28,6 +29,10 @@ public class SeedMatch {
             else if (a.rank < b.rank)
                 return -1;
             else if (a.rank > b.rank)
+                return 1;
+            else if (a.seedLength < b.seedLength)
+                return -1;
+            else if (a.seedLength > b.seedLength)
                 return 1;
             else
                 return 0;
@@ -48,10 +53,11 @@ public class SeedMatch {
      * @param rank
      * @return this
      */
-    public SeedMatch set(int queryOffset, int referenceOffset, int rank) {
+    public SeedMatch set(int queryOffset, int referenceOffset, int rank, int seedLength) {
         this.queryOffset = queryOffset;
         this.referenceOffset = referenceOffset;
         this.rank = rank;
+        this.seedLength = seedLength;
         return this;
     }
 
@@ -65,6 +71,10 @@ public class SeedMatch {
 
     public int getReferenceOffset() {
         return referenceOffset;
+    }
+
+    public int getSeedLength() {
+        return seedLength;
     }
 
     public String toString() {

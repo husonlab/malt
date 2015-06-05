@@ -8,11 +8,7 @@ import malt.align.ProteinScoringMatrix;
 import malt.analysis.OrganismsProfileMerger;
 import malt.data.*;
 import malt.genes.GeneTableAccess;
-import malt.io.BlastTextHelper;
-import malt.io.FastAReader;
-import malt.io.FileWriterRanked;
-import malt.io.SAMHelper;
-import malt.malt2.Malt2RMA3Writer;
+import malt.io.*;
 import malt.mapping.MappingHelper;
 import malt.util.ProfileUtilities;
 import malt.util.Utilities;
@@ -357,7 +353,7 @@ public class MaltRun {
         }
 
         final FileWriterRanked matchesWriter = (matchesOutputFileUsed != null ? new FileWriterRanked(matchesOutputFileUsed, maltOptions.getNumberOfThreads(), 1) : null);
-        final Malt2RMA3Writer rma3Writer = (rmaOutputFile != null ? new Malt2RMA3Writer(maltOptions, rmaOutputFile) : null);
+        final RMA3Writer rma3Writer = (rmaOutputFile != null ? new RMA3Writer(maltOptions, rmaOutputFile) : null);
         final FileWriterRanked alignedReadsWriter = (alignedReadsOutputFile != null ? new FileWriterRanked(alignedReadsOutputFile, maltOptions.getNumberOfThreads(), 1) : null);
         final FileWriterRanked unalignedReadsWriter = (unalignedReadsOutputFile != null ? new FileWriterRanked(unalignedReadsOutputFile, maltOptions.getNumberOfThreads(), 1) : null);
 

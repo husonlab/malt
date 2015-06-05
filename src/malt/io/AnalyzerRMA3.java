@@ -1,4 +1,4 @@
-package malt.malt2;
+package malt.io;
 
 import megan.algorithms.TaxonAssignmentUsingLCA;
 import megan.classification.IdMapper;
@@ -29,7 +29,7 @@ public class AnalyzerRMA3 {
         this.minScore = minScore;
         this.maxExpected = maxExpected;
         topPercentFactor = (100.0f - topPercent) / 100.0f;
-        taxIds = new HashSet<Integer>(100);
+        taxIds = new HashSet<>(100);
     }
 
     /**
