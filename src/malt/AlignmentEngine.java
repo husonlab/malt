@@ -375,7 +375,7 @@ public class AlignmentEngine {
                                                 if (percentIdentity > 0) // need to filter by percent identity. Can't do this earlier because number of matches not known until alignment has been computed
                                                 {
                                                     if (text == null && rma3Text == null)  // haven't computed alignment, so number of matches not yet computed
-                                                        aligner.computeAlignmentByTraceBack(); // compute number of matches
+                                                        aligner.computeAlignmentByTraceBack_OLD(); // compute number of matches
                                                     if (aligner.getIdentities() < percentIdentity * aligner.getAlignmentLength()) {  // too few identities
                                                         if (incrementedNumberOfReadMatchesForRefIndex)
                                                             numberOfReadMatchesForRefIndex--; // undo increment, won't be saving this match
