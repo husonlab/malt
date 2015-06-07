@@ -56,6 +56,9 @@ public class MaltOptions implements IMaltOptions {
 
     private boolean useReplicateQueryCaching = false;
 
+    private boolean hasMagnitudes = false;
+    private boolean pairedReads = false;
+
     /**
      * get seed shift step
      *
@@ -262,6 +265,22 @@ public class MaltOptions implements IMaltOptions {
 
     public void setUseReplicateQueryCaching(boolean useReplicateQueryCaching) {
         this.useReplicateQueryCaching = useReplicateQueryCaching;
+    }
+
+    public boolean isHasMagnitudes() {
+        return hasMagnitudes;
+    }
+
+    public void setHasMagnitudes(boolean hasMagnitudes) {
+        this.hasMagnitudes = hasMagnitudes;
+    }
+
+    public boolean isPairedReads() {
+        return pairedReads;
+    }
+
+    public void setPairedReads(boolean pairedReads) {
+        this.pairedReads = pairedReads;
     }
 
     /**

@@ -348,7 +348,7 @@ public class RMA3Writer {
         if (debug)
             System.err.println(userState);
 
-        Map<String, byte[]> label2data = new HashMap<String, byte[]>();
+        Map<String, byte[]> label2data = new HashMap<>();
         label2data.put(SampleAttributeTable.USER_STATE, userState.getBytes());
         auxFooter.writeAuxBlocks(writer, label2data);
 

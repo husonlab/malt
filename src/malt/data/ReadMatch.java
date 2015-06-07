@@ -78,7 +78,7 @@ class ReadMatch {
         this.endRef = endRef;
     }
 
-    public double getBitScore() {
+    public float getBitScore() {
         return bitScore;
     }
 

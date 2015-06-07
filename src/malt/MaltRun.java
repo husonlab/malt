@@ -294,7 +294,7 @@ public class MaltRun {
         for (String inFile : inputFileNames) {
             try {
                 if ((new File(inFile).exists())) {
-                    String rmaOutputFile = getOutputFileName(fileNumber, inputFileNames, outputRMAFileNames, ".rma", false);
+                    String rmaOutputFile = getOutputFileName(fileNumber, inputFileNames, outputRMAFileNames, ".rma6", false);
                     String matchesOutputFile = getOutputFileName(fileNumber, inputFileNames, outputMatchesFileNames, maltOptions.getMatchesOutputSuffix(), maltOptions.isGzipMatches());
                     String organismProfileOutputFile = getOutputFileName(fileNumber, inputFileNames, outputOrganismFileNames, "-organisms.xml", maltOptions.isGzipOrganisms());
                     String alignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputAlignedFileNames, "-aligned.fna", maltOptions.isGzipAlignedReads());
@@ -353,13 +353,13 @@ public class MaltRun {
         }
 
         final FileWriterRanked matchesWriter = (matchesOutputFileUsed != null ? new FileWriterRanked(matchesOutputFileUsed, maltOptions.getNumberOfThreads(), 1) : null);
-        final RMA3Writer rma3Writer = (rmaOutputFile != null ? new RMA3Writer(maltOptions, rmaOutputFile) : null);
+        final RMA6Writer rmaWriter = (rmaOutputFile != null ? new RMA6Writer(maltOptions, rmaOutputFile) : null);
         final FileWriterRanked alignedReadsWriter = (alignedReadsOutputFile != null ? new FileWriterRanked(alignedReadsOutputFile, maltOptions.getNumberOfThreads(), 1) : null);
         final FileWriterRanked unalignedReadsWriter = (unalignedReadsOutputFile != null ? new FileWriterRanked(unalignedReadsOutputFile, maltOptions.getNumberOfThreads(), 1) : null);
 
         final OutputStream organismOutStream = (organismProfileOutputFile != null ? new BufferedOutputStream(new FileOutputStream(organismProfileOutputFile)) : null);
 
-        if (matchesWriter == null && rma3Writer == null && alignedReadsWriter == null && unalignedReadsWriter == null)
+        if (matchesWriter == null && rmaWriter == null && alignedReadsWriter == null && unalignedReadsWriter == null)
             System.err.println("Warning: no output specified");
 
         if (matchesWriter != null) {
@@ -379,7 +379,7 @@ public class MaltRun {
                 public void run() {
                     try {
                         alignmentEngines[threadNumber] = new AlignmentEngine(threadNumber, maltOptions, alignerOptions, referencesDB, tables, fastAReader,
-                                matchesWriter, rma3Writer, organismOutStream, alignedReadsWriter, unalignedReadsWriter);
+                                matchesWriter, rmaWriter, organismOutStream, alignedReadsWriter, unalignedReadsWriter);
                         alignmentEngines[threadNumber].runOuterLoop();
                         alignmentEngines[threadNumber].finish();
                     } catch (Exception ex) {
@@ -407,8 +407,8 @@ public class MaltRun {
             matchesWriter.close();
             System.err.println("Alignments written to file: " + matchesOutputFileUsed);
         }
-        if (rma3Writer != null) {
-            rma3Writer.close();
+        if (rmaWriter != null) {
+            rmaWriter.close();
             System.err.println("Analysis written to file: " + rmaOutputFile);
         }
 
