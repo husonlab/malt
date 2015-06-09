@@ -63,13 +63,14 @@ This software is provided "AS IS" without warranty of any kind. This is
 developmental code, and we make no pretension as to it being bug-free and 
 totally reliable. Use at your own risk. We will accept no liability for any 
 damages incurred through the use of this software.
-Use of  \MALT is free for academic usage, however the program is not open source.
 
-\MALT, an acronym for \itt{MEGAN alignment tool} or \iit{MEGAN alignment tool}, is a sequence alignment and analysis tool designed for processing high-throughput sequencing data, especially in the context of metagenomics.
-It is an extension of MEGAN, the \itt{MEGenome Analyzer} and is designed to provide the input for MEGAN,
-but can also be used independently of MEGAN.
+\MALT is an open source program that is licensed under the Apache 2 license.
 
-The core of the program is an sequence alignment engine that aligns DNA or protein sequences
+\MALT, an acronym for  \iit{MEGAN alignment tool}, is a sequence alignment and analysis tool designed for processing high-throughput sequencing data, especially in the context of metagenomics.
+It is an extension of MEGAN6, the \iit{MEGenome Analyzer} and is designed to provide the input for MEGAN6,
+but can also be used independently of MEGAN6.
+
+The core of the program is a sequence alignment engine that aligns DNA or protein sequences
 to a {DNA or} protein reference database in either {BLASTN (DNA queries and DNA references),}
 BLASTX (DNA queries and protein references) or BLASTP (protein queries and protein references)
 mode. The engine uses a banded-alignment algorithm with affine gap scores
@@ -77,8 +78,8 @@ and BLOSUM substitution matrices (in the case of protein alignments).
 The program can compute both local alignments
 (Smith-Waterman) or semi-global alignments (in which reads are aligned end-to-end into reference sequences), the latter being more appropriate for aligning metagenomic reads to references.
 
-By default, \MALT produces a MEGAN ``RMA'' file that contains taxonomic and functional classifications of the reads
-that can be opened in MEGAN.
+By default, \MALT produces a MEGAN ``RMA6'' file that contains taxonomic and functional classifications of the reads
+that can be opened in MEGAN6.
 The taxonomic analysis use the naive LCA algorithm (introduced in \cite{MEGAN2011}).
 
 Used as an alignment tool,  \MALT can produce  alignments in BLAST  text format,
@@ -139,8 +140,6 @@ Download the program from \url{http://www-ab.informatik.uni-tuebingen.de/softwar
 see Section~\ref{sec:Obtaining and Installing the Program}
 for details.
 
-Then make sure that you have a license certificate for MEGAN5. This license is required to run \MALT.
-
 
 First, use \program{malt-build} to build an index for \MALT. For example,
 to build an index for all viral proteins in RefSeq, download the following file:
@@ -175,16 +174,19 @@ malt-run -i reads1.fna reads2.fna -d index -m BlastX -o . -L megan5-license.txt
 \end{verbatim}
 }
 
-If either of the two programs abort due to lack insufficient memory, then please end the files {\tt malt/bin/malt-build} and/or {\tt malt/bin/malt-run}.
-By default, for testing purposes, the memory reserved for the programs is set to $10GB$. 
+If either of the two programs abort due to lack insufficient memory, then please edit the files {\tt malt-build-gui.vmoptions} and/or {\tt malt-run-gui.vmoptions} to allocate more memory to the programs;
+By default, for testing purposes, the memory reserved for the programs is set to $64GB$. 
 For comparison against the NCBI-NR database, for example, you will  need about $300GB$.
 
-All input files are specified using {\tt -i}. Because loading of the index may take a long time, it is best to launch the program on a large
-number of files. The index to use is specified using {\tt -d}. The option {\tt -m} defines the alignment mode of the program, in this
+All input files are specified using {\tt -i}.  The index to use is specified using {\tt -d}. The option {\tt -m} defines the alignment mode of the program, in this
 case {\tt BlastX}. Use {\tt -at} to specify the alignment type.The option {\tt -om} is used to specify the output directory for matches.
 Here we specify the current directory ({\tt .}). The option {\tt --tax} requests that a taxonomic analysis of the reads be performed and {\tt -om .}
 requests that the resulting MEGAN file be written to the current directory.
 The file option {\tt -t} specifies the maximum number of threads.
+
+By default, \MALT uses memory mapping to access its index files. If you intend to align a large number of files in a single run of \MALT,
+then it may be more efficient to have the program preload the complete index. To achieve this, use the command-line option \itt{-mem false}.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \mysection{Obtaining and Installing the Program}
@@ -205,7 +207,6 @@ There are three different installers that target major operating systems:
 \item \itt{MALT\_macos\_\VERSION.dmg} provides an installer for \irm{MacOS X}.
 \item \itt{MALT\_unix\_\VERSION.sh} provides an installer for \irm{Linux} and  \irm{Unix}.
 \end{itemize}
-
 
 Download the installer that is appropriate for your computer. Please note that the \irm{memory requirement}
 of \MALT grows dramatically with the size of the reference database that you wish to employ.
@@ -234,30 +235,6 @@ ending on \itt{vmoptions} in the installation directory.
 Two copies of each of the program \program{malt-build} and \program{malt-run} will be installed.
 The two copies named \itt{malt-build} and \itt{malt-run} are intended in non-interactive, commandline use.
 The two copies  named \itt{malt-build-gui} and \itt{malt-run-gui} provide a very simple GUI interface.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\mysection{Licensing}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\MALT is an extension of MEGAN and so
-any usage of \MALT requires a valid MEGAN license. The following types of licenses are available for MEGAN:
-
-\begin{itemize}
-\item \pconcept{Academic license} This license permits use of the software exclusively for academic research
-(publications in academic journals and papers at academic conferences) and instruction.  This type of license is
-available free of charge from the MEGAN5 website.
-\item   \pconcept{Single user license} This license permits a single user to use the program.
-This type of license is granted for a charge from the University of T\"ubingen, please contact Daniel Huson for details.
-\item   \pconcept{Site license} This license permits use of the program at a single physical location, within
-  a single organization.
-This type of license is granted for a charge from the University of T\"ubingen, please contact Daniel Huson for details.
-  \item   \pconcept{Enterprise license} This license permits use of the program anywhere within
-  a single organization.
-This type of license is granted for a charge from the University of T\"ubingen,please contact Daniel Huson for details.
-\item \pconcept{Evaluation license} This type of license is  granted for 45 days and is for evaluation purposes only.
-   It is available free of charge from the University of T\"ubingen, please contact Daniel Huson for details.
-\end{itemize}
 
 
 
@@ -375,11 +352,12 @@ There are a couple of other options:
 SYNOPSIS
 	MaltBuild [options]
 DESCRIPTION
-	Builds the MALT index
+	Build an index for MALT (MEGAN alignment tool)
 OPTIONS
- Input and output:
+ Input:
 	-i, --input [string(s)]              Input reference file(s). Mandatory option.
 	-s, --sequenceType [string]          Sequence type. Mandatory option. Legal values: DNA, Protein
+ Output:
 	-d, --index [string]                 Name of index directory. Mandatory option.
  Performance:
 	-t, --threads [number]               Number of worker threads. Default value: 8.
@@ -387,10 +365,7 @@ OPTIONS
  Seed:
 	-ss, --shapes [string(s)]            Seed shape(s). Default value(s): default.
 	-mh, --maxHitsPerSeed [number]       Maximum number of hits per seed. Default value: 1000.
-	-pr, --proteinReduct [string(s)]     Name or definition of protein alphabet reductions (one for each seed, possible values:
-                                             BLOSUM50_10,BLOSUM50_11,BLOSUM50_15,BLOSUM50_4,BLOSUM50_8,DIAMOND_11,GBMR4,HSDM17,
-                                             MALT_10,MALT_12A,MALT_12B,MALT_12C,SDM12,UNREDUCED).
-                                             Default value(s): MALT_12A MALT_12B MALT_12C.
+	-pr, --proteinReduct [string]        Name or definition of protein alphabet reduction (BLOSUM50_10,BLOSUM50_11,BLOSUM50_15,BLOSUM50_4,BLOSUM50_8,DIAMOND_11,GBMR4,HSDM17,MALT_10,SDM12,UNREDUCED). Default value: DIAMOND_11.
  Classification support:
 	-g2t, --gi2taxa [string]             GI-to-Taxonomy mapping file. 
 	-r2t, --ref2taxa [string]            RefSeq-to-Taxonomy mapping file. 
@@ -405,15 +380,12 @@ OPTIONS
 	-r2c, --ref2cog [string]             RefSeq-to-COG mapping file. 
 	-s2c, --syn2cog [string]             Synonyms-to-COG mapping file. 
 	-gif, -geneInfoFile [string]         File containing gene information. 
- Additional files:
-	-tre, --taxTree [string]             NCBI tree file (ncbi.tre as used by MEGAN). 
-	-map, --taxMap [string]              NCBI map file (ncbi.map as used by MEGAN). 
-	-cmf, --cogMappingFile [string]      COG mapping file (cog.map file as used by MEGAN). 
  Other:
+	-fwo, --firstWordOnly                Save only first word of reference header. Default value: false.
 	-rns, --random [number]              Random number generator seed. Default value: 666.
 	-hsf, --hashScaleFactor [number]     Hash table scale factor. Default value: 0.9.
--v, --verbose                        Echo commandline options and be verbose. Default value: false.
-	-h, --help                           Show program usage and quit.
+	-v, --verbose                        Echo commandline options and be verbose. Default value: false.
+	-h, --help  
 \end{verbatim}
 }
 \caption{Summary of command-line usage of malt-build.}\label{fig:malt-build-usage}
@@ -461,6 +433,8 @@ There is a number of options for specifying the output generated by the program.
 per input file is written to the specified directory. Alternatively, if one or more output files are named, then
 the number of output files must equal the number of input files, in which case the output for the first
 input file is written to first output file, etc. 
+\item[\itt{--includeUnaligned}] Use this to ensure that all unaligned queries are placed into the output RMA file. By default, only
+queries that have an alignment are included in the output RMA file.
 \item[\itt{--alignments}]   Use to specify the files to which alignments should be written.
 	If a single directory is specified, then one output file
 per input file is written to the specified directory. Alternatively, if one or more output files are named, then
@@ -473,6 +447,9 @@ to standard-output rather than to a file. If this option is not supplied, then t
 \item[\itt{--outAligned}]        Use this to specify that all reads that have at least one significant alignment to some reference
 sequence should be saved. 
 File specification possibilities as for \itt{--alignments}.
+\item[\itt{--samSoftClip}] Request that SAM output uses soft clipping.
+\item[\itt{--sparseSAM}] Request a sparse version of SAM output. This is faster and uses less memory, but the files are not necessary compatible with
+other SAM processing tools.
 \item[\itt{--gzipAligned}]                    Compress aligned reads output using gzip. Default value: true.
 \item[\itt{--outUnaligned}]      Use this to specify that all reads that do not have any significant alignment to any reference
 sequence should be saved.
@@ -487,6 +464,7 @@ There are three performance-related options:
 \item[\itt{--threads}] Use to set the number of threads to use in parallel computations. Default is 8. Set this to
 the number of available cores.
 	-rqc,           Cache results for replicated queries. 
+\item[\itt{--memoryMapping}] Access indices via memory mapping rather than preloading them (on by default).
 \item[\itt{--maxTables}] Use to set the maximum number of seed tables to use (0=all). Default value: 0.
 \item[\itt{--replicateQueryCache}] Use to turn on caching of replicated queries. This is especially useful for processing 16S datasets
 in which identical sequences occur multiple times. Turning on this feature does not change the output of the program, but can
@@ -549,8 +527,6 @@ There are a number of options that control the heuristics used by \program{malt-
 \item[{\itt{--maxSeedsPerFrame}}]   Maximum number of seed matches per offset per read frame. Default value: 100.
 \item[{\itt{--maxSeedsPerRef}}]      Maximum number of seed matches per read and reference. Default value: 20.
 \item[\itt{ --seedShift}]            Seed shift. Default value: 1.
-\item[\itt{ --xDrop}]                XDrop parameter used for ungapped pre-screen. Default value: 7.
-\item[\itt{--minBitPre}]            Min bit score used for ungapped pre-screen. Default value: 30.0.
 \end{itemize}
 
 The program uses a banded-aligner as described in \cite{ChaoPM92}. There are a number of associated options.
@@ -561,19 +537,10 @@ The program uses a banded-aligner as described in \cite{ChaoPM92}. There are a n
 \item[\itt{--band}]                 Use this to specify width/2 for banded alignment. Default value: 4.
 \end{itemize}
 
-There are two options concerned with properties and licensing:
-\begin{itemize}
-\setlength{\itemindent}{30pt}
-\item[\itt{--propertiesFile}] Use to specify the program properties file. By default, \MALT uses the same file as MEGAN5.
-\item[\itt{licenseFile}] Use to specify a MEGAN5 license file. \MALT is an extension of MEGAN5 and use of \MALT requires a valid MEGAN5 license.
-If MEGAN5 is installed, then \MALT will locate and use the corresponding license.
-\end{itemize}
-
 The are a couple of other options:
 \begin{itemize}
 \setlength{\itemindent}{30pt}
-\item[\itt{--maxShapes}] Specify the maximum number of seed shapes to use. Only useful if the employed index was built using
-more than one seed shape. By default all seed shapes are used.
+\item[\itt{--replicateQueryCacheBits}] Specify the number of bits used to cache replicate queries (default is 20).
 \item[\itt{--verbose}] Use to run program in verbose mode.
 \item[\itt{--help}] Report command-line usage.
 \end{itemize}
@@ -584,27 +551,29 @@ more than one seed shape. By default all seed shapes are used.
 SYNOPSIS
 	MaltRun [options]
 DESCRIPTION
-	Runs the MEGAN alignment tool
+	Align sequences using MALT (MEGAN alignment tool)
 OPTIONS
  Mode:
-	-m, --mode [string]                  Program mode. Mandatory option. Legal values: BlastN, BlastP, BlastX
+	-m, --mode [string]                  Program mode. Mandatory option. Legal values: Unknown, BlastN, BlastP, BlastX, Classifier
 	-at, --alignmentType [string]        Type of alignment to be performed. Default value: Local. Legal values: Local, SemiGlobal
  Input:
 	-i, --inFile [string(s)]             Input file(s) containing queries in FastA or FastQ format. Mandatory option.
 	-d, --index [string]                 Index directory as generated by MaltBuild. Mandatory option.
  Output:
 	-o, --output [string(s)]             Output RMA file(s) or directory. 
+	-iu, --includeUnaligned              Include unaligned queries in RMA output file. Default value: false.
 	-a, --alignments [string(s)]         Output alignment file(s) or directory or STDOUT. 
 	-f, --format [string]                Alignment output format. Default value: SAM. Legal values: SAM, Tab, Text
 	-za, --gzipAlignments                Compress alignments using gzip. Default value: true.
-	-ssq, --samSQ                        Place @SQ lines in SAM files. Default value: false.
 	-ssc, --samSoftClip                  Use soft clipping in SAM files (BlastN mode only). Default value: false.
+	-sps, --sparseSAM                    Produce sparse SAM format (smaller, faster, suitable for MEGAN). Default value: false.
 	-oa, --outAligned [string(s)]        Aligned reads output file(s) or directory or STDOUT. 
 	-zal, --gzipAligned                  Compress aligned reads output using gzip. Default value: true.
 	-ou, --outUnaligned [string(s)]      Unaligned reads output file(s) or directory or STDOUT. 
 	-zul, --gzipUnaligned                Compress unaligned reads output using gzip. Default value: true.
  Performance:
 	-t, --numThreads [number]            Number of worker threads. Default value: 8.
+	-mem, --memoryMapping                Use memory mapping rather than loading all indices into memory. Default value: true.
 	-mt, --maxTables [number]            Set the maximum number of seed tables to use (0=all). Default value: 0.
 	-rqc, --replicateQueryCache          Cache results for replicated queries. Default value: false.
  Filter:
@@ -635,9 +604,6 @@ OPTIONS
 	-go, --gapOpen [number]              Gap open penalty. Default value: 11.
 	-ge, --gapExtend [number]            Gap extension penalty. Default value: 1.
 	-bd, --band [number]                 Band width/2 for banded alignment. Default value: 4.
- Properties and license:
-	-p, --propertiesFile [string]        Properties file. Default value: /Users/huson/Library/Preferences/Megan.def.
-	-L, --licenseFile [string]           Specify license file. Default value: /Users/huson/etc/megan5-license.txt.
  Other:
 	-rqcb, --replicateQueryCacheBits [number]   Bits used for caching replicate queries (size is then 2^bits). Default value: 20.
 	-xP, --xPart                         Show part of the table in human readable form for debugging. Default value: false.
