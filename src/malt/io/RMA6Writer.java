@@ -1,3 +1,21 @@
+/**
+ * Copyright 2015, Daniel Huson
+ * <p/>
+ * (Some files contain contributions from other authors, who are then mentioned separately)
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package malt.io;
 
 import jloda.util.Basic;
@@ -72,7 +90,7 @@ public class RMA6Writer {
      * @throws IOException
      */
     public RMA6Writer(final MaltOptions maltOptions, String rma6File) throws IOException {
-        System.err.println("Creating file: " + rma6File);
+        System.err.println("Starting file: " + rma6File);
         this.maltOptions = maltOptions;
         this.rma6File = rma6File;
 
@@ -178,6 +196,8 @@ public class RMA6Writer {
         if (numberOfMatches > 0) {
             totalAlignedReads++;
             totalMatches += numberOfMatches;
+        } else
+            totalUnalignedReads++;
 
             for (int i = 0; i < fNames.length; i++) {
                 final int id;
@@ -191,8 +211,6 @@ public class RMA6Writer {
                 if (i == taxonMapperIndex)
                     totalTaxWeight += readWeight;
             }
-        } else
-            totalUnalignedReads++;
     }
 
     /**
@@ -202,27 +220,24 @@ public class RMA6Writer {
      * @throws CanceledException
      */
     public void close() throws IOException {
-        final ProgressPercentage progress = new ProgressPercentage("Closing: " + rma6File);
+        System.err.println("Finishing file: "+rma6File);
 
         rma6FileCreator.endAddingQueries();
 
         try
         {
             int minSupport = this.minSupport;
-            if (minSupportPercent > 0 || minSupport > 1) // apply min-support filter
+            if (minSupportPercent > 0) {
+                minSupport = (int) Math.max(1, (minSupportPercent / 100.0) * totalTaxWeight);
+            }
+
+            if (minSupport > 1) // apply min-support filter
             {
-                progress.setSubtask("Applying the min-support filter");
-                progress.setProgress(0);
-
-                if (minSupportPercent > 0) {
-                    minSupport = (int) Math.max(1, (minSupportPercent / 100.0) * totalTaxWeight);
-                }
-
+                final ProgressPercentage progress = new ProgressPercentage("Applying min-support filter");
                 final MinSupportFilter minSupportFilter = new MinSupportFilter(fName2ClassId2Weight[taxonMapperIndex], minSupport, progress);
                 final Map<Integer, Integer> old2new = minSupportFilter.apply(); // computes mapping of all ids to new ids.
                 final Map<Integer, ListOfLongs> tax2Location = fName2ClassId2Location[taxonMapperIndex];
 
-                System.err.println(String.format("Min-supp. changes:%,12d", old2new.size()));
                 for (Integer oldId : old2new.keySet()) {
                     final ListOfLongs oldList = tax2Location.get(oldId);
                     if (oldList != null) {
@@ -235,6 +250,8 @@ public class RMA6Writer {
                         tax2Location.keySet().remove(oldId);
                     }
                 }
+                progress.close();
+                System.err.println(String.format("Min-supp. changes:%,12d", old2new.size()));
             }
             System.err.println(String.format("Total reads:  %,16d", totalAlignedReads + totalUnalignedReads));
             System.err.println(String.format("Total matches:%,16d ", totalMatches));
@@ -255,10 +272,9 @@ public class RMA6Writer {
             final Document doc;
             if (pairedReads) { // update paired reads info and then run dataprocessor
                 long count = 0;
-                progress.reportTaskCompleted();
                 try (InputOutputReaderWriter raf = new InputOutputReaderWriter(rma6File, "rw");
                      IReadBlockIterator it = (new RMA6Connector(rma6File)).getAllReadsIterator(0, 1000, false, false)) {
-                    progress.setSubtask("Linking paired reads");
+                    final ProgressPercentage progress = new ProgressPercentage("Linking paired reads");
                     progress.setProgress(0);
                     progress.setProgress(it.getMaximumProgress());
 
@@ -273,6 +289,7 @@ public class RMA6Writer {
                         }
                         progress.setProgress(it.getProgress());
                     }
+                    progress.close();
                     System.err.println(String.format("Number of pairs:%,14d", count));
                 }
 
@@ -327,7 +344,7 @@ public class RMA6Writer {
      */
     private String getHeader(final String creator, final long creationDate, final String fileName, final int numberOfQueries, final double minScore, final double maxExpected,
                             final double topPercent, final double minSupportPercent, final int minSupport) {
-        return "@MEGAN4\n"
+        return "@MEGAN6\n"
                 + "@Creator\t" + creator + "\n"
                 + "@CreationDate\t" + creationDate + "\n"
                 + "@ContentType\tSummary4\n"

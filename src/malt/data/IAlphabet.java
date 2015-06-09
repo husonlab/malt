@@ -1,3 +1,21 @@
+/**
+ * Copyright 2015, Daniel Huson
+ * <p/>
+ * (Some files contain contributions from other authors, who are then mentioned separately)
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package malt.data;
 
 /**
@@ -11,7 +29,7 @@ public interface IAlphabet extends INormalizer {
      * @param letter
      * @return
      */
-    public byte getNormalized(byte letter);
+    byte getNormalized(byte letter);
 
     /**
      * do letters a and b correspond to the same base or amino acid?
@@ -20,35 +38,35 @@ public interface IAlphabet extends INormalizer {
      * @param b
      * @return true, if equal bases
      */
-    public boolean equal(byte a, byte b);
+    boolean equal(byte a, byte b);
 
     /**
      * is this a protein alphabet?
      *
      * @return true, if protein
      */
-    public boolean isProtein();
+    boolean isProtein();
 
     /**
      * is this a DNA alphabet?
      *
      * @return true, if DNA
      */
-    public boolean isDNA();
+    boolean isDNA();
 
     /**
      * gets the name of this alphabet
      *
      * @return name
      */
-    public String getName();
+    String getName();
 
     /**
      * get the number of different letters
      *
      * @return size
      */
-    public int size();
+    int size();
 
     /**
      * is this word a good seed?
@@ -57,5 +75,5 @@ public interface IAlphabet extends INormalizer {
      * @param length
      * @return true, if good
      */
-    public boolean isGoodSeed(byte[] word, int length);
+    boolean isGoodSeed(byte[] word, int length);
 }

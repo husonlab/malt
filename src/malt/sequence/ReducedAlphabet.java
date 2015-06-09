@@ -1,3 +1,21 @@
+/**
+ * Copyright 2015, Daniel Huson
+ * <p/>
+ * (Some files contain contributions from other authors, who are then mentioned separately)
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package malt.sequence;
 
 import java.io.IOException;
@@ -107,8 +125,8 @@ public class ReducedAlphabet extends Alphabet implements ISeedExtractor {
         int letterInWord = pos - proteinAlphabet.lettersPerWord * word;
         int shift = 64 - (letterInWord + 1) * proteinAlphabet.bitsPerLetter;
 
-        for (int i = 0; i < seedShape.length; i++) {
-            if (seedShape[i]) {
+        for (boolean aSeedShape : seedShape) {
+            if (aSeedShape) {
                 long bits = (sequenceCode[word] & (proteinAlphabet.letterMask << shift)) >>> shift;
                 if (bits == 0)
                     return failValue;
@@ -181,7 +199,7 @@ public class ReducedAlphabet extends Alphabet implements ISeedExtractor {
      * @return reductions
      */
     private static Map<String, String> initReductions() {
-        Map<String, String> reductions = new TreeMap<String, String>();
+        Map<String, String> reductions = new TreeMap<>();
         // From: Bioinformatics. 2009 June 1; 25(11): 1356–1362. Published online 2009 April 7. doi: 10.1093/bioinformatics/btp164:
         reductions.put("GBMR4", "[ADKERNTSQ] [YFLIVMCWH*X] G P");
         reductions.put("SDM12", "A D [KER] N [STQ] [YF] [LIVM*X] C W H G P");

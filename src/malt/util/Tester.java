@@ -1,7 +1,26 @@
+/**
+ * Copyright 2015, Daniel Huson
+ * <p/>
+ * (Some files contain contributions from other authors, who are then mentioned separately)
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package malt.util;
 
 /**
- * Created by huson on 6/18/14.
+ * tester
+ * Daniel Huson, 2014
  */
 public class Tester {
 
@@ -17,19 +36,19 @@ public class Tester {
 
         int hash = Integer.MAX_VALUE;
         System.err.print("hash: " + hash);
-        if (hash == Integer.MAX_VALUE || hash <= Integer.MIN_VALUE + 1)
+        if ((long) hash == Integer.MAX_VALUE || (long) hash <= Integer.MIN_VALUE + 1)
             hash = 0;
         System.err.println(" -> " + hash);
 
         hash = Integer.MIN_VALUE;
         System.err.print("hash: " + hash);
-        if (hash == Integer.MAX_VALUE || hash <= Integer.MIN_VALUE + 1)
+        if ((long) hash == Integer.MAX_VALUE || (long) hash <= Integer.MIN_VALUE + 1)
             hash = 0;
         System.err.println(" -> " + hash);
 
         hash = Integer.MIN_VALUE + 1;
         System.err.print("hash: " + hash);
-        if (hash == Integer.MAX_VALUE || hash <= Integer.MIN_VALUE + 1)
+        if ((long) hash == Integer.MAX_VALUE || (long) hash <= Integer.MIN_VALUE + 1)
             hash = 0;
         System.err.println(" -> " + hash);
 
@@ -43,7 +62,7 @@ public class Tester {
         System.err.println("numberOfSeeds: " + numberOfSeeds);
 
         int tableSize;
-        if ((long) 0.9 * numberOfSeeds >= Integer.MAX_VALUE) {
+        if ((long) (0.9 * numberOfSeeds) >= Integer.MAX_VALUE) {
             tableSize = Integer.MAX_VALUE;
         } else {
             tableSize = 1;

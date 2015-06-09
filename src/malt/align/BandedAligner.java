@@ -1,3 +1,21 @@
+/**
+ * Copyright 2015, Daniel Huson
+ * <p/>
+ * (Some files contain contributions from other authors, who are then mentioned separately)
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package malt.align;
 
 import jloda.util.Basic;
@@ -48,8 +66,6 @@ public class BandedAligner {
     private final BlastMode mode;
     private final boolean doSemiGlobal;
 
-    private int bestRow;
-    private int bestCol;
     private int refOffset; // needed convert from row to position in reference
 
     private int startQuery; // first alignment position of query
@@ -94,8 +110,6 @@ public class BandedAligner {
     private final int rows;
     private final int lastRowToFill;
     private final int middleRow;
-
-    boolean useOldCode = false;
 
     /**
      * constructor
@@ -151,6 +165,9 @@ public class BandedAligner {
         this.queryPos = queryPos;
         this.refPos = refPos;
         this.seedLength = seedLength;
+
+        startQuery = startReference = endQuery = endReference=-1;
+
         if (doSemiGlobal)
             computeSemiGlobalAlignment();
         else
@@ -161,21 +178,16 @@ public class BandedAligner {
      * Performs a banded local alignment and return the raw score.
      */
     private void computeLocalAlignment() {
-        if (useOldCode) {
-            computeLocalAlignment_OLD();
-            return;
-        }
         alignment = null; // will need to call alignmentByTraceBack to compute this
 
-        startQuery = startReference = 0;
         refOffset = refPos - queryPos - band - 2; // need this to compute index in reference sequence
 
-        final int cols = query.length + 2; // query plus one col before and one after
+        final int cols = queryLength + 2; // query plus one col before and one after
 
         final int firstSeedCol = queryPos + 1; // +1 because col=pos+1
         final int lastSeedCol = queryPos + seedLength; // +1 because col=pos+1, but then -1 because want to be last in seed (not first after seed)
 
-        //if (lastSeedCol > query.length)
+        //if (lastSeedCol > queryLength)
         //     return; // too long
 
         // ------- compute score that comes from seed (without first and last member)
@@ -313,7 +325,7 @@ public class BandedAligner {
 
         // ------- fill dynamic programming matrix from end of query to last column of seed:
         {
-            final int lastCol = Math.min(query.length + 1, queryPos + reference.length - refPos + 1); // last column, fill upto lastCol-1
+            final int lastCol = Math.min(queryLength + 1, queryPos + referenceLength - refPos + 1); // last column, fill upto lastCol-1
 
             // initial last column:
 
@@ -334,10 +346,10 @@ public class BandedAligner {
                 for (int row = lastRowToFill; row >= 1; row--) {
                     final int refIndex = row + col + refOffset;
 
-                    if (refIndex >= reference.length) { // out of range of the alignment
+                    if (refIndex >= referenceLength) { // out of range of the alignment
                         traceBackM[col][row] = traceBackIRef[col][row] = traceBackIQuery[col][row] = DONE;
                         matrixM[col][row] = matrixIRef[col][row] = matrixIQuery[col][row] = 0;
-                    } else if (refIndex < reference.length) { // do the actual alignment:
+                    } else if (refIndex < referenceLength) { // do the actual alignment:
                         int bestMScore = 0;
                         // match or mismatch
                         {
@@ -408,7 +420,7 @@ public class BandedAligner {
                         }
 
                     }
-                    // else  refIndex >reference.length
+                    // else  refIndex >referenceLength
                 }
             }
         }
@@ -451,21 +463,16 @@ public class BandedAligner {
      * Performs a banded semi-global alignment.
      */
     private void computeSemiGlobalAlignment() {
-        if (useOldCode) {
-            computeSemiGlobalAlignment_OLD();
-            return;
-        }
         alignment = null; // will need to call alignmentByTraceBack to compute this
 
-        startQuery = startReference = 0;
         refOffset = refPos - queryPos - band - 2; // need this to compute index in reference sequence
 
-        final int cols = query.length + 2; // query plus one col before and one after
+        final int cols = queryLength + 2; // query plus one col before and one after
 
         final int firstSeedCol = queryPos + 1; // +1 because col=pos+1
         final int lastSeedCol = queryPos + seedLength; // +1 because col=pos+1, but then -1 because want to be last in seed (not first after seed)
 
-        //if (lastSeedCol > query.length)
+        //if (lastSeedCol > queryLength)
         //    return; // too long
 
         // ------- compute score that comes from seed (without first and last member)
@@ -595,7 +602,7 @@ public class BandedAligner {
 
         // ------- fill dynamic programming matrix from end of query to last column of seed:
         {
-            final int lastCol = Math.min(query.length + 1, queryPos + reference.length - refPos + 1); // last column, fill upto lastCol-1
+            final int lastCol = Math.min(queryLength + 1, queryPos + referenceLength - refPos + 1); // last column, fill upto lastCol-1
 
             // initial last column:
 
@@ -617,10 +624,10 @@ public class BandedAligner {
                 for (int row = lastRowToFill; row >= 1; row--) {
                     final int refIndex = row + col + refOffset;
 
-                    if (refIndex >= reference.length) { // out of range of the alignment
+                    if (refIndex >= referenceLength) { // out of range of the alignment
                         traceBackM[col][row] = traceBackIRef[col][row] = traceBackIQuery[col][row] = DONE;
                         matrixM[col][row] = matrixIRef[col][row] = matrixIQuery[col][row] = -gapOpenPenalty;
-                    } else if (refIndex < reference.length) { // do the actual alignment:
+                    } else if (refIndex < referenceLength) { // do the actual alignment:
                         int bestMScore = Integer.MIN_VALUE;
                         // match or mismatch
                         {
@@ -680,7 +687,7 @@ public class BandedAligner {
                             matrixIQuery[col][row] = bestIQueryScore;
                         }
                     }
-                    // else  refIndex >reference.length
+                    // else  refIndex >referenceLength
                 }
             }
         }
@@ -738,10 +745,6 @@ public class BandedAligner {
      * @return alignment
      */
     public void computeAlignmentByTraceBack() {
-        if (useOldCode) {
-            computeAlignmentByTraceBack_OLD();
-            return;
-        }
         if (rawScore <= 0) {
             alignment = null;
             return;
@@ -880,9 +883,9 @@ public class BandedAligner {
                 }
             } // end of loop
 
-            reverse(queryTrack, length);
-            reverse(midTrack, length);
-            reverse(referenceTrack, length);
+            reverseInPlace(queryTrack, length);
+            reverseInPlace(midTrack, length);
+            reverseInPlace(referenceTrack, length);
         }
 
         // get second part of alignment:
@@ -911,6 +914,7 @@ public class BandedAligner {
             }
         }
 
+
         // get third part of alignment:
         {
             int r = middleRow;
@@ -931,7 +935,7 @@ public class BandedAligner {
 
                 switch (traceBack[c][r]) {
                     case DONE:
-                        endQuery = c;
+                        endQuery = c-1;
                         endReference = r + c + refOffset + 1;
                         break loop;
                     case M_FROM_M:
@@ -1039,473 +1043,10 @@ public class BandedAligner {
                 }
             } // end of loop
         }
+
         alignmentLength = length;
-        alignment = new byte[][]{copyReverse(queryTrack, length), copyReverse(midTrack, length), copyReverse(referenceTrack, length)};
+        alignment = new byte[][]{copy(queryTrack, length), copy(midTrack, length), copy(referenceTrack, length)};
     }
-
-    /**
-     * Performs a banded local alignment and return the raw score.
-     *
-     * @deprecated todo: delete this once we are convinced that the new code works as intended
-     */
-    private void computeLocalAlignment_OLD() {
-        alignment = null; // will need to call alignmentByTraceBack to compute this
-
-        startQuery = startReference = 0;
-
-        final int rows = 2 * band + 3;
-        final int cols = queryLength + 1;
-
-        if (cols > matrixM.length) {  // all values will be 0
-            matrixM = new int[cols][rows];
-            matrixIRef = new int[cols][rows];
-            matrixIQuery = new int[cols][rows];
-            traceBackM = new byte[cols][rows];
-            traceBackIRef = new byte[cols][rows];
-            traceBackIQuery = new byte[cols][rows];
-            for (int r = 1; r < rows; r++) {
-                matrixM[0][r] = matrixIRef[0][r] = matrixIQuery[0][r] = 0;
-                traceBackM[0][r] = traceBackIRef[0][r] = traceBackIQuery[0][r] = DONE;
-            }
-            for (int c = 0; c < cols; c++) {
-                matrixM[c][0] = matrixIRef[c][0] = matrixIQuery[c][0] = matrixM[c][rows - 1] = matrixIRef[c][rows - 1] = matrixIQuery[c][rows - 1] = 0;
-                traceBackM[c][0] = traceBackIRef[0][0] = traceBackIQuery[0][0]
-                        = traceBackM[c][rows - 1] = traceBackIRef[0][rows - 1] = traceBackIQuery[0][rows - 1] = DONE;
-            }
-        }
-
-        refOffset = refPos - queryPos - band - 2; // need this to compute index in reference sequence
-
-        final int firstCol = Math.max(1, -refOffset - 2 * band - 1); // the column for which refIndex(firstCol,bottom-to-last row)==0
-        if (firstCol > 1) {
-            final int prevCol = firstCol - 1;
-            final int secondToLastRow = 2 * band + 1;
-            traceBackM[prevCol][secondToLastRow] = traceBackIRef[prevCol][secondToLastRow] = traceBackIQuery[prevCol][secondToLastRow] = DONE; // set previous column to done
-            matrixM[prevCol][secondToLastRow] = matrixIRef[prevCol][secondToLastRow] = matrixIQuery[prevCol][secondToLastRow] = 0;
-        }
-
-        final int lastCol = Math.min(cols - 1, referenceLength - refOffset - 2); // the column for which refIndex(lastCol,1)==refLength-1
-
-        bestRow = -1;
-        bestCol = -1;
-        rawScore = 0;
-
-        final int lastRow = rows - 2;
-
-        for (int col = firstCol; col <= lastCol; col++) {   // we never modify the first column or the first or last row
-            for (int row = 1; row <= lastRow; row++) {
-                final int refIndex = row + col + refOffset;
-
-                if (refIndex < -1) {
-                    // do nothing, this cell will not be used
-                } else if (refIndex == -1) {
-                    traceBackM[col][row] = traceBackIRef[col][row] = traceBackIQuery[col][row] = DONE; // this is column before reference starts, set to done
-                    matrixM[col][row] = matrixIRef[col][row] = matrixIQuery[col][row] = 0;
-                } else if (refIndex < referenceLength) {  // do the actual alignment:
-
-                    int bestMScore = 0;
-                    // match or mismatch
-                    {
-                        final int s = scoringMatrix[query[col - 1]][reference[refIndex]];
-
-                        int score = matrixM[col - 1][row] + s;
-                        if (score > 0) {
-                            traceBackM[col][row] = M_FROM_M;
-                            bestMScore = score;
-                        }
-                        score = matrixIRef[col - 1][row] + s;
-                        if (score > bestMScore) {
-                            traceBackM[col][row] = M_FROM_IRef;
-                            bestMScore = score;
-                        }
-                        score = matrixIQuery[col - 1][row] + s;
-                        if (score > bestMScore) {
-                            traceBackM[col][row] = M_FROM_IQuery;
-                            bestMScore = score;
-                        }
-                        if (bestMScore == 0) {
-                            traceBackM[col][row] = DONE;
-                        }
-                        matrixM[col][row] = bestMScore;
-                    }
-
-                    // insertion in ref
-                    int bestIRefScore = 0;
-                    {
-                        int score = matrixM[col][row - 1] - gapOpenPenalty;
-
-                        if (score > bestIRefScore) {
-                            traceBackIRef[col][row] = IRef_FROM_M;
-                            bestIRefScore = score;
-                        }
-
-                        score = matrixIRef[col][row - 1] - gapExtensionPenalty;
-                        if (score > bestIRefScore) {
-                            bestIRefScore = score;
-                            traceBackIRef[col][row] = IRef_FROM_IRef;
-                        }
-                        if (bestIRefScore == 0) {
-                            traceBackIRef[col][row] = DONE;
-                        }
-                        matrixIRef[col][row] = bestIRefScore;
-
-                    }
-
-                    // insertion in query:
-                    int bestIQueryScore = 0;
-                    {
-                        int score = matrixM[col - 1][row + 1] - gapOpenPenalty;
-
-                        if (score > bestIQueryScore) {
-                            bestIQueryScore = score;
-                            traceBackIQuery[col][row] = IQuery_FROM_M;
-                        }
-
-                        score = matrixIQuery[col - 1][row + 1] - gapExtensionPenalty;
-                        if (score > bestIQueryScore) {
-                            bestIQueryScore = score;
-                            traceBackIQuery[col][row] = IQuery_FROM_IQuery;
-                        }
-                        if (bestIQueryScore == 0) {
-                            traceBackIQuery[col][row] = DONE;
-                        }
-                        matrixIQuery[col][row] = bestIQueryScore;
-                    }
-
-                    int bestScore = Math.max(Math.max(bestMScore, bestIRefScore), bestIQueryScore);
-                    if (bestScore > rawScore) {
-                        rawScore = bestScore;
-                        bestRow = row;
-                        bestCol = col;
-                    }
-                } else { // refIndex>=referenceLength
-                    break; // all remaining refIndex for this column will be too big
-                }
-            }
-        }
-
-        if (false) {
-            System.err.println("Matrix M:");
-            System.err.println(toString(matrixM, firstCol, lastCol, query));
-            System.err.println("Matrix IQuery:");
-            System.err.println(toString(matrixIQuery, firstCol, lastCol, query));
-            System.err.println("Matrix IRef:");
-            System.err.println(toString(matrixIRef, firstCol, lastCol, query));
-        }
-
-        if (bestRow == -1 || bestCol == -1) {
-            rawScore = 0;
-        }
-    }
-
-    /**
-     * Performs a banded semi-global alignment.
-     *
-     * @deprecated todo: delete this once we are convinced that the new code works as intended
-     */
-    private void computeSemiGlobalAlignment_OLD() {
-        alignment = null; // will need to call alignmentByTraceBack to compute this
-
-        startQuery = startReference = 0;
-
-        final int rows = 2 * band + 3;
-        final int cols = queryLength + 1;
-
-        if (cols > matrixM.length) { // reinitialize
-            matrixM = new int[cols][rows];
-            matrixIRef = new int[cols][rows];
-            matrixIQuery = new int[cols][rows];
-            traceBackM = new byte[cols][rows];
-            traceBackIRef = new byte[cols][rows];
-            traceBackIQuery = new byte[cols][rows];
-            for (int r = 1; r < rows; r++) {
-                traceBackM[0][r] = traceBackIRef[0][r] = traceBackIQuery[0][r] = DONE;
-                matrixIQuery[0][r] = -gapOpenPenalty;
-            }
-            for (int c = 0; c < cols; c++)
-                matrixM[c][0] = matrixIRef[c][0] = matrixIQuery[c][0]
-                        = matrixM[c][rows - 1] = matrixIRef[c][rows - 1] = matrixIQuery[c][rows - 1]
-                        = MINUS_INFINITY; // must never go outside band
-        }
-
-        refOffset = refPos - queryPos - band - 2; // need this to compute index in reference sequence
-
-        final int firstCol = Math.max(1, -refOffset - 2 * band - 1); // the column for which refIndex(firstCol,bottom-to-last row)==0
-
-        if (firstCol > 1) {
-            final int prevCol = firstCol - 1;
-            final int secondToLastRow = rows - 2;
-            traceBackM[prevCol][secondToLastRow] = traceBackIRef[prevCol][secondToLastRow] = traceBackIQuery[prevCol][secondToLastRow] = DONE; // set previous column to done
-            matrixM[prevCol][secondToLastRow] = matrixIRef[prevCol][secondToLastRow] = matrixIQuery[prevCol][secondToLastRow] = 0;
-        }
-
-        final int lastCol = Math.min(cols - 1, referenceLength - refOffset - 2); // the column for which refIndex(lastCol,1)==refLength-1
-
-        bestRow = -1;
-        bestCol = -1;
-        rawScore = 0;
-
-        final int lastRowToFill = rows - 2;
-
-        for (int col = firstCol; col <= lastCol; col++) {   // we never modify the first column or the first or last row
-            for (int row = 1; row <= lastRowToFill; row++) {
-                final int refIndex = row + col + refOffset;
-
-                if (refIndex < -1) {
-                    // do nothing, this cell will not be used
-                } else if (refIndex == -1) {
-                    traceBackM[col][row] = traceBackIRef[col][row] = traceBackIQuery[col][row] = DONE; // this is column before reference starts, set to done
-                    matrixM[col][row] = 0;
-                    matrixIRef[col][row] = matrixIQuery[col][row] = -gapOpenPenalty;
-                } else if (refIndex < referenceLength) {  // do the actual alignment:
-                    int bestMScore = Integer.MIN_VALUE;
-                    // match or mismatch
-                    {
-                        final int s = scoringMatrix[query[col - 1]][reference[refIndex]];  // note: queryIndex=c-1
-
-                        int score = matrixM[col - 1][row] + s;
-                        if (score > bestMScore) {
-                            traceBackM[col][row] = M_FROM_M;
-                            bestMScore = score;
-                        }
-                        score = matrixIRef[col - 1][row] + s;
-                        if (score > bestMScore) {
-                            traceBackM[col][row] = M_FROM_IRef;
-                            bestMScore = score;
-                        }
-                        score = matrixIQuery[col - 1][row] + s;
-                        if (score > bestMScore) {
-                            traceBackM[col][row] = M_FROM_IQuery;
-                            bestMScore = score;
-                        }
-                        matrixM[col][row] = bestMScore;
-                    }
-
-                    // insertion in ref
-                    int bestIRefScore = Integer.MIN_VALUE;
-                    {
-                        int score = matrixM[col][row - 1] - gapOpenPenalty;
-
-                        if (score > bestIRefScore) {
-                            traceBackIRef[col][row] = IRef_FROM_M;
-                            bestIRefScore = score;
-                        }
-
-                        score = matrixIRef[col][row - 1] - gapExtensionPenalty;
-                        if (score > bestIRefScore) {
-                            bestIRefScore = score;
-                            traceBackIRef[col][row] = IRef_FROM_IRef;
-                        }
-                        matrixIRef[col][row] = bestIRefScore;
-                    }
-
-                    // insertion in query
-                    int bestIQueryScore = Integer.MIN_VALUE;
-                    {
-                        int score = matrixM[col - 1][row + 1] - gapOpenPenalty;
-
-                        if (score > bestIQueryScore) {
-                            bestIQueryScore = score;
-                            traceBackIQuery[col][row] = IQuery_FROM_M;
-                        }
-
-                        score = matrixIQuery[col - 1][row + 1] - gapExtensionPenalty;
-                        if (score > bestIQueryScore) {
-                            bestIQueryScore = score;
-                            traceBackIQuery[col][row] = IQuery_FROM_IQuery;
-                        }
-                        matrixIQuery[col][row] = bestIQueryScore;
-                    }
-
-                    if ((col == lastCol || (col <= lastCol && refIndex == referenceLength - 1))
-                            && Math.max(Math.max(bestMScore, bestIRefScore), bestIQueryScore) > rawScore) {
-                        rawScore = Math.max(Math.max(bestMScore, bestIRefScore), bestIQueryScore);
-                        bestRow = row;
-                        bestCol = col;
-                    }
-                } else { // refIndex>=referenceLength
-                    break; // all remaining refIndex for this column will be too big
-                }
-            }
-        }
-
-        if (false) {
-            System.err.println("Matrix M:");
-            System.err.println(toString(matrixM, firstCol - 1, lastCol + 1, query));
-            System.err.println("Matrix IQuery:");
-            System.err.println(toString(matrixIRef, firstCol - 1, lastCol + 1, query));
-            System.err.println("Matrix IRef:");
-            System.err.println(toString(matrixIQuery, firstCol - 1, lastCol + 1, query));
-        }
-
-        if (bestRow == -1 || bestCol == -1) {
-            rawScore = 0;
-        }
-    }
-
-    /**
-     * gets the alignment. Also sets the number of matches, mismatches and gaps
-     *
-     * @return alignment
-     * @deprecated todo: delete this once we are convinced that the new code works as intended
-     */
-    public void computeAlignmentByTraceBack_OLD() {
-        if (rawScore <= 0) {
-            alignment = null;
-            return;
-        }
-        int r = bestRow;
-        int c = bestCol;
-
-        if (bestRow == -1 || bestCol == -1)
-            return;
-
-        byte[][] traceBack;
-        traceBack = traceBackM;
-        if (matrixIRef[c][r] > matrixM[c][r]) {
-            traceBack = traceBackIRef;
-            if (matrixIQuery[c][r] > matrixIRef[c][r])
-                traceBack = traceBackIQuery;
-        } else if (matrixIQuery[c][r] > matrixM[c][r])
-            traceBack = traceBackIQuery;
-
-        gaps = 0;
-        gapOpens = 0;
-        identities = 0;
-        mismatches = 0;
-
-        int pos = 0;
-
-        endQuery = c;
-        endReference = r + c + refOffset + 1;
-
-        loop:
-        while (true) {
-            int refIndex = r + c + refOffset;
-
-            switch (traceBack[c][r]) {
-                case DONE:
-                    startQuery = c;
-                    startReference = r + c + refOffset + 1;
-                    break loop;
-                case M_FROM_M:
-                    queryTrack[pos] = query[c - 1];
-                    referenceTrack[pos] = reference[refIndex];
-                    if (queryTrack[pos] == referenceTrack[pos]) {
-                        if (isDNAAlignment)
-                            midTrack[pos] = '|';
-                        else
-                            midTrack[pos] = queryTrack[pos];
-                        identities++;
-                    } else {
-                        if (isDNAAlignment || scoringMatrix[queryTrack[pos]][referenceTrack[pos]] <= 0)
-                            midTrack[pos] = ' ';
-                        else
-                            midTrack[pos] = '+';
-                        mismatches++;
-                    }
-                    c--;
-                    traceBack = traceBackM;
-                    break;
-                case M_FROM_IRef:
-                    queryTrack[pos] = query[c - 1];
-                    referenceTrack[pos] = reference[refIndex];
-                    if (queryTrack[pos] == referenceTrack[pos]) {
-                        if (isDNAAlignment)
-                            midTrack[pos] = '|';
-                        else
-                            midTrack[pos] = queryTrack[pos];
-                        identities++;
-                    } else {
-                        if (isDNAAlignment || scoringMatrix[queryTrack[pos]][referenceTrack[pos]] <= 0)
-                            midTrack[pos] = ' ';
-                        else
-                            midTrack[pos] = '+';
-                    }
-                    c--;
-                    traceBack = traceBackIRef;
-                    break;
-                case M_FROM_IQuery:
-                    queryTrack[pos] = query[c - 1];
-                    referenceTrack[pos] = reference[refIndex];
-                    if (queryTrack[pos] == referenceTrack[pos]) {
-                        if (isDNAAlignment)
-                            midTrack[pos] = '|';
-                        else
-                            midTrack[pos] = queryTrack[pos];
-                        identities++;
-                    } else {
-                        if (isDNAAlignment || scoringMatrix[queryTrack[pos]][referenceTrack[pos]] <= 0)
-                            midTrack[pos] = ' ';
-                        else
-                            midTrack[pos] = '+';
-                    }
-                    c--;
-                    traceBack = traceBackIQuery;
-                    break;
-                case IRef_FROM_M:
-                    queryTrack[pos] = '-';
-                    referenceTrack[pos] = reference[refIndex];
-                    midTrack[pos] = ' ';
-                    r--;
-                    traceBack = traceBackM;
-                    gaps++;
-                    gapOpens++;
-                    break;
-                case IRef_FROM_IRef:
-                    queryTrack[pos] = '-';
-                    referenceTrack[pos] = reference[refIndex];
-                    midTrack[pos] = ' ';
-                    r--;
-                    traceBack = traceBackIRef;
-                    gaps++;
-                    break;
-                case IQuery_FROM_M:
-                    queryTrack[pos] = query[c - 1];
-                    referenceTrack[pos] = '-';
-                    midTrack[pos] = ' ';
-                    c--;
-                    r++;
-                    traceBack = traceBackM;
-                    gaps++;
-                    gapOpens++;
-                    break;
-                case IQuery_FROM_IQuery:
-                    queryTrack[pos] = query[c - 1];
-                    referenceTrack[pos] = '-';
-                    midTrack[pos] = ' ';
-                    c--;
-                    r++;
-                    traceBack = traceBackIQuery;
-                    gaps++;
-                    break;
-                default:
-                    throw new RuntimeException("Undefined trace-back state: " + traceBack[c][r]);
-            }
-            if (queryTrack[pos] == '-' && referenceTrack[pos] == '-')
-                System.err.println("gap-gap at: " + pos);
-
-            if (++pos >= queryTrack.length) {
-                queryTrack = grow(queryTrack);
-                midTrack = grow(midTrack);
-                referenceTrack = grow(referenceTrack);
-            }
-        } // end of loop
-
-        alignmentLength = pos;
-
-        /*
-        if(alignmentLength<5) {
-            System.err.println("Matrix M:");
-            System.err.println(toString(matrixM, 0, endQuery+1, query));
-            System.err.println("Matrix I:");
-            System.err.println(toString(matrixI,0, endQuery+1, query));
-        }
-        */
-        alignment = new byte[][]{copy(queryTrack, pos), copy(midTrack, pos), copy(referenceTrack, pos)};
-    }
-
-
 
     public int getStartQuery() {
         return startQuery;
@@ -1563,18 +1104,20 @@ public class BandedAligner {
         this.referenceDatabaseLength = referenceDatabaseLength;
     }
 
-
     /**
      * reverse bytes
      *
      * @param array
      * @return reversed bytes
      */
-    private byte[] reverse(byte[] array, int length) {
-        byte[] result = new byte[length];
-        for (int i = 0; i < length; i++)
-            result[i] = array[length - i - 1];
-        return result;
+    private void reverseInPlace(byte[] array, int length) {
+        int top = length / 2;
+        for (int i = 0; i < top; i++) {
+            byte tmp = array[i];
+            int j = length - i - 1;
+            array[i] = array[j];
+            array[j]=tmp;
+        }
     }
 
     /**
@@ -1730,16 +1273,6 @@ public class BandedAligner {
                 alignmentBuffer.writeAsAscii(String.format(" %d\n", sEnd));
                 sStart = sEnd + 1;
             }
-               /*       // old code: each row on one line
-                alignmentBuffer.writeAsAscii(String.format("\nQuery: %-9d ", data.getStartQueryForOutput(frameRank, startQuery)));
-                alignmentBuffer.write(alignment[0]);
-                alignmentBuffer.writeAsAscii(String.format(" %d\n", data.getEndQueryForOutput(frameRank, endQuery)));
-                alignmentBuffer.write(midTrackSpaces);
-                alignmentBuffer.write(alignment[1]);
-                alignmentBuffer.writeAsAscii(String.format("\nSbjct: %-9d ", startReference + 1));
-                alignmentBuffer.write(alignment[2]);
-                alignmentBuffer.writeAsAscii(String.format(" %d\n", endReference));
-            */
         }
         return alignmentBuffer.makeCopy();
     }
@@ -1811,6 +1344,7 @@ public class BandedAligner {
         if (mode == BlastMode.BlastX) {
             blastXQueryStart = data.getStartQueryForOutput(frameRank, startQuery);
         }
+
         return SAMHelper.createSAMLine(mode, queryHeader, querySequence, startQuery, blastXQueryStart, endQuery, queryLength, alignment[0], referenceHeader,
                 outputStartReference, outputEndReference, alignment[2], referenceLength, bitScore, rawScore, expected, 100 * identities / alignmentLength, frame, data.getQualityValues(), samSoftClipping).getBytes();
     }

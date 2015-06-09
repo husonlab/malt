@@ -1,3 +1,21 @@
+/**
+ * Copyright 2015, Daniel Huson
+ * <p/>
+ * (Some files contain contributions from other authors, who are then mentioned separately)
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 package malt.io.xml;
 
@@ -104,7 +122,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "", name = "species")
     public JAXBElement<String> createSpecies(String value) {
-        return new JAXBElement<String>(_Species_QNAME, String.class, null, value);
+        return new JAXBElement<>(_Species_QNAME, String.class, null, value);
     }
 
     /**
@@ -112,7 +130,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "", name = "strain")
     public JAXBElement<String> createStrain(String value) {
-        return new JAXBElement<String>(_Strain_QNAME, String.class, null, value);
+        return new JAXBElement<>(_Strain_QNAME, String.class, null, value);
     }
 
     /**
@@ -120,7 +138,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "", name = "datasetName")
     public JAXBElement<String> createDatasetName(String value) {
-        return new JAXBElement<String>(_DatasetName_QNAME, String.class, null, value);
+        return new JAXBElement<>(_DatasetName_QNAME, String.class, null, value);
     }
 
     /**
@@ -128,7 +146,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "", name = "organismsReport")
     public JAXBElement<ReportType> createOrganismsReport(ReportType value) {
-        return new JAXBElement<ReportType>(_OrganismsReport_QNAME, ReportType.class, null, value);
+        return new JAXBElement<>(_OrganismsReport_QNAME, ReportType.class, null, value);
     }
 
     /**
@@ -136,7 +154,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "", name = "organismName")
     public JAXBElement<String> createOrganismName(String value) {
-        return new JAXBElement<String>(_OrganismName_QNAME, String.class, null, value);
+        return new JAXBElement<>(_OrganismName_QNAME, String.class, null, value);
     }
 
     /**
@@ -144,7 +162,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "", name = "genus")
     public JAXBElement<String> createGenus(String value) {
-        return new JAXBElement<String>(_Genus_QNAME, String.class, null, value);
+        return new JAXBElement<>(_Genus_QNAME, String.class, null, value);
     }
 
 }

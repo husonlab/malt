@@ -1,3 +1,21 @@
+/**
+ * Copyright 2015, Daniel Huson
+ * <p/>
+ * (Some files contain contributions from other authors, who are then mentioned separately)
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package malt.io;
 
 import jloda.util.Basic;
@@ -38,9 +56,9 @@ public class FileWriterRanked {
         // one wait queue for each thread:
         threadSpecificWaitQueues = new ArrayBlockingQueue[numberOfThreads];
         for (int i = 0; i < threadSpecificWaitQueues.length; i++)
-            threadSpecificWaitQueues[i] = new ArrayBlockingQueue<OutputItem>(QUEUE_LENGTH);
+            threadSpecificWaitQueues[i] = new ArrayBlockingQueue<>(QUEUE_LENGTH);
         // the output queue:
-        outputQueue = new ArrayBlockingQueue<OutputItem>(QUEUE_LENGTH);
+        outputQueue = new ArrayBlockingQueue<>(QUEUE_LENGTH);
 
         // the output writer:
         OutputStream outs;
@@ -112,8 +130,8 @@ public class FileWriterRanked {
                         if (strings != null) {
                             for (byte[] string : strings) {
                                 byte b = 0;
-                                for (int i = 0; i < string.length; i++) {
-                                    b = string[i];
+                                for (byte aString : string) {
+                                    b = aString;
                                     if (b == 0)
                                         break; // zero-terminated byte string
                                     writer.write((char) b);
