@@ -1,8 +1,16 @@
 MALT - MEGAN ALignment Tool
 
-Use of MEGAN and MALT requires a license that is granted by the University of Tuebingen. Academic licenses are issued free of charge for use at non-profit academic institutions. All other usages require a commerical license, which is granted for an annual fee. Contact daniel.huson@uni-tuebingen.de for details.
+Copyright (c) 2015, Daniel H. Huson
 
-As most programs, this software probably contains many bugs, both apparent and less apparent ones.  We recommend that you cross-validate all results obtained with this software using other programs. We do not accept responsibility for any problems that arise from use of this software. Use entirely at your own risk.  
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-If you publish results obtained with the help of this software, then we require that you cite the software as follows: D.H. Huson et al., MALT - MEGAN Alignment Tool, in preparation.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
