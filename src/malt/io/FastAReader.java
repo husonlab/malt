@@ -34,7 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Daniel Huson, 8.2014
  */
 public class FastAReader {
-    final public static int BUFFER_SIZE = 1024 * 1024;
+    final public static int BUFFER_SIZE = 8192;
 
     private final IAlphabet alphabet;
 

@@ -53,7 +53,7 @@ public class TaxonMapping extends RefIndex2ClassId {
      * @param referencesDB
      * @param progress
      */
-    public static TaxonMapping create(final ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException {
+    public static TaxonMapping create(final ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException, IOException {
         TaxonMapping mapping = new TaxonMapping(referencesDB.getNumberOfSequences());
 
         int countIdentified = 0;

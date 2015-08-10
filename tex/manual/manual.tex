@@ -474,7 +474,7 @@ There are three performance-related options:
 \item[\itt{--threads}] Use to set the number of threads to use in parallel computations. Default is 8. Set this to
 the number of available cores.
 	-rqc,           Cache results for replicated queries. 
-\item[\itt{--memoryMapping}] Access indices via memory mapping rather than preloading them (on by default).
+\item[\itt{--memoryMode}] Load all indices into memory, load indices page by page when needed or use memory mapping (load, page or map).
 \item[\itt{--maxTables}] Use to set the maximum number of seed tables to use (0=all). Default value: 0.
 \item[\itt{--replicateQueryCache}] Use to turn on caching of replicated queries. This is especially useful for processing 16S datasets
 in which identical sequences occur multiple times. Turning on this feature does not change the output of the program, but can
@@ -583,7 +583,7 @@ OPTIONS
 	-zul, --gzipUnaligned                Compress unaligned reads output using gzip. Default value: true.
  Performance:
 	-t, --numThreads [number]            Number of worker threads. Default value: 8.
-	-mem, --memoryMapping                Use memory mapping rather than loading all indices into memory. Default value: true.
+	-mem, --memoryMode                   Memory mode. Default value: load. Legal values: load, page, map.
 	-mt, --maxTables [number]            Set the maximum number of seed tables to use (0=all). Default value: 0.
 	-rqc, --replicateQueryCache          Cache results for replicated queries. Default value: false.
  Filter:

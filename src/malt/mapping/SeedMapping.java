@@ -53,15 +53,15 @@ public class SeedMapping extends RefIndex2ClassId {
      * @param referencesDB
      * @param progress
      */
-    public static SeedMapping create(ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException {
+    public static SeedMapping create(ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException, IOException {
         SeedMapping mapping = new SeedMapping(referencesDB.getNumberOfSequences());
 
         progress.setMaximum(referencesDB.getNumberOfSequences());
         progress.setProgress(0);
         for (int i = 0; i < referencesDB.getNumberOfSequences(); i++) {
             String header = Basic.toString(referencesDB.getHeader(i));
-            Integer classId = classificationMapper.getIdFromHeaderLine(header);
-            if (classId != null) {
+            int classId = classificationMapper.getIdFromHeaderLine(header);
+            if (classId != 0) {
                 mapping.put(i, classId);
                 referencesDB.extendHeader(i, ReferencesDBBuilder.SEED_TAG, classId);
             }

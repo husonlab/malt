@@ -1,37 +1,25 @@
 <!-- file build.xml in your project root directory -->
-<!-- Ant build script for yfiles -->
-<!-- The java based Ant tool is available from -->
-<!-- http://jakarta.apache.org/ant -->
-<!-- This file demonstrates the use of the yGuard byte -->
-<!-- code obfuscator from yWorks Gmbh -->
-<!-- yGuard can be downloaded from -->
-<!--- http://www.yworks.com/products/yguard -->
 
-<project name="project" default="sign" basedir=".">
+<project name="project" default="jar" basedir=".">
 
     <!-- edit the following lines to your needs -->
     <property name="project_name" value="MALT"/>
     <property name="jlodaSrcDir" value="../../jloda/src"/>
-    <property name="meganSrcDir" value="../../megan5/src"/>
+    <property name="meganSrcDir" value="../../megan6/src"/>
     <property name="maltSrcDir" value="../../malt/src"/>
     <property name="srcDir" value="src"/>
     <property name="classDir" value="classes"/>
-    <property name="jar" value="${project_name}_raw.jar"/>
-    <property name="obfjar" value="${project_name}.jar"/>
-    <property name="renamelog" value="${project_name}_renamelog.xml"/>
-    <property name="shrinklog" value="${project_name}_shrinklog.xml"/>
+    <property name="jar" value="${project_name}.jar"/>
     <property name="mainclass" value="malt.MaltBuild"/>
 
     <!-- class path -->
 
     <path id="build.classpath">
+    	    <fileset dir="../../jloda/jars"  includes="*.jar"/>
 	    <fileset dir="../../jloda/jars/batik-1.8"  includes="*.jar"/>
-
-	    <fileset dir="../../megan5/jars"  includes="*.jar"/>
-	    <fileset dir="../../megan5/jars/google-gson-2.2.2"  includes="*.jar"/>
-	    <fileset dir="../../megan5/jars/megan5server"  includes="*.jar"/>
-
-	    <fileset dir="../../malt/jars"  includes="*.jar"/>
+    	    <fileset dir="../../megan6/jars"  includes="*.jar"/>
+	    <fileset dir="../../megan6/jars/megan5server"  includes="*.jar"/>
+	    <fileset dir="../../malt/jars/"  includes="*.jar"/>
     </path>
 
     <!-- init -->
@@ -75,85 +63,12 @@
     <target name="jar" depends="compile">
         <jar jarfile="${jar}"
              basedir="${classDir}"
-             includes="gnu/** jloda/** megan/** log4j.properties malt/** rusch/**">
+             includes="jloda/** megan/** log4j.properties malt/** rusch/**">
         </jar>
     </target>
 
-    <!-- obfuscate .jar -->
 
-    <target name="yguard" depends="jar">
-        <taskdef name="yguard" classname="com.yworks.yguard.YGuardTask"
-                 classpath="../../jars/yguard-2.5.1/lib/yguard.jar"
-                 classpathref="build.classpath"
-                />
-        <!-- the following can be adjusted to your needs -->
-        <yguard>
-
-            <inoutpair in="${jar}" out="${obfjar}"/>
-
-            <shrink logfile="${shrinklog}">
-
-                <keep>
-                    <class classes="protected"
-                           methods="protected" fields="protected">
-                        <patternset>
-                            <include name="jloda.gui.director.IProjectsChangedListener"/>
-
-                            <include name="megan.mainviewer.NodeDrawer"/>
-                            <include name="megan.tools.ExtendMappingsUsingNR"/>
-                            <include name="megan.tools.CompareMatches"/>
-                            <include name="malt.io.xml*"/>
-                            <include name="malt.io.xml.**.*"/>
-                            <include name="malt.MaltBuild"/>
-                            <include name="malt.MaltRun"/>
-                            <include name="malt.MaltOptions"/>
-                            <include name="malt.tools.SAM2RMA3"/>
-                            <include name="malt.tools.BlastTab2Megan"/>
-			    <include name="malt.data.SequenceType"/>
-
-                            <include name="malt.malt2.MaltBuild2"/>
-                            <include name="malt.malt2.MaltRun2"/>
-                            <include name="malt.malt2.MaltOptions2"/>
-                        </patternset>
-                    </class>
-                </keep>
-            </shrink>
-
-            <rename mainclass="${mainclass}" logfile="${renamelog}">
-                <property name="error-checking" value="pedantic"/>
-
-                <keep>
-                    <class classes="protected"
-                           methods="protected" fields="protected">
-                        <patternset>
-                            <include name="jloda.gui.director.IProjectsChangedListener"/>
-
-                            <include name="megan.mainviewer.NodeDrawer"/>
-                            <include name="megan.tools.ExtendMappingsUsingNR"/>
-                            <include name="megan.tools.CompareMatches"/>
-                            <include name="malt.io.xml*"/>
-                            <include name="malt.io.xml.**.*"/>
-                            <include name="malt.MaltBuild"/>
-                            <include name="malt.MaltRun"/>
-                            <include name="malt.tools.SAM2RMA3"/>
-                            <include name="malt.tools.BlastTab2Megan"/>
-                            <include name="malt.MaltOptions"/>
-                            <include name="malt.data.SequenceType"/>
-
-                            <include name="malt.malt2.MaltBuild2"/>
-                            <include name="malt.malt2.MaltRun2"/>
-                            <include name="malt.malt2.MaltOptions2"/>
-                        </patternset>
-                    </class>
-                </keep>
-            </rename>
-
-        </yguard>
-
-    </target>
-
-
-    <target name="sign" depends="yguard">
+    <target name="sign" depends="jar">
         <signjar jar="${obfjar}"
                  alias="DanielHusonsLab"
                  storepass="p1r0ng1A"
@@ -163,11 +78,11 @@
     </target>
 
     <!-- run project -->
-    <target name="run" depends="yguard">
+    <target name="run" depends="jar">
         <java classname="${mainclass}" fork="true"
               classpathref="build.classpath">
             <classpath>
-                <pathelement location="${obfjar}"/>
+                <pathelement location="${jar}"/>
             </classpath>
             <arg value="--help"/>
             <jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
@@ -183,11 +98,7 @@
     <target name="clean">
         <delete dir="${classDir}" includeEmptyDirs="true"/>
         <delete dir="src" includeEmptyDirs="true"/>
-        <delete file="MALT_shrinklog.xml"/>
-        <delete file="MALT_renamelog.xml"/>
         <delete file="MALT.jar"/>
-        <delete file="MALT_raw.jar"/>
-        <delete file="yfiles.jar"/>
     </target>
 </project>
 

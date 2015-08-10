@@ -53,7 +53,7 @@ public class CogMapping extends RefIndex2ClassId {
      * @param referencesDB
      * @param progress
      */
-    public static CogMapping create(final ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException {
+    public static CogMapping create(final ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException, IOException {
         CogMapping mapping = new CogMapping(referencesDB.getNumberOfSequences());
 
         progress.setMaximum(referencesDB.getNumberOfSequences());

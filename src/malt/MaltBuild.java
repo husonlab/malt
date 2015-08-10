@@ -53,16 +53,16 @@ public class MaltBuild {
     public static void main(String[] args) {
         try {
             PeakMemoryUsageMonitor.start();
-            long start = System.currentTimeMillis();
             final MaltBuild maltBuild = new MaltBuild();
+            ResourceManager.setWarningMissingIcon(false);
             ProgramProperties.setProgramIcon(ResourceManager.getIcon("malt-build48.png"));
             ProgramProperties.setProgramName("MaltBuild");
             ProgramProperties.setProgramVersion(Version.SHORT_DESCRIPTION);
 
             maltBuild.run(args);
 
-            System.err.println("Total time: " + ((System.currentTimeMillis() - start) / 1000) + "s");
-            System.err.println("Memory use: " + PeakMemoryUsageMonitor.getPeakUsageString());
+            System.err.println("Total time:  " + PeakMemoryUsageMonitor.getSecondsSinceStartString());
+            System.err.println("Peak memory: " + PeakMemoryUsageMonitor.getPeakUsageString());
             if (!ArgsOptions.hasMessageWindow())
                 System.exit(0);
             else

@@ -21,11 +21,14 @@ package malt.data;
 
 import jloda.map.IIntGetter;
 import jloda.map.ILongGetter;
-import jloda.map.IntFileGetter;
-import jloda.map.LongFileGetter;
+import jloda.map.IntFileGetterMappedMemory;
+import jloda.map.LongFileGetterMappedMemory;
+import jloda.map.experimental.IntFileGetterPagedMemory;
+import jloda.map.experimental.LongFileGetterPagedMemory;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressPercentage;
+import malt.MaltOptions;
 import malt.io.IntFileGetterInMemory;
 import malt.io.LongFileGetterInMemory;
 import malt.util.MurmurHash3;
@@ -38,7 +41,7 @@ import java.io.*;
  * Daniel Huson, 8.2014
  */
 
-public class ReferencesHashTableAccess {
+public class ReferencesHashTableAccess implements Closeable {
     public static int BUFFER_SIZE = 8192;  // benchmarking suggested that choosing a large size doesn't make a difference
     private final ILongGetter tableIndexGetter; // each entry points to a row of integers that is contained in the data table
 
@@ -59,7 +62,7 @@ public class ReferencesHashTableAccess {
      *
      * @param indexDirectory
      */
-    public ReferencesHashTableAccess(boolean useMemoryMapping, String indexDirectory, int tableNumber) throws IOException, CanceledException {
+    public ReferencesHashTableAccess(MaltOptions.MemoryMode memoryMode, String indexDirectory, int tableNumber) throws IOException, CanceledException {
         final File indexFile = new File(indexDirectory, "index" + tableNumber + ".idx");
         final File tableIndexFile = new File(indexDirectory, "table" + tableNumber + ".idx");
         final File tableDataFile = new File(indexDirectory, "table" + tableNumber + ".db");
@@ -102,30 +105,21 @@ public class ReferencesHashTableAccess {
             progress.reportTaskCompleted();
         }
 
-        tableIndexGetter = loadTableIndex(useMemoryMapping, tableIndexFile);
-        tableDataGetter = loadTableData(useMemoryMapping, tableDataFile);
-    }
-
-    /**
-     * load the table index as a memory mapped file
-     *
-     * @param tableIndexFile
-     * @return long buffer to access file
-     * @throws IOException
-     */
-    private ILongGetter loadTableIndex(boolean useMemoryMapping, final File tableIndexFile) throws IOException {
-        return (useMemoryMapping ? new LongFileGetter(tableIndexFile) : new LongFileGetterInMemory(tableIndexFile));
-    }
-
-    /**
-     * load the table data as a memory mapped file
-     *
-     * @param tableDataFile
-     * @return input reader to access file
-     * @throws IOException
-     */
-    private IIntGetter loadTableData(boolean useMemoryMapping, final File tableDataFile) throws IOException {
-        return (useMemoryMapping ? new IntFileGetter(tableDataFile) : new IntFileGetterInMemory(tableDataFile));
+        switch (memoryMode) {
+            default:
+            case load:
+                tableIndexGetter = new LongFileGetterInMemory(tableIndexFile);
+                tableDataGetter = new IntFileGetterInMemory(tableDataFile);
+                break;
+            case page:
+                tableIndexGetter = new LongFileGetterPagedMemory(tableIndexFile);
+                tableDataGetter = new IntFileGetterPagedMemory(tableDataFile);
+                break;
+            case map:
+                tableIndexGetter = new LongFileGetterMappedMemory(tableIndexFile);
+                tableDataGetter = new IntFileGetterMappedMemory(tableDataFile);
+                break;
+        }
     }
 
     /**
@@ -135,7 +129,7 @@ public class ReferencesHashTableAccess {
      * @param key
      * @param row
      */
-    public int lookup(byte[] key, Row row) {
+    public int lookup(byte[] key, Row row) throws IOException {
         int hashValue = getHash(key);
         if (hashValue >= 0 && hashValue < tableIndexGetter.limit() && setRow(tableIndexGetter.get(hashValue), row))
             return row.size();
@@ -209,7 +203,7 @@ public class ReferencesHashTableAccess {
      * @param row
      * @return false, if location invalid
      */
-    private boolean setRow(long location, Row row) {
+    private boolean setRow(long location, Row row) throws IOException {
         if (location == 0)
             return false;
         if (location < 0) {
@@ -302,6 +296,11 @@ public class ReferencesHashTableAccess {
             Basic.readAndVerifyMagicNumber(ins, ReferencesHashTableBuilder.MAGIC_NUMBER);
             return SequenceType.valueOf(ins.readInt());
         }
+    }
+
+    public void close() {
+        tableIndexGetter.close();
+        tableDataGetter.close();
     }
 }
 

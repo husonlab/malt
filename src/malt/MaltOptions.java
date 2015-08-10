@@ -40,6 +40,8 @@ public class MaltOptions {
         }
     }
 
+    public enum MemoryMode {load, page, map} // load data into memory, load data in pages on demand, use memory mapping
+
     private boolean saveUnalignedToRMA;
 
     private int maxAlignmentsPerQuery = 25;

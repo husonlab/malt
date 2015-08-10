@@ -66,16 +66,16 @@ public class MaltRun {
     public static void main(String[] args) {
         try {
             PeakMemoryUsageMonitor.start();
-            long start = System.currentTimeMillis();
             MaltRun program = new MaltRun();
+            ResourceManager.setWarningMissingIcon(false);
             ProgramProperties.setProgramIcon(ResourceManager.getIcon("malt-run48.png"));
             ProgramProperties.setProgramName("MaltRun");
             ProgramProperties.setProgramVersion(Version.SHORT_DESCRIPTION);
 
             program.run(args);
 
-            System.err.println("Total time: " + ((System.currentTimeMillis() - start) / 1000) + "s");
-            System.err.println("Memory use: " + PeakMemoryUsageMonitor.getPeakUsageString());
+            System.err.println("Total time:  " + PeakMemoryUsageMonitor.getSecondsSinceStartString());
+            System.err.println("Peak memory: " + PeakMemoryUsageMonitor.getPeakUsageString());
             if (!ArgsOptions.hasMessageWindow())
                 System.exit(0);
             else
@@ -154,7 +154,7 @@ public class MaltRun {
 
         options.comment("Performance:");
         maltOptions.setNumberOfThreads(options.getOption("t", "numThreads", "Number of worker threads", Runtime.getRuntime().availableProcessors()));
-        final boolean useMemoryMapping = options.getOption("mem", "memoryMapping", "Use memory mapping rather than loading all indices into memory", true);
+        final MaltOptions.MemoryMode memoryMode = MaltOptions.MemoryMode.valueOf(options.getOption("mem", "memoryMode", "Memory mode", MaltOptions.MemoryMode.values(), MaltOptions.MemoryMode.load.toString()));
         final int maxNumberOfSeedShapes = options.getOption("mt", "maxTables", "Set the maximum number of seed tables to use (0=all)", 0);
         maltOptions.setUseReplicateQueryCaching(options.getOption("rqc", "replicateQueryCache", "Cache results for replicated queries", false));
 
@@ -270,7 +270,7 @@ public class MaltRun {
         // load the index:
         System.err.println("--- LOADING ---:");
         // load the reference file:
-        final ReferencesDBAccess referencesDB = new ReferencesDBAccess(useMemoryMapping, new File(indexDirectory, "ref.idx"), new File(indexDirectory, "ref.db"), new File(indexDirectory, "ref.inf"));
+        final ReferencesDBAccess referencesDB = new ReferencesDBAccess(memoryMode, new File(indexDirectory, "ref.idx"), new File(indexDirectory, "ref.db"), new File(indexDirectory, "ref.inf"));
         alignerOptions.setReferenceDatabaseLength(referencesDB.getNumberOfLetters());
 
         int numberOfTables = ReferencesHashTableAccess.determineNumberOfTables(indexDirectory);
@@ -283,8 +283,8 @@ public class MaltRun {
         final ReferencesHashTableAccess[] hashTables = new ReferencesHashTableAccess[numberOfTables];
         for (int t = 0; t < numberOfTables; t++) {
             System.err.println("LOADING table (" + t + ") ...");
-            hashTables[t] = new ReferencesHashTableAccess(useMemoryMapping, indexDirectory, t);
-            System.err.println("Table size: " + hashTables[t].size());
+            hashTables[t] = new ReferencesHashTableAccess(memoryMode, indexDirectory, t);
+            System.err.println(String.format("Table size:%,15d", hashTables[t].size()));
             if (showAPart)
                 hashTables[t].showAPart();
         }
@@ -332,6 +332,12 @@ public class MaltRun {
             } finally {
                 fileNumber++;
             }
+        }
+
+        // close everything:
+        referencesDB.close();
+        for (int t = 0; t < numberOfTables; t++) {
+            hashTables[t].close();
         }
 
         AlignmentEngine.reportStats();

@@ -53,7 +53,7 @@ public class KeggMapping extends RefIndex2ClassId {
      * @param referencesDB
      * @param progress
      */
-    public static KeggMapping create(ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException {
+    public static KeggMapping create(ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException, IOException {
         KeggMapping mapping = new KeggMapping(referencesDB.getNumberOfSequences());
 
         progress.setMaximum(referencesDB.getNumberOfSequences());

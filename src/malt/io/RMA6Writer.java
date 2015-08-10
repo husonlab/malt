@@ -95,7 +95,7 @@ public class RMA6Writer {
         this.maltOptions = maltOptions;
         this.rma6File = rma6File;
 
-        rma6Analyzer = new AnalyzerRMA6((float) maltOptions.getMinBitScore(), (float) maltOptions.getMaxExpected(), (float) maltOptions.getTopPercentLCA());
+        rma6Analyzer = new AnalyzerRMA6((float) maltOptions.getMinBitScore(), (float) maltOptions.getMaxExpected(), (float) maltOptions.getTopPercentLCA(), 100f);
 
         maxMatchesPerQuery = maltOptions.getMaxAlignmentsPerQuery();
 
@@ -122,7 +122,7 @@ public class RMA6Writer {
 
         match2classification2id = new int[maxMatchesPerQuery][fNames.length];
 
-        rma6FileCreator = new RMA6FileCreator(rma6File);
+        rma6FileCreator = new RMA6FileCreator(rma6File, true);
         rma6FileCreator.writeHeader(Version.SHORT_DESCRIPTION, maltOptions.getMode(), fNames, false);
 
         totalAlignedReads = 0;

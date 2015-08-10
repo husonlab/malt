@@ -19,16 +19,19 @@
  */
 package malt.data;
 
-import jloda.map.ByteFileGetter;
 import jloda.map.IByteGetter;
 import jloda.map.ILongGetter;
-import jloda.map.LongFileGetter;
+import jloda.map.LongFileGetterMappedMemory;
+import jloda.map.experimental.ByteFileGetterRandomAccess;
+import jloda.map.experimental.LongFileGetterPagedMemory;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.FileInputIterator;
+import malt.MaltOptions;
 import malt.io.ByteFileGetterInMemory;
 import malt.io.LongFileGetterInMemory;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 
@@ -36,7 +39,7 @@ import java.io.IOException;
  * accesses the references DB
  * Daniel Huson, 3.2015
  */
-public class ReferencesDBAccess {
+public class ReferencesDBAccess implements Closeable {
     private byte[][] headers;
     private byte[][] sequences;
 
@@ -56,14 +59,27 @@ public class ReferencesDBAccess {
      * @param refIndexFile
      * @throws java.io.IOException
      */
-    public ReferencesDBAccess(boolean useMemoryMapping, File refIndexFile, File refDBFile, File refInfFile) throws IOException, CanceledException {
+    public ReferencesDBAccess(MaltOptions.MemoryMode memoryMode, File refIndexFile, File refDBFile, File refInfFile) throws IOException, CanceledException {
         syncObjects = new Object[SYNC_BITMASK + 1];
         for (int i = 0; i < syncObjects.length; i++) {
             syncObjects[i] = new Object();
         }
 
-        refIndex = (useMemoryMapping ? new LongFileGetter(refIndexFile) : new LongFileGetterInMemory(refIndexFile));
-        refDB = (useMemoryMapping ? new ByteFileGetter(refDBFile) : new ByteFileGetterInMemory(refDBFile));
+        switch (memoryMode) {
+            default:
+            case load:
+                refIndex = new LongFileGetterInMemory(refIndexFile);
+                refDB = new ByteFileGetterInMemory(refDBFile);
+                break;
+            case page:
+                refIndex = new LongFileGetterPagedMemory(refIndexFile);
+                refDB = new ByteFileGetterRandomAccess(refDBFile); // paged memory doesn't make sense because we copy
+                break;
+            case map:
+                refIndex = new LongFileGetterMappedMemory(refIndexFile);
+                refDB = new ByteFileGetterRandomAccess(refDBFile); // mapped memory doesn't make sense because we copy
+                break;
+        }
 
         FileInputIterator it = new FileInputIterator(refInfFile);
         while (it.hasNext()) {
@@ -91,20 +107,23 @@ public class ReferencesDBAccess {
      * @param index
      * @return header
      */
-    public byte[] getHeader(int index) {
-        if (headers[index] == null) {
+    public byte[] getHeader(int index) throws IOException {
+        byte[] array = headers[index];
+        if (array == null) {
             synchronized (syncObjects[index & SYNC_BITMASK]) {
                 if (headers[index] == null) {
                     long dbIndex = refIndex.get(index);
                     dbIndex += 4 + refDB.getInt(dbIndex); // increment dbIndex by 4 plus length of sequence (to skip over sequence)
                     int headerLength = refDB.getInt(dbIndex);
                     dbIndex += 4;
-                    headers[index] = new byte[headerLength];
-                    refDB.get(dbIndex, headers[index], 0, headerLength);
-                }
+                    array = new byte[headerLength];
+                    refDB.get(dbIndex, array, 0, headerLength);
+                    headers[index] = array;
+                } else
+                    array = headers[index];
             }
         }
-        return headers[index];
+        return array;
     }
 
     /**
@@ -113,19 +132,22 @@ public class ReferencesDBAccess {
      * @param index
      * @return sequence
      */
-    public byte[] getSequence(int index) {
-        if (sequences[index] == null) {
+    public byte[] getSequence(int index) throws IOException {
+        byte[] array = sequences[index];
+        if (array == null) {
             synchronized (syncObjects[index & SYNC_BITMASK]) {
                 if (sequences[index] == null) {
                     long dbIndex = refIndex.get(index);
                     int sequenceLength = refDB.getInt(dbIndex);
                     dbIndex += 4;
-                    sequences[index] = new byte[sequenceLength];
-                    refDB.get(dbIndex, sequences[index], 0, sequenceLength);
-                }
+                    array = new byte[sequenceLength];
+                    refDB.get(dbIndex, array, 0, sequenceLength);
+                    sequences[index] = array;
+                } else
+                    array = sequences[index];
             }
         }
-        return sequences[index];
+        return array;
     }
 
     /**
@@ -134,7 +156,7 @@ public class ReferencesDBAccess {
      * @param index
      * @return sequence length
      */
-    public int getSequenceLength(int index) {
+    public int getSequenceLength(int index) throws IOException {
         if (sequences[index] != null)
             return sequences[index].length;
         else
