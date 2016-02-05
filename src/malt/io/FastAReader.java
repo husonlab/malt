@@ -79,6 +79,8 @@ public class FastAReader {
         {
             InputStream tmp = new BufferedInputStream(Basic.getInputStreamPossiblyZIPorGZIP(fileName));
             int value = tmp.read();
+            if (value != '@' && value != '>')
+                throw new IOException("Input file '" + fileName + "' does not appear to be in FastA or FastQ format, as it does not start with a '>' or '@'");
             isFastQ = (value == '@');
             tmp.close();
         }

@@ -44,10 +44,11 @@ public class IntFileGetterInMemory implements IIntGetter {
     public IntFileGetterInMemory(File file) throws IOException {
         limit = file.length() / 4;
 
-        data = new int[(int) ((limit >> 30)) + 1][];
         length0 = (int) (Math.min(limit, 1 << 30));
+        data = new int[(int) ((limit - 1) / length0) + 1][];
+
         for (int i = 0; i < data.length; i++) {
-            int length = Math.min(length0, dataPos(limit) + 1);
+            final int length = (int) Math.min(length0, limit - (i * length0));
             data[i] = new int[length];
         }
 

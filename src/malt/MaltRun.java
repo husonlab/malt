@@ -372,7 +372,7 @@ public class MaltRun {
         final ExecutorService executor = Executors.newFixedThreadPool(maltOptions.getNumberOfThreads());
         final CountDownLatch countDownLatch = new CountDownLatch(maltOptions.getNumberOfThreads());
 
-        final FastAReader fastAReader = new FastAReader(infile, maltOptions.getQueryAlphabet(), new ProgressPercentage("Aligning file: " + infile));
+        final FastAReader fastAReader = new FastAReader(infile, maltOptions.getQueryAlphabet(), new ProgressPercentage("+++++ Aligning file: " + infile));
 
         final String matchesOutputFileUsed;
         final boolean usingTemporarySAMOutputFile;
