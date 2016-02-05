@@ -306,51 +306,44 @@ was suggested in \cite{Murphy2000}.
 
 \end{itemize}
 
+MALT is able to generate RMA files that can be directly opened in MEGAN.
+\begin{itemize}
+\setlength{\itemindent}{30pt}
+\item[\itt{--classify}] Use this option to determine which classifications should be computed, such as Taxonomy, EGGNOG, INTERPRO2GO, KEGG and/or SEED.
+\end{itemize} 
+
 There are numerous options that can be used to provide mapping files to \program{malt-build} for classification support.
 These are used
 by the program to map reference sequences or genes to taxonomic and/or functional classes.
 \begin{itemize}
 \setlength{\itemindent}{30pt}
-\item[\itt{-g2t} \itt{-r2t} \itt{-s2t}] Use to specify mapping files to map reference sequences to taxonomic identifiers (NCBI taxon integer ids).
-Use {\tt -g2t} for a file mapping GI numbers to taxon ids. Use {\tt -r2t} for a file mapping RefSeq identifiers to taxon ids.
-Use {\tt -s2t} for a file that maps \pconcept{synonyms} to taxon ids. A synonym is any word that may occur in
+\item[\itt{-g2taxonomy}] \itt{-r2taxonomy} \itt{-s2taxonomy} Use to specify mapping files to map reference sequences to taxonomic identifiers (NCBI taxon integer ids).
+Use {\tt -g2taxonomy} for a file mapping GI numbers to taxon ids. Use {\tt -r2taxonomy} for a file mapping RefSeq identifiers to taxon ids.
+Use {\tt -s2taxonomy} for a file that maps \pconcept{synonyms} to taxon ids. A synonym is any word that may occur in
 the header line of a reference sequence.
-\item[\itt{-g2k} \itt{-r2k} \itt{-s2k}] Use to specify mapping files to map reference sequences to KEGG KO numbers  \cite{Kanehisa2000} .
+\item[\itt{-g2interpro2go}] \itt{-r2interpro2go} \itt{-s2interpro2go} Use to specify mapping files to map reference sequences to InterPro numbers  \cite{GeneOntology2000,Mitchell2015} .
 The detailed usage of three different options is analogous to above.
-\item[\itt{-g2s} \itt{-r2s} \itt{-s2s}] Use to specify mapping files to map reference sequences to SEED \cite{SEED2005} classes.
+\item[\itt{-g2seed}] \itt{-r2seed} \itt{-s2seed} Use to specify mapping files to map reference sequences to SEED \cite{SEED2005} classes.
 Unfortunately, the SEED classification does not assign numerical identifiers to classes. As a work-around,
 \program{malt-build} uses the numerical identifiers defined and used by \irm{MEGAN} \cite{MEGAN2011}.
 The detailed usage of three different options is analogous to above.
-\item[\itt{-g2c} \itt{-r2c} \itt{-s2c}] Use to specify mapping files to map reference sequences to COG and NOG \cite{Tatusov1997,eggNOG} classes.
+\item[\itt{-g2eggnog}] \itt{-r2eggnog} \itt{-s2eggnog} Use to specify mapping files to map reference sequences to COG and NOG \cite{Tatusov1997,eggNOG} classes.
 Unfortunately,  COG's and NOG's do not share the same space of numerical identifiers. As a work-around,
 \program{malt-build} uses the numerical identifiers defined and used by \irm{MEGAN} \cite{MEGAN2011}.
 The detailed usage of three different options is analogous to above.
-{
+\item[\itt{-g2kegg}] \itt{-r2kegg} \itt{-s2kegg} Use to specify mapping files to map reference sequences to KEGG KO numbers  \cite{Kanehisa2000} .
+The detailed usage of three different options is analogous to above.
+\ignore{
 \item[\itt{-gif}] Use this option specify a \concept{gene information file}. Such a file assigns maps genes to intervals
 in reference sequences, as described below. This is usually used when the reference sequences are genomes.
 }
-\end{itemize}
-
-When using classification support, a number of additional files may be necessary. 
-\begin{itemize}
-\setlength{\itemindent}{30pt}
-\item[\itt{--taxTree}] Use to specify the taxonomic tree, for example \itt{malt/data/ncbi.tre.gz}.
-\item[\itt{--taxMap} ]Use to specify the associated map file, for example  \itt{malt/data/ncbi.map.gz}.
-\item[\itt{--cogMappingFile}] Use to specify the COG mapping file, for example \itt{malt/data/cog.map.gz}.
-\end{itemize}
-
-There are two options concerned with properties and licensing:
-\begin{itemize}
-\setlength{\itemindent}{30pt}
-\item[\itt{--propertiesFile}] Use to specify the program properties file. By default, \MALT uses the same file as MEGAN5.
-\item[\itt{licenseFile}] Use to specify a MEGAN5 license file. \MALT is an extension of MEGAN5 and use of \MALT requires a valid MEGAN5 license.
-If MEGAN5 is installed, then \MALT will locate and use the corresponding license.
 \end{itemize}
 
 
 There are a couple of other options:
 \begin{itemize}
 \setlength{\itemindent}{30pt}
+\item[\itt{--firstWordOnly}] Use to specify to save only the first word of each reference header. Default value: false.
 \item[\itt{--random}] Use to specify the seed used by the random number generator.
 \item[\itt{--verbose}] Use to run program in verbose mode.
 \item[\itt{--help}] Report command-line usage.
@@ -376,26 +369,31 @@ OPTIONS
 	-ss, --shapes [string(s)]            Seed shape(s). Default value(s): default.
 	-mh, --maxHitsPerSeed [number]       Maximum number of hits per seed. Default value: 1000.
 	-pr, --proteinReduct [string]        Name or definition of protein alphabet reduction (BLOSUM50_10,BLOSUM50_11,BLOSUM50_15,BLOSUM50_4,BLOSUM50_8,DIAMOND_11,GBMR4,HSDM17,MALT_10,SDM12,UNREDUCED). Default value: DIAMOND_11.
- Classification support:
-	-g2t, --gi2taxa [string]             GI-to-Taxonomy mapping file. 
-	-r2t, --ref2taxa [string]            RefSeq-to-Taxonomy mapping file. 
-	-s2t, --syn2taxa [string]            Synonyms-to-Taxonomy mapping file. 
-	-g2k, --gi2kegg [string]             GI-to-KEGG mapping file. 
-	-r2k, --ref2kegg [string]            RefSeq-to-KEGG mapping file. 
-	-s2k, --syn2kegg [string]            Synonyms-to-KEGG mapping file. 
-	-g2s, --gi2seed [string]             GI-to-SEED mapping file. 
-	-r2s, --ref2seed [string]            RefSeq-to-SEED mapping file. 
-	-s2s, --syn2seed [string]            Synonyms-to-SEED mapping file. 
-	-g2c, --gi2cog [string]              GI-to-COG mapping file. 
-	-r2c, --ref2cog [string]             RefSeq-to-COG mapping file. 
-	-s2c, --syn2cog [string]             Synonyms-to-COG mapping file. 
+ Classification:
+	-c, --classify [string(s)]           Classifications (any of EGGNOG INTERPRO2GO KEGG SEED Taxonomy). Mandatory option.
+	-g2eggnog, --gi2eggnog [string]      GI-to-EGGNOG mapping file. 
+	-r2eggnog, --ref2eggnog [string]     RefSeq-to-EGGNOG mapping file. 
+	-s2eggnog, --syn2eggnog [string]     Synonyms-to-EGGNOG mapping file. 
+	-g2interpro2go, --gi2interpro2go [string]   GI-to-INTERPRO2GO mapping file. 
+	-r2interpro2go, --ref2interpro2go [string]   RefSeq-to-INTERPRO2GO mapping file. 
+	-s2interpro2go, --syn2interpro2go [string]   Synonyms-to-INTERPRO2GO mapping file. 
+	-g2kegg, --gi2kegg [string]          GI-to-KEGG mapping file. 
+	-r2kegg, --ref2kegg [string]         RefSeq-to-KEGG mapping file. 
+	-s2kegg, --syn2kegg [string]         Synonyms-to-KEGG mapping file. 
+	-g2seed, --gi2seed [string]          GI-to-SEED mapping file. 
+	-r2seed, --ref2seed [string]         RefSeq-to-SEED mapping file. 
+	-s2seed, --syn2seed [string]         Synonyms-to-SEED mapping file. 
+	-g2taxonomy, --gi2taxonomy [string]   GI-to-Taxonomy mapping file. 
+	-r2taxonomy, --ref2taxonomy [string]   RefSeq-to-Taxonomy mapping file. 
+	-s2taxonomy, --syn2taxonomy [string]   Synonyms-to-Taxonomy mapping file. 
+	-tn, --parseTaxonNames               Parse taxon names. Default value: true.
 	-gif, -geneInfoFile [string]         File containing gene information. 
  Other:
 	-fwo, --firstWordOnly                Save only first word of reference header. Default value: false.
 	-rns, --random [number]              Random number generator seed. Default value: 666.
 	-hsf, --hashScaleFactor [number]     Hash table scale factor. Default value: 0.9.
 	-v, --verbose                        Echo commandline options and be verbose. Default value: false.
-	-h, --help  
+	-h, --help                           Show program usage and quit.
 \end{verbatim}
 }
 \caption{Summary of command-line usage of malt-build.}\label{fig:malt-build-usage}
@@ -522,10 +520,11 @@ or  \concept{BlastX mode}, then the following options are available.
 \item[\itt{ --reverseOnly}]       Use to align query reverse strand only. Default value: false.
 \end{itemize}
 
-The program uses the LCA algorithm \cite{MEGAN2007} to assign reads to taxa. There are a number of
-options that control this.
+The program uses the LCA algorithm \cite{MEGAN2007} to assign reads to taxa. There are a number of options that control this.
 \begin{itemize}
 \setlength{\itemindent}{30pt}
+\item[\itt{lca\_taxonomy}] Use to specify that the LCA algorithm should be applied to the taxonomy classification. Similar switches are available to turn on the use of the LCA algorithm for other classifications.
+But using the LCA algorithms only makes sense when providing additional taxonomic classifications such as the RDP tree.
 \item[\itt{--topPercent}]          Use to specify the \pconcept{top percent} value for LCA algorithm. Default value is 10\%. For each read,
 only those matches are used for taxonomic placement whose bit score is within 10\% of the best score for that read.
 \item[\itt{--minSupport}]           Use to specify the \pconcept{min support} value for the LCA algorithm. 
@@ -583,7 +582,7 @@ OPTIONS
 	-zul, --gzipUnaligned                Compress unaligned reads output using gzip. Default value: true.
  Performance:
 	-t, --numThreads [number]            Number of worker threads. Default value: 8.
-	-mem, --memoryMode                   Memory mode. Default value: load. Legal values: load, page, map.
+	-mem, --memoryMode [string]          Memory mode. Default value: load. Legal values: load, page, map
 	-mt, --maxTables [number]            Set the maximum number of seed tables to use (0=all). Default value: 0.
 	-rqc, --replicateQueryCache          Cache results for replicated queries. Default value: false.
  Filter:
@@ -603,6 +602,11 @@ OPTIONS
 	-fo, --forwardOnly                   Align query forward strand only. Default value: false.
 	-ro, --reverseOnly                   Align query reverse strand only. Default value: false.
  LCA:
+	-l_eggnog, --lca_eggnog              Use LCA for assigning to 'EGGNOG' (otherwise 'best-hit'). Default value: false.
+	-l_interpro2go, --lca_interpro2go    Use LCA for assigning to 'INTERPRO2GO' (otherwise 'best-hit'). Default value: false.
+	-l_kegg, --lca_kegg                  Use LCA for assigning to 'KEGG' (otherwise 'best-hit'). Default value: false.
+	-l_seed, --lca_seed                  Use LCA for assigning to 'SEED' (otherwise 'best-hit'). Default value: false.
+	-l_taxonomy, --lca_taxonomy          Use LCA for assigning to 'Taxonomy' (otherwise 'best-hit'). Default value: true.
 	-top, --topPercent [number]          Top percent value for LCA algorithm. Default value: 10.0.
 	-supp, --minSupportPercent [number]   Min support value for LCA algorithm as a percent of assigned reads (0==off). Default value: 0.001.
 	-sup, --minSupport [number]          Min support value for LCA algorithm (overrides --minSupportPercent). Default value: 1.
@@ -618,8 +622,7 @@ OPTIONS
 	-rqcb, --replicateQueryCacheBits [number]   Bits used for caching replicate queries (size is then 2^bits). Default value: 20.
 	-xP, --xPart                         Show part of the table in human readable form for debugging. Default value: false.
 	-v, --verbose                        Echo commandline options and be verbose. Default value: false.
-	-h, --help                           Show program usage and quit.
-\end{verbatim}
+	-h, --help                           Show program usage and quit.\end{verbatim}
 }
 \caption{Summary of command-line usage of {\tt malt-run}.}\label{fig:malt-run-usage}
 \end{figure}
