@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="6.0.3" transformSequenceNumber="5">
-  <directoryPresets config="../../megan6/jars/data.jar" />
-  <application name="MALT" distributionSourceDir="" applicationId="3229-5251-7410-5330" mediaDir="../../../builds" mediaFilePattern="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" compression="6" lzmaCompression="false" pack200Compression="false" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="true" shortName="MALT" publisher="Daniel Huson's Lab, University of Tuebingen" publisherWeb="www-ab.informatik.uni-tuebingen.de" version="0" allPathsRelative="true" backupOnSave="true" autoSave="false" convertDotsToUnderscores="true" macSignature="????" macVolumeId="970a61501b2fa775" javaMinVersion="1.7" javaMaxVersion="" allowBetaVM="true" jdkMode="runtimeJre" jdkName="">
+<install4j version="6.0.4" transformSequenceNumber="5">
+  <directoryPresets config="../resources/icons/malt-build48.pdf" />
+  <application name="MALT" distributionSourceDir="" applicationId="3229-5251-7410-5330" mediaDir="../../../builds" mediaFilePattern="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" compression="6" lzmaCompression="false" pack200Compression="false" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="true" shortName="MALT" publisher="Daniel Huson's Lab, University of Tuebingen" publisherWeb="www-ab.informatik.uni-tuebingen.de" version="0" allPathsRelative="true" backupOnSave="true" autoSave="false" convertDotsToUnderscores="true" macSignature="????" macVolumeId="970a61501b2fa775" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="true" jdkMode="runtimeJre" jdkName="">
     <languages skipLanguageSelection="false" languageSelectionInPrincipalLanguage="false">
       <principalLanguage id="en" customLocalizationFile="" />
       <additionalLanguages />
@@ -28,7 +28,7 @@
       <mountPoint id="1691242160" root="" location="" mode="755" />
     </mountPoints>
     <entries>
-      <fileEntry mountPoint="1691243191" file="../resources/icons/malt-build48.pdf" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="false" overrideOverwriteMode="false" overrideUninstallMode="false" />
+      <fileEntry mountPoint="1691243191" file="../resources/icons/malt-build48.png" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="false" overrideOverwriteMode="false" overrideUninstallMode="false" />
       <fileEntry mountPoint="1691243191" file="../resources/icons/malt-run48.png" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="false" overrideOverwriteMode="false" overrideUninstallMode="false" />
       <fileEntry mountPoint="1691242408" file="../resources/log4j.properties" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" />
       <fileEntry mountPoint="1691242151" file="../antbuild/MALT.jar" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="false" overrideOverwriteMode="false" overrideUninstallMode="false" />
@@ -186,142 +186,6 @@
         </text>
       </splashScreen>
       <java mainClass="malt.MaltRun" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" arguments="" allowVMPassthroughParameters="true" preferredVM="" bundleRuntime="true">
-        <classPath>
-          <directory location="class" failOnError="false" />
-          <scanDirectory location="jars" failOnError="false" />
-        </classPath>
-        <nativeLibraryDirectories />
-      </java>
-      <includedFiles />
-      <unextractableFiles />
-      <vmOptionsFile mode="template" overwriteMode="0" fileMode="644">
-        <content />
-      </vmOptionsFile>
-      <customScript mode="1" file="">
-        <content />
-      </customScript>
-      <infoPlist mode="1" file="">
-        <content />
-      </infoPlist>
-      <iconImageFiles>
-        <file path="../resources/icons/malt-run16.png" />
-        <file path="../resources/icons/malt-run32.png" />
-        <file path="../resources/icons/malt-run48.png" />
-      </iconImageFiles>
-    </launcher>
-    <launcher name="malt2-build-gui" id="1691243296" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="../resources/icons/malt-build.icns" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
-      <executable name="malt2-build-gui" type="1" iconSet="true" iconFile="" executableDir="" redirectStderr="true" stderrFile="malt-build.log" stderrMode="overwrite" redirectStdout="true" stdoutFile="malt-build.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="false" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
-        <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
-      </executable>
-      <splashScreen show="false" width="450" height="300" bitmapFile="" windowsNative="false" textOverlay="false">
-        <text>
-          <statusLine x="383" y="15" text="" fontSize="8" fontColor="0,0,0" bold="false" />
-          <versionLine x="17" y="10" text="MALT ${compiler:sys.version}" fontSize="12" fontColor="0,0,0" bold="false" />
-        </text>
-      </splashScreen>
-      <java mainClass="malt.malt2.MaltBuild2" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" arguments="--argsGui" allowVMPassthroughParameters="true" preferredVM="server" bundleRuntime="true">
-        <classPath>
-          <directory location="class" failOnError="false" />
-          <scanDirectory location="jars" failOnError="false" />
-        </classPath>
-        <nativeLibraryDirectories />
-      </java>
-      <includedFiles />
-      <unextractableFiles />
-      <vmOptionsFile mode="template" overwriteMode="1" fileMode="644">
-        <content />
-      </vmOptionsFile>
-      <customScript mode="1" file="">
-        <content />
-      </customScript>
-      <infoPlist mode="1" file="">
-        <content />
-      </infoPlist>
-      <iconImageFiles>
-        <file path="../resources/icons/malt-build16.png" />
-        <file path="../resources/icons/malt-build32.png" />
-        <file path="../resources/icons/malt-build48.png" />
-      </iconImageFiles>
-    </launcher>
-    <launcher name="malt2-run-gui" id="1691243297" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="../resources/icons/malt-run.icns" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
-      <executable name="malt2-run-gui" type="1" iconSet="true" iconFile="" executableDir="" redirectStderr="true" stderrFile="malt-run.log" stderrMode="overwrite" redirectStdout="true" stdoutFile="malt-run.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="false" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
-        <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
-      </executable>
-      <splashScreen show="false" width="0" height="0" bitmapFile="" windowsNative="false" textOverlay="false">
-        <text>
-          <statusLine x="20" y="20" text="" fontSize="8" fontColor="0,0,0" bold="false" />
-          <versionLine x="20" y="40" text="version ${compiler:sys.version}" fontSize="8" fontColor="0,0,0" bold="false" />
-        </text>
-      </splashScreen>
-      <java mainClass="malt.malt2.MaltRun2" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" arguments="--argsGui" allowVMPassthroughParameters="true" preferredVM="" bundleRuntime="true">
-        <classPath>
-          <directory location="class" failOnError="false" />
-          <scanDirectory location="jars" failOnError="false" />
-        </classPath>
-        <nativeLibraryDirectories />
-      </java>
-      <includedFiles />
-      <unextractableFiles />
-      <vmOptionsFile mode="template" overwriteMode="0" fileMode="644">
-        <content />
-      </vmOptionsFile>
-      <customScript mode="1" file="">
-        <content />
-      </customScript>
-      <infoPlist mode="1" file="">
-        <content />
-      </infoPlist>
-      <iconImageFiles>
-        <file path="../resources/icons/malt-run16.png" />
-        <file path="../resources/icons/malt-run32.png" />
-        <file path="../resources/icons/malt-run48.png" />
-      </iconImageFiles>
-    </launcher>
-    <launcher name="malt2-build" id="1691243298" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="../resources/icons/malt-build.icns" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
-      <executable name="malt2-build" type="1" iconSet="true" iconFile="" executableDir="" redirectStderr="false" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="2" changeWorkingDirectory="false" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
-        <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
-      </executable>
-      <splashScreen show="false" width="450" height="300" bitmapFile="" windowsNative="false" textOverlay="false">
-        <text>
-          <statusLine x="383" y="15" text="" fontSize="8" fontColor="0,0,0" bold="false" />
-          <versionLine x="17" y="10" text="MALT ${compiler:sys.version}" fontSize="12" fontColor="0,0,0" bold="false" />
-        </text>
-      </splashScreen>
-      <java mainClass="malt.malt2.MaltBuild2" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" arguments="" allowVMPassthroughParameters="true" preferredVM="server" bundleRuntime="true">
-        <classPath>
-          <directory location="class" failOnError="false" />
-          <scanDirectory location="jars" failOnError="false" />
-        </classPath>
-        <nativeLibraryDirectories />
-      </java>
-      <includedFiles />
-      <unextractableFiles />
-      <vmOptionsFile mode="template" overwriteMode="1" fileMode="644">
-        <content />
-      </vmOptionsFile>
-      <customScript mode="1" file="">
-        <content />
-      </customScript>
-      <infoPlist mode="1" file="">
-        <content />
-      </infoPlist>
-      <iconImageFiles>
-        <file path="../resources/icons/malt-build16.png" />
-        <file path="../resources/icons/malt-build32.png" />
-        <file path="../resources/icons/malt-build48.png" />
-      </iconImageFiles>
-    </launcher>
-    <launcher name="malt2-run" id="1691243299" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="../resources/icons/malt-run.icns" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
-      <executable name="malt2-run" type="1" iconSet="true" iconFile="" executableDir="" redirectStderr="false" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="2" changeWorkingDirectory="false" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
-        <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
-      </executable>
-      <splashScreen show="false" width="0" height="0" bitmapFile="" windowsNative="false" textOverlay="false">
-        <text>
-          <statusLine x="20" y="20" text="" fontSize="8" fontColor="0,0,0" bold="false" />
-          <versionLine x="20" y="40" text="version ${compiler:sys.version}" fontSize="8" fontColor="0,0,0" bold="false" />
-        </text>
-      </splashScreen>
-      <java mainClass="malt.malt2.MaltRun2" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" arguments="" allowVMPassthroughParameters="true" preferredVM="" bundleRuntime="true">
         <classPath>
           <directory location="class" failOnError="false" />
           <scanDirectory location="jars" failOnError="false" />
@@ -679,106 +543,6 @@
                     <object class="com.install4j.runtime.beans.actions.misc.AddVmOptionsAction">
                       <void property="launcherId">
                         <string>1691243207</string>
-                      </void>
-                      <void property="macosVmOptionsType">
-                        <object class="java.lang.Enum" method="valueOf">
-                          <class>com.install4j.runtime.beans.actions.misc.MacosVmOptionsType</class>
-                          <string>OUTER</string>
-                        </object>
-                      </void>
-                      <void property="vmOptions">
-                        <array class="java.lang.String" length="1">
-                          <void index="0">
-                            <string>-Xmx${installer:myXmx}G</string>
-                          </void>
-                        </array>
-                      </void>
-                    </object>
-                  </java>
-                </serializedBean>
-                <condition />
-              </action>
-              <action name="" id="1691243404" customizedId="" beanClass="com.install4j.runtime.beans.actions.misc.AddVmOptionsAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
-                <serializedBean>
-                  <java class="java.beans.XMLDecoder">
-                    <object class="com.install4j.runtime.beans.actions.misc.AddVmOptionsAction">
-                      <void property="launcherId">
-                        <string>1691243296</string>
-                      </void>
-                      <void property="macosVmOptionsType">
-                        <object class="java.lang.Enum" method="valueOf">
-                          <class>com.install4j.runtime.beans.actions.misc.MacosVmOptionsType</class>
-                          <string>OUTER</string>
-                        </object>
-                      </void>
-                      <void property="vmOptions">
-                        <array class="java.lang.String" length="1">
-                          <void index="0">
-                            <string>-Xmx${installer:myXmx}G</string>
-                          </void>
-                        </array>
-                      </void>
-                    </object>
-                  </java>
-                </serializedBean>
-                <condition />
-              </action>
-              <action name="" id="1691243405" customizedId="" beanClass="com.install4j.runtime.beans.actions.misc.AddVmOptionsAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
-                <serializedBean>
-                  <java class="java.beans.XMLDecoder">
-                    <object class="com.install4j.runtime.beans.actions.misc.AddVmOptionsAction">
-                      <void property="launcherId">
-                        <string>1691243297</string>
-                      </void>
-                      <void property="macosVmOptionsType">
-                        <object class="java.lang.Enum" method="valueOf">
-                          <class>com.install4j.runtime.beans.actions.misc.MacosVmOptionsType</class>
-                          <string>OUTER</string>
-                        </object>
-                      </void>
-                      <void property="vmOptions">
-                        <array class="java.lang.String" length="1">
-                          <void index="0">
-                            <string>-Xmx${installer:myXmx}G</string>
-                          </void>
-                        </array>
-                      </void>
-                    </object>
-                  </java>
-                </serializedBean>
-                <condition />
-              </action>
-              <action name="" id="1691243406" customizedId="" beanClass="com.install4j.runtime.beans.actions.misc.AddVmOptionsAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
-                <serializedBean>
-                  <java class="java.beans.XMLDecoder">
-                    <object class="com.install4j.runtime.beans.actions.misc.AddVmOptionsAction">
-                      <void property="launcherId">
-                        <string>1691243298</string>
-                      </void>
-                      <void property="macosVmOptionsType">
-                        <object class="java.lang.Enum" method="valueOf">
-                          <class>com.install4j.runtime.beans.actions.misc.MacosVmOptionsType</class>
-                          <string>OUTER</string>
-                        </object>
-                      </void>
-                      <void property="vmOptions">
-                        <array class="java.lang.String" length="1">
-                          <void index="0">
-                            <string>-Xmx${installer:myXmx}G</string>
-                          </void>
-                        </array>
-                      </void>
-                    </object>
-                  </java>
-                </serializedBean>
-                <condition />
-              </action>
-              <action name="" id="1691243407" customizedId="" beanClass="com.install4j.runtime.beans.actions.misc.AddVmOptionsAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
-                <serializedBean>
-                  <java class="java.beans.XMLDecoder">
-                    <object class="com.install4j.runtime.beans.actions.misc.AddVmOptionsAction">
-                      <void property="launcherId">
-                        <string>1691243299</string>
                       </void>
                       <void property="macosVmOptionsType">
                         <object class="java.lang.Enum" method="valueOf">
@@ -1695,7 +1459,7 @@ wizardContext.setCancelButtonVisible(false);</preActivation>
         <content />
       </installerScript>
     </unixInstaller>
-    <macosFolder name="Mac OS X Folder" id="1691242149" customizedId="" mediaFileName="" installDir="MALT" overridePrincipalLanguage="true" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="macosx-amd64-1.8.0_51" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" appleJre="false" requiredVmIdPrefix="" customInstallBaseDir="" contentFilesType="2" installerName="${i18n:InstallerName(${compiler:sys.fullName})}" volumeName="${compiler:sys.shortName}" compressDmg="false" signLaunchers="false">
+    <macosFolder name="Mac OS X Folder" id="1691242149" customizedId="" mediaFileName="" installDir="MALT" overridePrincipalLanguage="true" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="macosx-amd64-1.8.0_72" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" appleJre="false" requiredVmIdPrefix="" customInstallBaseDir="" contentFilesType="2" installerName="${i18n:InstallerName(${compiler:sys.fullName})}" volumeName="${compiler:sys.shortName}" compressDmg="false" signLaunchers="false">
       <excludedComponents>
         <component id="1691242252" />
       </excludedComponents>
@@ -1713,7 +1477,7 @@ wizardContext.setCancelButtonVisible(false);</preActivation>
       </autoUpdate>
       <topLevelFiles />
     </macosFolder>
-    <windows name="Windows" id="1691242407" customizedId="" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" installDir="Malt" overridePrincipalLanguage="true" jreBitType="64" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="windows-amd64-1.8.0_51" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="true" customInstallBaseDir="" contentFilesType="1" verifyIntegrity="true">
+    <windows name="Windows" id="1691242407" customizedId="" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" installDir="Malt" overridePrincipalLanguage="true" jreBitType="64" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="windows-amd64-1.8.0_72" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="true" customInstallBaseDir="" contentFilesType="1" verifyIntegrity="true">
       <excludedComponents />
       <includedDownloadableComponents />
       <excludedLaunchers>

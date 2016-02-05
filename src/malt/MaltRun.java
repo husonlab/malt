@@ -28,9 +28,11 @@ import malt.analysis.OrganismsProfileMerger;
 import malt.data.*;
 import malt.genes.GeneTableAccess;
 import malt.io.*;
-import malt.mapping.MappingHelper;
+import malt.mapping.MappingManager;
 import malt.util.ProfileUtilities;
 import malt.util.Utilities;
+import megan.classification.Classification;
+import megan.classification.ClassificationManager;
 import megan.parsers.blast.BlastMode;
 
 import javax.xml.bind.JAXBException;
@@ -106,6 +108,7 @@ public class MaltRun {
         final ArgsOptions options = new ArgsOptions(args, this, "Align sequences using MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
         options.setVersion(malt.Version.SHORT_DESCRIPTION);
+        options.setLicense("Copyright (C) 2016 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Mode:");
         maltOptions.setMode(BlastMode.valueOfIgnoreCase(options.getOptionMandatory("m", "mode", "Program mode", BlastMode.values(), BlastMode.BlastX.toString())));
@@ -132,7 +135,7 @@ public class MaltRun {
             alignerOptions.setSamSoftClipping(options.getOption("ssc", "samSoftClip", "Use soft clipping in SAM files (BlastN mode only)", alignerOptions.isSamSoftClipping()));
         }
         if (maltOptions.getMatchOutputFormat() == MaltOptions.MatchOutputFormat.SAM || options.isDoHelp()) {
-            maltOptions.setSparseSAM(options.getOption("sps", "sparseSAM", "Produce sparse SAM format (smaller, faster, suitable for MEGAN)", maltOptions.isSparseSAM()));
+            maltOptions.setSparseSAM(options.getOption("sps", "sparseSAM", "Produce sparse SAM format (smaller, faster, but only suitable for MEGAN)", maltOptions.isSparseSAM()));
         }
         final List<String> outputOrganismFileNames;
         if (true) // do not allow organisms output
@@ -185,7 +188,13 @@ public class MaltRun {
             maltOptions.setDoForward(!options.getOption("ro", "reverseOnly", "Align query reverse strand only", false));
         }
 
-        options.comment("LCA:");
+        options.comment("LCA parameters:");
+        final String[] cNames = (options.isDoHelp() ? ClassificationManager.getAllSupportedClassifications().toArray(new String[ClassificationManager.getAllSupportedClassifications().size()]) : MappingManager.determineAvailableMappings(indexDirectory));
+        for (String cName : cNames) {
+            final boolean useLCA = options.getOption("-l_" + cName.toLowerCase(), "lca_" + cName.toLowerCase(), "Use LCA for assigning to '" + cName + "' (otherwise 'best-hit')", ProgramProperties.get(cName + "UseLCA", cName.equals(Classification.Taxonomy)));
+            ProgramProperties.put(cName + "UseLCA", useLCA);
+        }
+
         maltOptions.setTopPercentLCA(options.getOption("top", "topPercent", "Top percent value for LCA algorithm", maltOptions.getTopPercentLCA()));
         maltOptions.setMinSupportPercentLCA(options.getOption("supp", "minSupportPercent", "Min support value for LCA algorithm as a percent of assigned reads (0==off)", maltOptions.getMinSupportPercentLCA()));
         maltOptions.setMinSupportLCA(options.getOption("sup", "minSupport", "Min support value for LCA algorithm (overrides --minSupportPercent)", maltOptions.getMinSupportLCA()));
@@ -290,15 +299,10 @@ public class MaltRun {
         }
         // table.show();
 
-        // load taxonomy files if they exist:
-        final boolean loadMappings = (outputRMAFileNames.size() > 0);
-        if (loadMappings) {
-            MappingHelper.loadTaxonMapping(true, indexDirectory);
-            MappingHelper.loadKeggMapping(true, indexDirectory);
-            MappingHelper.loadSeedMapping(true, indexDirectory);
-            MappingHelper.loadCogMapping(true, indexDirectory);
+        // load mapping files, if we are going to generate RMA
+        if ((outputRMAFileNames.size() > 0)) {
+            MappingManager.loadMappings(cNames, indexDirectory);
         }
-
 
         final GeneTableAccess geneTableAccess;
         if (outputOrganismFileNames.size() > 0 && (new File(indexDirectory, "gene-table.idx")).exists())
@@ -483,7 +487,7 @@ public class MaltRun {
         }
 
         if (organismOutStream != null) {
-            OrganismsProfileMerger organismsProfileMerger = new OrganismsProfileMerger(MappingHelper.getTaxonMapping(), geneTableAccess);
+            OrganismsProfileMerger organismsProfileMerger = new OrganismsProfileMerger(MappingManager.getTaxonomyMapping(), geneTableAccess);
             organismsProfileMerger.setName(Basic.getFileBaseName(Basic.getFileNameWithoutPath(infile)));
             organismsProfileMerger.mergeAndCompute(ProfileUtilities.getOrganismsProfiles(alignmentEngines));
             organismsProfileMerger.write(organismOutStream);

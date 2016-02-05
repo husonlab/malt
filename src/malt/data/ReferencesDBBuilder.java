@@ -35,7 +35,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     public static final String TAXON_TAG = "tax";
     public static final String KEGG_TAG = "kegg";
     public static final String SEED_TAG = "seed";
-    public static final String COG_TAG = "cog";
+    public static final String EGGNOG_TAG = "eggnog";
 
     private byte[][] headers;
     private byte[][] sequences;

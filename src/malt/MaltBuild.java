@@ -22,16 +22,12 @@ package malt;
 import jloda.util.*;
 import malt.data.*;
 import malt.genes.GeneTableBuilder;
-import malt.mapping.CogMapping;
-import malt.mapping.KeggMapping;
-import malt.mapping.SeedMapping;
-import malt.mapping.TaxonMapping;
+import malt.mapping.Mapping;
 import malt.util.Utilities;
 import megan.classification.Classification;
 import megan.classification.ClassificationManager;
 import megan.classification.IdMapper;
 import megan.classification.IdParser;
-import megan.mainviewer.data.TaxonomyData;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,6 +85,7 @@ public class MaltBuild {
         final ArgsOptions options = new ArgsOptions(args, this, "Build an index for MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
         options.setVersion(malt.Version.SHORT_DESCRIPTION);
+        options.setLicense("Copyright (C) 2016 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Input:");
         final List<String> inputFiles = options.getOptionMandatory("i", "input", "Input reference file(s)", new LinkedList<String>());
@@ -111,23 +108,32 @@ public class MaltBuild {
         else
             proteinReduction = "";
 
-        options.comment("Classification support:");
+        final String[] availableFNames = ClassificationManager.getAllSupportedClassifications().toArray(new String[ClassificationManager.getAllSupportedClassifications().size()]);
+        options.comment("Classification:");
+        String[] cNames = options.getOptionMandatory("-c", "classify", "Classifications (any of " + Basic.toString(availableFNames, " ") + ")", new String[]{Classification.Taxonomy});
+        for (String cName : cNames) {
+            if (!ClassificationManager.getAllSupportedClassifications().contains(cName))
+                throw new UsageException("--classify: Unknown classification: " + cName);
+        }
 
-        final String gi2TaxaFile = options.getOption("-g2t", "gi2taxa", "GI-to-Taxonomy mapping file", "");
-        final String refSeq2TaxaFile = options.getOption("-r2t", "ref2taxa", "RefSeq-to-Taxonomy mapping file", "");
-        final String synonyms2TaxaFile = options.getOption("-s2t", "syn2taxa", "Synonyms-to-Taxonomy mapping file", "");
+        if (options.isDoHelp())
+            cNames = availableFNames;
 
-        final String gi2KeggFile = options.getOption("-g2k", "gi2kegg", "GI-to-KEGG mapping file", "");
-        final String refSeq2KeggFile = options.getOption("-r2k", "ref2kegg", "RefSeq-to-KEGG mapping file", "");
-        final String synonyms2KeggFile = options.getOption("-s2k", "syn2kegg", "Synonyms-to-KEGG mapping file", "");
+        final boolean parseTaxonNames = true;
 
-        final String gi2SeedFile = options.getOption("-g2s", "gi2seed", "GI-to-SEED mapping file", "");
-        final String refSeq2SeedFile = options.getOption("-r2s", "ref2seed", "RefSeq-to-SEED mapping file", "");
-        final String synonyms2SeedFile = options.getOption("-s2s", "syn2seed", "Synonyms-to-SEED mapping file", "");
+        final String[] gi2FNames = new String[cNames.length];
+        final String[] ref2FNames = new String[cNames.length];
+        final String[] synonyms2FNames = new String[cNames.length];
 
-        final String gi2CogFile = options.getOption("-g2c", "gi2cog", "GI-to-COG mapping file", "");
-        final String refSeq2CogFile = options.getOption("-r2c", "ref2cog", "RefSeq-to-COG mapping file", "");
-        final String synonyms2CogFile = options.getOption("-s2c", "syn2cog", "Synonyms-to-COG mapping file", "");
+        for (int i1 = 0; i1 < cNames.length; i1++) {
+            String cName = cNames[i1];
+            gi2FNames[i1] = options.getOption("-g2" + cName.toLowerCase(), "gi2" + cName.toLowerCase(), "GI-to-" + cName + " mapping file", "");
+            ref2FNames[i1] = options.getOption("-r2" + cName.toLowerCase(), "ref2" + cName.toLowerCase(), "RefSeq-to-" + cName + " mapping file", "");
+            synonyms2FNames[i1] = options.getOption("-s2" + cName.toLowerCase(), "syn2" + cName.toLowerCase(), "Synonyms-to-" + cName + " mapping file", "");
+
+            if (cName.equalsIgnoreCase(Classification.Taxonomy))
+                options.getOption("-tn", "parseTaxonNames", "Parse taxon names", true);
+        }
 
         final String geneTableFile = options.getOption("-gif", "-geneInfoFile", "File containing gene information", "");
 
@@ -141,6 +147,9 @@ public class MaltBuild {
 
         options.done();
         Basic.setDebugMode(options.isVerbose());
+
+        if (sequenceType == null)
+            throw new IOException("Sequence type undefined");
 
         System.err.println("Reference sequence type set to: " + sequenceType.toString());
         final IAlphabet referenceAlphabet;
@@ -203,46 +212,25 @@ public class MaltBuild {
             }
         }
 
-        // build classification index files, if requested
-        if (Utilities.hasAMapping(synonyms2TaxaFile, refSeq2TaxaFile, gi2TaxaFile) || geneTableFile.length() > 0) {
-            TaxonomyData.load();
-            final File indexTreeFile = new File(indexDirectory, "taxonomy.tre");
-            final File indexMapFile = new File(indexDirectory, "taxonomy.map");
-            Basic.writeStreamToFile(ResourceManager.getFileAsStream("ncbi.map"), indexMapFile);
-            Basic.writeStreamToFile(ResourceManager.getFileAsStream("ncbi.tre"), indexTreeFile);
+        // setup classification support
+        for (int i = 0; i < cNames.length; i++) {
+            final String cName = cNames[i];
+            final String cNameLowerCase = cName.toLowerCase();
+            final String sourceName = (cName.equals(Classification.Taxonomy) ? "ncbi" : cNameLowerCase);
 
-            Utilities.loadMapping(synonyms2TaxaFile, IdMapper.MapType.Synonyms, Classification.Taxonomy);
-            Utilities.loadMapping(refSeq2TaxaFile, IdMapper.MapType.RefSeq, Classification.Taxonomy);
-            Utilities.loadMapping(gi2TaxaFile, IdMapper.MapType.GI, Classification.Taxonomy);
+            ClassificationManager.ensureTreeIsLoaded(cName);
+            Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".tre"), new File(indexDirectory, cNameLowerCase + ".tre"));
+            Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".map"), new File(indexDirectory, cNameLowerCase + ".map"));
 
-            final IdParser idParser = ClassificationManager.get(Classification.Taxonomy).getIdMapper().createIdParser();
-            final TaxonMapping taxonMapping = TaxonMapping.create(referencesDB, idParser, new ProgressPercentage("Building taxon-mapping..."));
-            taxonMapping.save(new File(indexDirectory, "taxonomy.idx"));
-        }
-        if (Utilities.hasAMapping(synonyms2KeggFile, refSeq2KeggFile, gi2KeggFile)) {
-            Utilities.loadMapping(synonyms2KeggFile, IdMapper.MapType.Synonyms, "KEGG");
-            Utilities.loadMapping(refSeq2KeggFile, IdMapper.MapType.RefSeq, "KEGG");
-            Utilities.loadMapping(gi2KeggFile, IdMapper.MapType.GI, "KEGG");
-            final IdParser idParser = ClassificationManager.get("KEGG").getIdMapper().createIdParser();
-            final KeggMapping keggMapping = KeggMapping.create(referencesDB, idParser, new ProgressPercentage("Building KEGG-mapping..."));
-            keggMapping.save(new File(indexDirectory, "kegg.idx"));
-        }
-        if (Utilities.hasAMapping(synonyms2SeedFile, refSeq2SeedFile, gi2SeedFile)) {
-            Utilities.loadMapping(synonyms2SeedFile, IdMapper.MapType.Synonyms, "SEED");
-            Utilities.loadMapping(refSeq2SeedFile, IdMapper.MapType.RefSeq, "SEED");
-            Utilities.loadMapping(gi2SeedFile, IdMapper.MapType.GI, "SEED");
-            final IdParser idParser = ClassificationManager.get("SEED").getIdMapper().createIdParser();
-            SeedMapping seedMapping = SeedMapping.create(referencesDB, idParser, new ProgressPercentage("Building SEED-mapping..."));
-            seedMapping.save(new File(indexDirectory, "seed.idx"));
-        }
-        if (Utilities.hasAMapping(synonyms2CogFile, refSeq2CogFile, gi2CogFile)) {
-            Utilities.loadMapping(synonyms2CogFile, IdMapper.MapType.Synonyms, "COG");
-            Utilities.loadMapping(refSeq2CogFile, IdMapper.MapType.RefSeq, "COG");
-            Utilities.loadMapping(gi2CogFile, IdMapper.MapType.GI, "COG");
+            Utilities.loadMapping(synonyms2FNames[i], IdMapper.MapType.Synonyms, cName);
+            Utilities.loadMapping(ref2FNames[i], IdMapper.MapType.RefSeq, cName);
+            Utilities.loadMapping(gi2FNames[i], IdMapper.MapType.GI, cName);
 
-            final IdParser idParser = ClassificationManager.get("COG").getIdMapper().createIdParser();
-            final CogMapping cogMapping = CogMapping.create(referencesDB, idParser, new ProgressPercentage("Building COG-mapping..."));
-            cogMapping.save(new File(indexDirectory, "cog.idx"));
+            final IdParser idParser = ClassificationManager.get(cName, true).getIdMapper().createIdParser();
+            if (cName.equals(Classification.Taxonomy))
+                idParser.setUseTextParsing(parseTaxonNames);
+            final Mapping mapping = Mapping.create(cName, referencesDB, idParser, new ProgressPercentage("Building " + cName + "-mapping..."));
+            mapping.save(new File(indexDirectory, cNameLowerCase + ".idx"));
         }
 
         if (doBuildTables) // don't write until after running classification mappers, as they add tags to reference sequences

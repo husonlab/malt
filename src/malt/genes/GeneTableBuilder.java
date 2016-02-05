@@ -57,12 +57,12 @@ public class GeneTableBuilder {
         for (int i = 0; i < numberOfSyncObjects; i++)
             syncObjects[i] = new Object();
 
-        if (ClassificationManager.get("KEGG").getIdMapper().isActiveMap(IdMapper.MapType.GI))
-            keggMapper = ClassificationManager.get("KEGG").getIdMapper();
+        if (ClassificationManager.get("KEGG", false).getIdMapper().isActiveMap(IdMapper.MapType.GI))
+            keggMapper = ClassificationManager.get("KEGG", false).getIdMapper();
         else
             keggMapper = null;
-        if (ClassificationManager.get("COG").getIdMapper().isActiveMap(IdMapper.MapType.GI))
-            cogMapper = ClassificationManager.get("COG").getIdMapper();
+        if (ClassificationManager.get("EGGNOG", false).getIdMapper().isActiveMap(IdMapper.MapType.GI))
+            cogMapper = ClassificationManager.get("EGGNOG", false).getIdMapper();
         else
             cogMapper = null;
     }

@@ -25,7 +25,7 @@ import malt.align.BandedAligner;
 import malt.analysis.OrganismsProfile;
 import malt.data.*;
 import malt.io.*;
-import malt.mapping.MappingHelper;
+import malt.mapping.MappingManager;
 import malt.util.FixedSizePriorityQueue;
 import malt.util.Utilities;
 import megan.parsers.blast.BlastMode;
@@ -157,7 +157,7 @@ public class AlignmentEngine {
             readMatchesForRefIndex[i] = new ReadMatch();
 
         if (organismsOutStream != null) {
-            organismsProfile = new OrganismsProfile(MappingHelper.getTaxonMapping());
+            organismsProfile = new OrganismsProfile(MappingManager.getTaxonomyMapping());
             organismsProfile.setTopPercent(maltOptions.getTopPercentLCA());
         } else
             organismsProfile = null;

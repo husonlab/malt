@@ -20,7 +20,7 @@
 package malt.analysis;
 
 import malt.data.ReadMatch;
-import malt.mapping.TaxonMapping;
+import malt.mapping.Mapping;
 import malt.util.Utilities;
 import megan.algorithms.LCAAlgorithm;
 
@@ -32,7 +32,7 @@ import java.util.*;
  * Daniel Huson, 8.2014
  */
 public class OrganismsProfile {
-    protected final TaxonMapping taxonMapping;
+    protected final Mapping taxonMapping;
     protected final Map<Integer, Integer> refIndex2weight = new HashMap<>(100000);
     protected final QueryItem head = new QueryItem();  // head of query item list
     protected QueryItem tail = head;                     // tail of query item list
@@ -53,7 +53,7 @@ public class OrganismsProfile {
     /**
      * constructor
      */
-    public OrganismsProfile(final TaxonMapping taxonMapping) {
+    public OrganismsProfile(final Mapping taxonMapping) {
         this.taxonMapping = taxonMapping;
     }
 

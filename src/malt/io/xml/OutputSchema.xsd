@@ -61,7 +61,7 @@
                 <xs:attribute name="protein_id" type="xs:string"/>
                 <xs:attribute name="product" type="xs:string"/>
                 <xs:attribute name="kegg" type="xs:string"/>
-                <xs:attribute name="cog" type="xs:string"/>
+                <xs:attribute name="eGGNOG" type="xs:string"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>

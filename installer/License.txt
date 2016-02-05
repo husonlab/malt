@@ -1,6 +1,6 @@
 MALT - MEGAN ALignment Tool
 
-Copyright (c) 2015, Daniel H. Huson
+Copyright (c) 2016, Daniel H. Huson
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

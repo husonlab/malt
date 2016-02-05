@@ -24,10 +24,12 @@ import jloda.util.ProgressPercentage;
 import malt.genes.GeneItem;
 import malt.genes.GeneTableAccess;
 import malt.io.xml.*;
-import malt.mapping.TaxonMapping;
+import malt.mapping.Mapping;
 import malt.util.TaxonomyUtilities;
 import megan.algorithms.LCAAlgorithm;
-import megan.mainviewer.data.TaxonomyData;
+import megan.classification.Classification;
+import megan.classification.ClassificationManager;
+import megan.classification.data.Name2IdMap;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -56,7 +58,7 @@ public class OrganismsProfileMerger extends OrganismsProfile {
      *
      * @param taxonMapping
      */
-    public OrganismsProfileMerger(TaxonMapping taxonMapping, GeneTableAccess geneTableAccess) {
+    public OrganismsProfileMerger(Mapping taxonMapping, GeneTableAccess geneTableAccess) {
         super(taxonMapping);
         this.geneTableAccess = geneTableAccess;
         taxonId2OrganismItem = new HashMap<>(10000, 1f);
@@ -218,6 +220,8 @@ public class OrganismsProfileMerger extends OrganismsProfile {
         long countGenes = 0;
         long countReads = 0;
 
+        final Name2IdMap name2IdMap = ClassificationManager.get(Classification.Taxonomy, false).getName2IdMap();
+
         for (Integer taxId : taxonId2OrganismItem.keySet()) {
             OrganismItem organismItem = taxonId2OrganismItem.get(taxId);
             if (organismItem != null) {
@@ -226,7 +230,7 @@ public class OrganismsProfileMerger extends OrganismsProfile {
                 report.getOrganisms().getOrganism().add(organism);
                 organism.setTaxonomy(new Taxonomy());
 
-                organism.setOrganismName(TaxonomyData.getName2IdMap().get(taxId));
+                organism.setOrganismName(name2IdMap.get(taxId));
                 String genus = TaxonomyUtilities.getContainingGenus(taxId);
                 if (genus != null)
                     organism.setGenus(genus);
@@ -236,7 +240,7 @@ public class OrganismsProfileMerger extends OrganismsProfile {
                 final String strain = TaxonomyUtilities.getStrain(taxId);
                 if (strain != null)
                     organism.setStrain(strain);
-                organism.setOrganismName(TaxonomyData.getName2IdMap().get(taxId));
+                organism.setOrganismName(name2IdMap.get(taxId));
                 organism.getTaxonomy().setTaxonId(BigInteger.valueOf(taxId));
                 organism.getTaxonomy().setValue(TaxonomyUtilities.getPath(taxId));
                 organism.getTaxonomy().setValue(TaxonomyUtilities.getPath(taxId));
