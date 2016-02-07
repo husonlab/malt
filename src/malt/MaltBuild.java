@@ -198,7 +198,6 @@ public class MaltBuild {
         System.err.println(String.format("Number of sequences:%12d", referencesDB.getNumberOfSequences()));
         System.err.println(String.format("Number of letters:  %12d", referencesDB.getNumberOfLetters()));
 
-        // terminate if no valid license:
         // generate hash table for each seed shape
         if (doBuildTables) {
             for (int tableNumber = 0; tableNumber < shapes.length; tableNumber++) {

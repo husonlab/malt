@@ -32,11 +32,6 @@ import java.util.List;
  * Daniel Huson, 8.2014
  */
 public class ReferencesDBBuilder implements ISequenceAccessor {
-    public static final String TAXON_TAG = "tax";
-    public static final String KEGG_TAG = "kegg";
-    public static final String SEED_TAG = "seed";
-    public static final String EGGNOG_TAG = "eggnog";
-
     private byte[][] headers;
     private byte[][] sequences;
     private int numberOfSequences;

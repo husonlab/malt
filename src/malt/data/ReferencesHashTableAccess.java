@@ -19,18 +19,13 @@
  */
 package malt.data;
 
-import jloda.map.IIntGetter;
-import jloda.map.ILongGetter;
-import jloda.map.IntFileGetterMappedMemory;
-import jloda.map.LongFileGetterMappedMemory;
-import jloda.map.experimental.IntFileGetterPagedMemory;
-import jloda.map.experimental.LongFileGetterPagedMemory;
+import jloda.map.*;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressPercentage;
 import malt.MaltOptions;
-import malt.io.IntFileGetterInMemory;
-import malt.io.LongFileGetterInMemory;
+import malt.io.experimental.IntFileGetterPagedMemory;
+import malt.io.experimental.LongFileGetterPagedMemory;
 import malt.util.MurmurHash3;
 import malt.util.Utilities;
 
