@@ -44,19 +44,6 @@ Bin Ma, John Tromp, and Ming Li.
 \newblock {PatternHunter}: faster and more sensitive homology search.
 \newblock {\em Bioinformatics}, 18(3):440--445, 2002.
 
-\bibitem{Mitchell2015}
-Alex Mitchell, Hsin-Yu Chang, Louise Daugherty, Matthew Fraser, Sarah Hunter,
-  Rodrigo Lopez, Craig McAnulla, Conor McMenamin, Gift Nuka, Sebastien Pesseat,
-  Amaia Sangrador-Vegas, Maxim Scheremetjew, Claudia Rato, Siew-Yit Yong, Alex
-  Bateman, Marco Punta, Teresa~K. Attwood, Christian~J.A. Sigrist, Nicole
-  Redaschi, Catherine Rivoire, Ioannis Xenarios, Daniel Kahn, Dominique Guyot,
-  Peer Bork, Ivica Letunic, Julian Gough, Matt Oates, Daniel Haft, Hongzhan
-  Huang, Darren~A. Natale, Cathy~H. Wu, Christine Orengo, Ian Sillitoe, Huaiyu
-  Mi, Paul~D. Thomas, and Robert~D. Finn.
-\newblock The interpro protein families database: the classification resource
-  after 15 years.
-\newblock {\em Nucleic Acids Research}, 43(D1):D213--D221, 2015.
-
 \bibitem{Murphy2000}
 Lynne~Reed Murphy, Anders Wallqvist, and Ronald~M. Levy.
 \newblock Simplified amino acid alphabets for protein fold recognition and
