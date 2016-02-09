@@ -99,7 +99,6 @@ public class DataForInnerLoop {
                     numberOfFrames++;
                 } else
                     negativeFrameInfoString = null;
-
                 break;
             }
             case BlastX: {

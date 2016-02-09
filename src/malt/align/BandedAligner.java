@@ -1077,6 +1077,12 @@ public class BandedAligner {
         return identities;
     }
 
+    public float getPercentIdentity() {
+        if (alignment == null)
+            computeAlignmentByTraceBack();
+        return getAlignmentLength() == 0 ? 0 : (float) (100 * getIdentities()) / (float) getAlignmentLength();
+    }
+
     public int getMismatches() {
         return mismatches;
     }
@@ -1279,6 +1285,15 @@ public class BandedAligner {
     }
 
     /**
+     * gets simple text, for debugging purproses
+     * @return text
+     */
+    public byte[] getAlignmentSimpleText() {
+        DataForInnerLoop dataForInnerLoop = new DataForInnerLoop(mode, true, false, 1, 1);
+        return getAlignmentText(dataForInnerLoop, 0);
+    }
+
+    /**
      * get alignment in tabular format. If queryHeader==null, skips the first entry which is the query name
      *
      * @param data
@@ -1358,7 +1373,6 @@ public class BandedAligner {
      */
     public int getRawScoreForBitScore(double bitScore) {
         return (int) Math.floor((LN_2 * bitScore + lnK) / lambda);
-
     }
 
     private static final int minNumberOfExactMatches = 10;
