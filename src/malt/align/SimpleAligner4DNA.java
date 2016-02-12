@@ -20,7 +20,6 @@
 package malt.align;
 
 import jloda.util.Basic;
-import malt.data.DNA5;
 import megan.parsers.blast.BlastMode;
 import megan.util.BoyerMoore;
 
@@ -119,19 +118,22 @@ public class SimpleAligner4DNA {
     }
 
     /**
-     * gets a position of the query in the reference, or -1
+     * gets a position of the query in the reference, or reference.length if not contained
      *
      * @param query
      * @param reference
      * @param queryMustBeContained
-     * @return pos or -1
+     * @return pos or reference.length
      */
     public int getPositionInReference(byte[] query, byte[] reference, boolean queryMustBeContained) {
-        DNA5.getInstance().normalize(query);
-        DNA5.getInstance().normalize(reference);
 
-        final int k = 10;
-        for (int i = 0; i < query.length - k; i++) {
+        if (getMinPercentIdentity() >= 100) {
+            return (new BoyerMoore(query, 127)).search(reference);
+        }
+
+        final int k = Math.max(10, (int) (100.0 / (100.0 - minPercentIdentity + 1))); // determine smallest exact match that must be present
+
+        for (int i = 0; i < query.length - k + 1; i++) {
             byte[] queryWord = new byte[k];
             System.arraycopy(query, i, queryWord, 0, k);
             BoyerMoore boyerMoore = new BoyerMoore(queryWord, 127);
@@ -143,7 +145,7 @@ public class SimpleAligner4DNA {
                 }
             }
         }
-        return -1;
+        return reference.length;
     }
 
     /**
@@ -154,7 +156,7 @@ public class SimpleAligner4DNA {
      * @return true, if query has significant alignment into reference
      */
     public boolean isContained(byte[] query, byte[] reference) {
-        return getPositionInReference(query, reference, true) != -1;
+        return getPositionInReference(query, reference, true) != reference.length;
     }
 
     /**
@@ -182,7 +184,7 @@ public class SimpleAligner4DNA {
         simpleAligner4DNA.setMinPercentIdentity(90);
 
 
-        if (simpleAligner4DNA.getPositionInReference(query, reference, false) != -1) {
+        if (simpleAligner4DNA.getPositionInReference(query, reference, false) != reference.length) {
             System.err.println(simpleAligner4DNA.getAlignmentString());
         } else System.err.println("No alignment found");
     }
