@@ -34,6 +34,7 @@ import malt.util.Utilities;
 import megan.classification.Classification;
 import megan.classification.ClassificationManager;
 import megan.parsers.blast.BlastMode;
+import megan.util.ReadMagnitudeParser;
 
 import javax.xml.bind.JAXBException;
 import java.io.*;
@@ -203,6 +204,7 @@ public class MaltRun {
             if (options.isVerbose())
                 System.err.println("\t(--minSupportPercent overridden)");
         }
+        ReadMagnitudeParser.setEnabled(options.getOption("-mag", "magnitudes", "Reads have magnitudes (to be used in taxonomic or functional analysis)", false));
 
         options.comment("Heuristics:");
         maltOptions.setMaxSeedsPerOffsetPerFrame(options.getOption("spf", "maxSeedsPerFrame", "Maximum number of seed matches per offset per read frame", maltOptions.getMaxSeedsPerOffsetPerFrame()));

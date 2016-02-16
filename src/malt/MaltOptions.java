@@ -79,7 +79,6 @@ public class MaltOptions {
 
     private boolean useReplicateQueryCaching = false;
 
-    private boolean hasMagnitudes = false;
     private boolean pairedReads = false;
 
     /**
@@ -290,13 +289,6 @@ public class MaltOptions {
         this.useReplicateQueryCaching = useReplicateQueryCaching;
     }
 
-    public boolean isHasMagnitudes() {
-        return hasMagnitudes;
-    }
-
-    public void setHasMagnitudes(boolean hasMagnitudes) {
-        this.hasMagnitudes = hasMagnitudes;
-    }
 
     public boolean isPairedReads() {
         return pairedReads;
