@@ -19,15 +19,11 @@
  */
 package malt.data;
 
-import jloda.map.IByteGetter;
-import jloda.map.ILongGetter;
-import jloda.map.LongFileGetterInMemory;
-import jloda.map.LongFileGetterMappedMemory;
+import jloda.map.*;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.FileInputIterator;
 import malt.MaltOptions;
-import malt.io.ByteFileGetterInMemory;
 import malt.io.experimental.ByteFileGetterRandomAccess;
 import malt.io.experimental.LongFileGetterPagedMemory;
 
