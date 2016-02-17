@@ -20,11 +20,11 @@
 package malt.sequence;
 
 
-import jloda.io.OutputWriter;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressListener;
 import jloda.util.ProgressPercentage;
+import megan.io.OutputWriter;
 
 import java.io.DataInputStream;
 import java.io.File;

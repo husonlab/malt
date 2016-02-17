@@ -19,7 +19,7 @@
  */
 package malt.util;
 
-import jloda.io.OutputWriter;
+import megan.io.OutputWriter;
 
 import java.io.IOException;
 import java.util.Arrays;

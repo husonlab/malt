@@ -19,8 +19,8 @@
  */
 package malt.genes;
 
-import jloda.io.OutputWriter;
 import jloda.util.Basic;
+import megan.io.OutputWriter;
 
 import java.io.DataInputStream;
 import java.io.IOException;

@@ -19,13 +19,13 @@
  */
 package malt.data;
 
-import jloda.io.IntFilePutter;
-import jloda.io.OutputWriter;
 import jloda.util.Basic;
 import jloda.util.ProgressPercentage;
 import jloda.util.Single;
 import malt.util.MurmurHash3;
 import malt.util.Utilities;
+import megan.io.IntFilePutter;
+import megan.io.OutputWriter;
 
 import java.io.File;
 import java.io.IOException;

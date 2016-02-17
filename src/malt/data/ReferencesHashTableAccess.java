@@ -19,15 +19,15 @@
  */
 package malt.data;
 
-import jloda.io.*;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressPercentage;
 import malt.MaltOptions;
-import malt.io.experimental.IntFileGetterPagedMemory;
-import malt.io.experimental.LongFileGetterPagedMemory;
 import malt.util.MurmurHash3;
 import malt.util.Utilities;
+import megan.io.*;
+import megan.io.experimental.IntFileGetterPagedMemory;
+import megan.io.experimental.LongFileGetterPagedMemory;
 
 import java.io.*;
 

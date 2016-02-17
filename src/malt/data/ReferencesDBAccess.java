@@ -19,13 +19,13 @@
  */
 package malt.data;
 
-import jloda.io.*;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.FileInputIterator;
 import malt.MaltOptions;
-import malt.io.experimental.ByteFileGetterPagedMemory;
-import malt.io.experimental.LongFileGetterPagedMemory;
+import megan.io.*;
+import megan.io.experimental.ByteFileGetterPagedMemory;
+import megan.io.experimental.LongFileGetterPagedMemory;
 
 import java.io.Closeable;
 import java.io.File;

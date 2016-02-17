@@ -19,7 +19,6 @@
  */
 package malt.util;
 
-import jloda.io.IIntPutter;
 import jloda.util.Basic;
 import jloda.util.UsageException;
 import malt.data.ReadMatch;
@@ -27,6 +26,7 @@ import malt.data.Row;
 import malt.data.SequenceType;
 import megan.classification.IdMapper;
 import megan.classification.commandtemplates.LoadMappingFileCommand;
+import megan.io.IIntPutter;
 import megan.parsers.blast.BlastMode;
 
 import java.io.File;

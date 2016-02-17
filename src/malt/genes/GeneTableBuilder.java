@@ -19,13 +19,13 @@
  */
 package malt.genes;
 
-import jloda.io.OutputWriter;
 import jloda.util.Basic;
 import jloda.util.FileInputIterator;
 import jloda.util.ProgressPercentage;
 import malt.data.ReferencesDBBuilder;
 import megan.classification.ClassificationManager;
 import megan.classification.IdMapper;
+import megan.io.OutputWriter;
 import net.sf.picard.util.IntervalTree;
 
 import java.io.File;

@@ -19,11 +19,11 @@
  */
 package malt.data;
 
-import jloda.io.OutputWriter;
 import jloda.util.CanceledException;
 import jloda.util.ProgressListener;
 import jloda.util.ProgressPercentage;
 import malt.io.FastAFileIteratorBytes;
+import megan.io.OutputWriter;
 
 import java.io.*;
 import java.util.List;
