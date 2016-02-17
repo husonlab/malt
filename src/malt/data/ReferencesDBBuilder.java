@@ -19,6 +19,7 @@
  */
 package malt.data;
 
+import jloda.io.OutputWriter;
 import jloda.util.CanceledException;
 import jloda.util.ProgressListener;
 import jloda.util.ProgressPercentage;
@@ -197,8 +198,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
         final ProgressPercentage progress = new ProgressPercentage("Writing file: " + refIndexFile, numberOfLetters);
         System.err.println("Writing file: " + refDBFile);
 
-        try (final DataOutputStream refDBOutputStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refDBFile), 8192));
-             DataOutputStream refIndexOutputStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refIndexFile), 8192))) {
+        try (final OutputWriter refDBOutputStream = new OutputWriter(refDBFile); OutputWriter refIndexOutputStream = new OutputWriter(refIndexFile)) {
             long dbFilePos = 0;
 
             for (int i = 0; i < numberOfSequences; i++) {

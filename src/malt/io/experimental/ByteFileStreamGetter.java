@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2016 Daniel H. Huson
+ *  Copyright (C) 2015 Daniel H. Huson
  *
  *  (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,25 +18,25 @@
  */
 package malt.io.experimental;
 
-import jloda.io.ByteFileGetterMappedMemory;
 import jloda.io.IByteGetter;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Random;
 
 /**
- * byte file getter using paged memory
- * Daniel Huson, 5.2015
+ * byte file getter input stream
+ * Daniel Huson, 2.2016
  */
-public class ByteFileGetterRandomAccess implements IByteGetter {
+public class ByteFileStreamGetter implements IByteGetter {
     private final File file;
-    private final RandomAccessFile raf;
+    private final BufferedInputStream raf;
 
     private final long limit;
+    private long currentIndex = 0;
 
     /**
      * constructor
@@ -45,12 +45,12 @@ public class ByteFileGetterRandomAccess implements IByteGetter {
      * @throws IOException
      * @throws CanceledException
      */
-    public ByteFileGetterRandomAccess(File file) throws IOException {
+    public ByteFileStreamGetter(File file) throws IOException {
         this.file = file;
         limit = file.length();
 
         System.err.println("Opening file: " + file);
-        raf = new RandomAccessFile(file, "r");
+        raf = new BufferedInputStream(new FileInputStream(file));
     }
 
     /**
@@ -65,10 +65,14 @@ public class ByteFileGetterRandomAccess implements IByteGetter {
     @Override
     public int get(long index, byte[] bytes, int offset, int len) throws IOException {
         synchronized (raf) {
-            raf.seek(index);
-            len = raf.read(bytes, offset, len);
+            if (index != currentIndex)
+                throw new IOException("seek(): not supported");
+            else {
+                len = raf.read(bytes, offset, len);
+                index += len;
+                return len;
+            }
         }
-        return len;
     }
 
     /**
@@ -80,7 +84,9 @@ public class ByteFileGetterRandomAccess implements IByteGetter {
     @Override
     public int get(long index) throws IOException {
         synchronized (raf) {
-            raf.seek(index);
+            if (index != currentIndex)
+                throw new IOException("seek(): not supported");
+            currentIndex++;
             return raf.read();
         }
     }
@@ -94,7 +100,9 @@ public class ByteFileGetterRandomAccess implements IByteGetter {
     @Override
     public int getInt(long index) throws IOException {
         synchronized (raf) {
-            raf.seek(index);
+            if (index != currentIndex)
+                throw new IOException("seek(): not supported");
+            currentIndex += 4;
             return ((raf.read() & 0xFF) << 24) + ((raf.read() & 0xFF) << 16) + ((raf.read() & 0xFF) << 8) + (raf.read() & 0xFF);
         }
     }
@@ -123,24 +131,17 @@ public class ByteFileGetterRandomAccess implements IByteGetter {
         }
     }
 
-
     public static void main(String[] args) throws IOException {
-        File file = new File("/Users/huson/data/ma/protein/index-new/table0.idx");
+        File file = new File("/Users/huson/data/ma/protein/index/table0.idx");
 
-        final IByteGetter oldGetter = new ByteFileGetterMappedMemory(file);
-        final IByteGetter newGetter = new ByteFileGetterRandomAccess(file);
+        final IByteGetter getter = new ByteFileStreamGetter(file);
 
-        final Random random = new Random();
-        System.err.println("Limit: " + oldGetter.limit());
+        System.err.println("Limit: " + getter.limit());
         for (int i = 0; i < 100; i++) {
-            int r = random.nextInt((int) oldGetter.limit());
+            int value = getter.get(i);
 
-            int oldValue = oldGetter.get(r);
-            int newValue = newGetter.get(r);
-
-            System.err.println(r + ": " + oldValue + (oldValue == newValue ? " == " : " != ") + newValue);
+            System.err.println(i + " -> " + value);
         }
-        oldGetter.close();
-        newGetter.close();
+        getter.close();
     }
 }

@@ -19,7 +19,8 @@
  */
 package malt.util;
 
-import java.io.DataOutputStream;
+import jloda.io.OutputWriter;
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -159,7 +160,7 @@ public class XIntArray {
      *
      * @param outs
      */
-    public void write(DataOutputStream outs) throws IOException {
+    public void write(OutputWriter outs) throws IOException {
         for (long index = 0; index < maxIndex; index++) {
             outs.writeInt(get(index));
         }

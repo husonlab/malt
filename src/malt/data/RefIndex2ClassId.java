@@ -22,7 +22,6 @@ package malt.data;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressPercentage;
-import malt.util.Utilities;
 
 import java.io.*;
 
@@ -79,17 +78,15 @@ public class RefIndex2ClassId {
      * @throws java.io.IOException
      */
     public void save(File file, byte[] magicNumber) throws IOException, CanceledException {
-        final byte[] buffer = new byte[8];
-
-        try (ProgressPercentage progressListener = new ProgressPercentage("Writing file: " + file, maxRefId); BufferedOutputStream outs = new BufferedOutputStream(new FileOutputStream(file), 8192)) {
+        try (BufferedOutputStream outs = new BufferedOutputStream(new FileOutputStream(file)); ProgressPercentage progressListener = new ProgressPercentage("Writing file: " + file, maxRefId)) {
             outs.write(magicNumber);
 
             // number of entries
-            Utilities.writeInt(outs, maxRefId, buffer);
+            writeInt(outs, maxRefId);
 
             // write headers and sequences:
             for (int i = 0; i < maxRefId; i++) {
-                Utilities.writeInt(outs, refIndex2ClassId[i], buffer);
+                writeInt(outs, refIndex2ClassId[i]);
                 // System.err.println("write: "+i+" "+refIndex2ClassId[i]);
                 progressListener.incrementProgress();
             }
@@ -111,25 +108,50 @@ public class RefIndex2ClassId {
      * @param file
      */
     public RefIndex2ClassId(File file, byte[] magicNumber) throws IOException, CanceledException {
-        final byte[] buffer = new byte[8];
-
         ProgressPercentage progressListener = null;
-        try (BufferedInputStream ins = new BufferedInputStream(new FileInputStream(file), 8192)) {
+        try (BufferedInputStream ins = new BufferedInputStream(new FileInputStream(file))) {
             // check magic number:
             Basic.readAndVerifyMagicNumber(ins, magicNumber);
-            maxRefId = Utilities.readInt(ins, buffer);
+            maxRefId = readInt(ins);
             progressListener = new ProgressPercentage("Reading file: " + file, maxRefId);
             refIndex2ClassId = new int[maxRefId + 1];
             // write headers and sequences:
             for (int i = 0; i < maxRefId; i++) {
-                refIndex2ClassId[i] = Utilities.readInt(ins, buffer);
+                refIndex2ClassId[i] = readInt(ins);
                 // System.err.println("read: "+i+" "+refIndex2ClassId[i]);
                 progressListener.incrementProgress();
             }
         } finally {
             if (progressListener != null)
                 progressListener.close();
-
         }
+    }
+
+    /**
+     * read an int from an input stream
+     *
+     * @param ins
+     * @return long value
+     * @throws java.io.IOException
+     */
+    public static int readInt(InputStream ins) throws IOException {
+        return ((ins.read() & 0xFF) << 24)
+                + ((ins.read() & 0xFF) << 16)
+                + ((ins.read() & 0xFF) << 8)
+                + ((ins.read() & 0xFF));
+    }
+
+    /**
+     * writes an int value
+     *
+     * @param outs
+     * @param value
+     * @throws java.io.IOException
+     */
+    public static void writeInt(OutputStream outs, int value) throws IOException {
+        outs.write((byte) (value >> 24));
+        outs.write((byte) (value >> 16));
+        outs.write((byte) (value >> 8));
+        outs.write((byte) value);
     }
 }

@@ -19,10 +19,10 @@
  */
 package malt.genes;
 
+import jloda.io.OutputWriter;
 import jloda.util.Basic;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 /**
@@ -103,37 +103,37 @@ public class GeneItem {
      * @param outs
      * @throws java.io.IOException
      */
-    public void write(DataOutputStream outs) throws IOException {
+    public void write(OutputWriter outs) throws IOException {
         outs.writeLong(giNumber);
         if (product == null || product.length == 0)
             outs.writeInt(0);
         else {
             outs.writeInt(product.length);
-            outs.write(product);
+            outs.write(product, 0, product.length);
         }
         if (geneName == null || geneName.length == 0)
             outs.writeInt(0);
         else {
             outs.writeInt(geneName.length);
-            outs.write(geneName);
+            outs.write(geneName, 0, geneName.length);
         }
         if (proteinId == null || proteinId.length == 0)
             outs.writeInt(0);
         else {
             outs.writeInt(proteinId.length);
-            outs.write(proteinId);
+            outs.write(proteinId, 0, proteinId.length);
         }
         if (keggId == null || keggId.length == 0)
             outs.writeInt(0);
         else {
             outs.writeInt(keggId.length);
-            outs.write(keggId);
+            outs.write(keggId, 0, keggId.length);
         }
         if (cogId == null || cogId.length == 0)
             outs.writeInt(0);
         else {
             outs.writeInt(cogId.length);
-            outs.write(cogId);
+            outs.write(cogId, 0, cogId.length);
         }
     }
 

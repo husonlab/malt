@@ -19,12 +19,12 @@
  */
 package malt.data;
 
-import jloda.map.*;
+import jloda.io.*;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.FileInputIterator;
 import malt.MaltOptions;
-import malt.io.experimental.ByteFileGetterRandomAccess;
+import malt.io.experimental.ByteFileGetterPagedMemory;
 import malt.io.experimental.LongFileGetterPagedMemory;
 
 import java.io.Closeable;
@@ -69,24 +69,24 @@ public class ReferencesDBAccess implements Closeable {
                 break;
             case page:
                 refIndex = new LongFileGetterPagedMemory(refIndexFile);
-                refDB = new ByteFileGetterRandomAccess(refDBFile); // paged memory doesn't make sense because we copy
+                refDB = new ByteFileGetterPagedMemory(refDBFile);
                 break;
             case map:
                 refIndex = new LongFileGetterMappedMemory(refIndexFile);
-                refDB = new ByteFileGetterRandomAccess(refDBFile); // mapped memory doesn't make sense because we copy
+                refDB = new ByteFileGetterMappedMemory(refDBFile);
                 break;
         }
 
-        FileInputIterator it = new FileInputIterator(refInfFile);
-        while (it.hasNext()) {
-            String aLine = it.next();
-            if (aLine.startsWith("sequences")) {
-                numberOfSequences = Integer.parseInt(Basic.getTokenFromTabSeparatedLine(aLine, 1));
-            } else if (aLine.startsWith("letters")) {
-                numberOfLetters = Long.parseLong(Basic.getTokenFromTabSeparatedLine(aLine, 1));
+        try (FileInputIterator it = new FileInputIterator(refInfFile)) {
+            while (it.hasNext()) {
+                String aLine = it.next();
+                if (aLine.startsWith("sequences")) {
+                    numberOfSequences = Integer.parseInt(Basic.getTokenFromTabSeparatedLine(aLine, 1));
+                } else if (aLine.startsWith("letters")) {
+                    numberOfLetters = Long.parseLong(Basic.getTokenFromTabSeparatedLine(aLine, 1));
+                }
             }
         }
-        it.close();
         System.err.println(String.format("Number of sequences:%,13d", numberOfSequences));
         System.err.println(String.format("Number of letters:%,15d", numberOfLetters));
 

@@ -19,7 +19,7 @@
  */
 package malt.util;
 
-import jloda.map.IIntPutter;
+import jloda.io.IIntPutter;
 import jloda.util.Basic;
 import jloda.util.UsageException;
 import malt.data.ReadMatch;
@@ -29,7 +29,9 @@ import megan.classification.IdMapper;
 import megan.classification.commandtemplates.LoadMappingFileCommand;
 import megan.parsers.blast.BlastMode;
 
-import java.io.*;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -104,120 +106,6 @@ public class Utilities {
         }
     }
 
-
-    /**
-     * read a long from an input stream
-     *
-     * @param ins
-     * @param bytes
-     * @return long value
-     * @throws java.io.IOException
-     */
-    public static long readLong(InputStream ins, byte[] bytes) throws IOException {
-        if (ins.read(bytes, 0, 8) != 8)
-            throw new IOException("Read long: too few bytes");
-        return ((long) (bytes[0]) << 56)
-                | ((long) (bytes[1] & 0xFF) << 48)
-                | ((long) (bytes[2] & 0xFF) << 40)
-                | ((long) (bytes[3] & 0xFF) << 32)
-                | ((long) (bytes[4] & 0xFF) << 24)
-                | ((long) (bytes[5] & 0xFF) << 16)
-                | ((long) (bytes[6] & 0xFF) << 8)
-                | (long) (bytes[7] & 0xFF);
-    }
-
-    /**
-     * writes a long value
-     *
-     * @param outs
-     * @param value
-     * @param bytes
-     * @throws java.io.IOException
-     */
-    public static void writeLong(OutputStream outs, long value, byte[] bytes) throws IOException {
-        bytes[0] = (byte) ((value >> 56));
-        bytes[1] = (byte) (value >> 48);
-        bytes[2] = (byte) (value >> 40);
-        bytes[3] = (byte) (value >> 32);
-        bytes[4] = (byte) (value >> 24);
-        bytes[5] = (byte) (value >> 16);
-        bytes[6] = (byte) (value >> 8);
-        bytes[7] = (byte) value;
-        outs.write(bytes, 0, 8);
-    }
-
-    /**
-     * read an int from an input stream
-     *
-     * @param ins
-     * @param bytes
-     * @return long value
-     * @throws java.io.IOException
-     */
-    public static int readInt(InputStream ins, byte[] bytes) throws IOException {
-        if (ins.read(bytes, 0, 4) != 4)
-            throw new IOException("Read int: too few bytes");
-        return ((bytes[0] & 0xFF) << 24) | ((bytes[1] & 0xFF) << 16) | ((bytes[2] & 0xFF) << 8) | (bytes[3] & 0xFF);
-    }
-
-    /**
-     * writes a 3-byte int value
-     *
-     * @param outs
-     * @param value
-     * @param bytes
-     * @throws java.io.IOException
-     */
-    public static void writeInt3(OutputStream outs, int value, byte[] bytes) throws IOException {
-        bytes[0] = (byte) (value >> 16);
-        bytes[1] = (byte) (value >> 8);
-        bytes[2] = (byte) value;
-        outs.write(bytes, 0, 3);
-    }
-
-    /**
-     * read a 3-byte int from an input stream
-     *
-     * @param ins
-     * @param bytes
-     * @return long value
-     * @throws java.io.IOException
-     */
-    public static int readInt3(InputStream ins, byte[] bytes) throws IOException {
-        if (ins.read(bytes, 0, 3) != 3)
-            throw new IOException("Read int3: too few bytes");
-        return ((bytes[0] & 0xFF) << 16) | ((bytes[1] & 0xFF) << 8) | (bytes[2] & 0xFF);
-    }
-
-    /**
-     * writes an int value
-     *
-     * @param outs
-     * @param value
-     * @param bytes
-     * @throws java.io.IOException
-     */
-    public static void writeInt(OutputStream outs, int value, byte[] bytes) throws IOException {
-        bytes[0] = (byte) (value >> 24);
-        bytes[1] = (byte) (value >> 16);
-        bytes[2] = (byte) (value >> 8);
-        bytes[3] = (byte) value;
-        outs.write(bytes, 0, 4);
-    }
-
-    /**
-     * grow row, always return an odd-length array with length <= maxLength
-     *
-     * @param row
-     * @param maxLengthOdd
-     * @return new row four times as big
-     */
-    public static int[] growOdd(int[] row, int maxLengthOdd) {
-        int[] result = new int[(int) Math.max(13L, Math.min(maxLengthOdd, 4L * row.length + 1))];
-        System.arraycopy(row, 0, result, 0, row.length);
-        return result;
-    }
-
     /**
      * resize array
      *
@@ -255,25 +143,6 @@ public class Utilities {
         ReadMatch[] result = new ReadMatch[newSize];
         System.arraycopy(array, 0, result, 0, Math.min(newSize, array.length));
         return result;
-    }
-
-    /**
-     * get first word of header
-     *
-     * @param header
-     * @return first word
-     */
-    public static byte[] getFirstWord(byte[] header) {
-        int length = 0;
-        while (length < header.length) {
-            if (header[length] == 0 || Character.isWhitespace(header[length])) {
-                byte[] result = new byte[length];
-                System.arraycopy(header, 0, result, 0, length);
-                return result;
-            }
-            length++;
-        }
-        return header;
     }
 
     /**
@@ -327,7 +196,6 @@ public class Utilities {
             length++;
         }
         return header;
-
     }
 
 
@@ -347,24 +215,6 @@ public class Utilities {
         byte[] result = new byte[length];
         System.arraycopy(bytes, 0, result, 0, length);
         return result;
-    }
-
-    /**
-     * get first word of header and write it to result
-     *
-     * @param header
-     * @return first word
-     */
-    public static int getFirstWord(byte[] header, byte[] result) {
-        int length = 0;
-
-        while (length < header.length) {
-            if (header[length] == 0 || Character.isWhitespace(header[length]) || header[length] == 0)
-                break;
-            length++;
-        }
-        System.arraycopy(header, 0, result, 0, length);
-        return length;
     }
 
     /**
@@ -442,7 +292,6 @@ public class Utilities {
             default:
                 throw new IOException("Unsupported mode: " + mode);
         }
-
     }
 
     /**
@@ -504,23 +353,6 @@ public class Utilities {
     }
 
     /**
-     * is the given sequence a homopolymer sequence?
-     *
-     * @param seq
-     * @return True if all letters are the same
-     */
-    public static boolean isHomoPolymer(byte[] seq) {
-        byte a = seq[0];
-
-        for (int i = 1; i < seq.length; i++) {
-            if (a != seq[i])
-                return false;
-        }
-        return true;
-    }
-
-
-    /**
      * does this contain only at most two different letters
      *
      * @param seq
@@ -555,13 +387,6 @@ public class Utilities {
         return Integer.MAX_VALUE;
     }
 
-    public static int getNextPowerOf2Mask(int value) {
-        if (value >= Integer.MAX_VALUE >>> 1)
-            return -1;
-        else
-            return getNextPowerOf2(value) - 1;
-    }
-
     /**
      * gets a file for a given directory with a given name, if it exists. If gzippedOk, also tries adding .gz or replacing the suffix by .gz
      *
@@ -583,18 +408,6 @@ public class Utilities {
                 return file;
         }
         return null;
-    }
-
-    /**
-     * is one of the three names non null and of length>0?
-     *
-     * @param fileA
-     * @param fileB
-     * @param fileC
-     * @return true, if a file is specified
-     */
-    public static boolean hasAMapping(String fileA, String fileB, String fileC) {
-        return fileA != null && fileA.length() > 0 || fileB != null && fileB.length() > 0 || fileC != null && fileC.length() > 0;
     }
 
     /**

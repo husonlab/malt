@@ -19,6 +19,7 @@
  */
 package malt.io;
 
+import jloda.io.InputOutputReaderWriter;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressPercentage;
@@ -31,7 +32,6 @@ import megan.core.Document;
 import megan.core.SyncArchiveAndDataTable;
 import megan.data.IReadBlock;
 import megan.data.IReadBlockIterator;
-import megan.io.InputOutputReaderWriter;
 import megan.rma6.MatchLineRMA6;
 import megan.rma6.RMA6Connector;
 import megan.rma6.RMA6FileCreator;

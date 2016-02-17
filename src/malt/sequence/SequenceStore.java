@@ -20,12 +20,16 @@
 package malt.sequence;
 
 
+import jloda.io.OutputWriter;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressListener;
 import jloda.util.ProgressPercentage;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 /**
  * Sequence store using encoded sequenceCodes
@@ -82,26 +86,24 @@ public class SequenceStore {
      * @param fileName
      */
     public void write(final String fileName) throws IOException {
-        DataOutputStream outs = new DataOutputStream(new FileOutputStream(fileName));
-        outs.writeInt(numberOfSequences);
-        ProgressPercentage progress = new ProgressPercentage("Writing file: " + fileName, numberOfSequences);
-        for (int i = 0; i < numberOfSequences; i++) {
-            {
-                int length = headers[i].length;
-                outs.writeInt(length);
-                for (int j = 0; j < length; j++)
-                    outs.writeByte(headers[i][j]);
+        try (OutputWriter outs = new OutputWriter(new File(fileName)); ProgressPercentage progress = new ProgressPercentage("Writing file: " + fileName, numberOfSequences)) {
+            outs.writeInt(numberOfSequences);
+            for (int i = 0; i < numberOfSequences; i++) {
+                {
+                    int length = headers[i].length;
+                    outs.writeInt(length);
+                    outs.write(headers[i], 0, length);
+                }
+                {
+                    int length = sequenceCodes[i].length;
+                    outs.writeInt(length);
+                    for (int j = 0; j < length; j++)
+                        outs.writeLong(sequenceCodes[i][j]);
+                }
+                progress.incrementProgress();
             }
-            {
-                int length = sequenceCodes[i].length;
-                outs.writeInt(length);
-                for (int j = 0; j < length; j++)
-                    outs.writeLong(sequenceCodes[i][j]);
-            }
-            progress.incrementProgress();
+            progress.close();
         }
-        outs.close();
-        progress.close();
     }
 
     /**

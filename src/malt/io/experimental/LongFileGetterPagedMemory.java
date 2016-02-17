@@ -18,8 +18,8 @@
  */
 package malt.io.experimental;
 
-import jloda.map.ILongGetter;
-import jloda.map.LongFileGetterMappedMemory;
+import jloda.io.ILongGetter;
+import jloda.io.LongFileGetterMappedMemory;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 

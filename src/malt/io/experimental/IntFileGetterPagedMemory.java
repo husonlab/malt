@@ -18,8 +18,8 @@
  */
 package malt.io.experimental;
 
-import jloda.map.IIntGetter;
-import jloda.map.IntFileGetterMappedMemory;
+import jloda.io.IIntGetter;
+import jloda.io.IntFileGetterMappedMemory;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 

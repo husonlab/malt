@@ -19,7 +19,7 @@
  */
 package malt.data;
 
-import jloda.map.*;
+import jloda.io.*;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressPercentage;

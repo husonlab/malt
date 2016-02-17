@@ -18,15 +18,13 @@
  */
 package malt.io.experimental;
 
-import jloda.map.ByteFileGetterMappedMemory;
-import jloda.map.IByteGetter;
+import jloda.io.IByteGetter;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Random;
 
 /**
  * byte file getter using paged memory
@@ -140,7 +138,7 @@ public class ByteFileGetterPagedMemory implements IByteGetter {
     public void close() {
         try {
             raf.close();
-            System.err.println("XXX Closing file: " + file.getName() + " (" + pages + "/" + data.length + " pages)");
+            System.err.println("Closing file: " + file.getName() + " (" + pages + "/" + data.length + " pages)");
         } catch (IOException e) {
             Basic.caught(e);
         }
@@ -152,25 +150,5 @@ public class ByteFileGetterPagedMemory implements IByteGetter {
 
     private int dataPos(long index) {
         return (int) (index - (index >> PAGE_BITS) * length0);
-    }
-
-    public static void main(String[] args) throws IOException {
-        File file = new File("/Users/huson/data/ma/protein/index-new/table0.idx");
-
-        final IByteGetter oldGetter = new ByteFileGetterMappedMemory(file);
-        final IByteGetter newGetter = new ByteFileGetterPagedMemory(file);
-
-        final Random random = new Random();
-        System.err.println("Limit: " + oldGetter.limit());
-        for (int i = 0; i < 1000; i++) {
-            int r = random.nextInt((int) oldGetter.limit());
-
-            int oldValue = oldGetter.get(r);
-            int newValue = newGetter.get(r);
-
-            System.err.println(r + ": " + oldValue + (oldValue == newValue ? " == " : " != ") + newValue);
-        }
-        oldGetter.close();
-        newGetter.close();
     }
 }

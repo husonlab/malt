@@ -19,6 +19,7 @@
  */
 package malt.genes;
 
+import jloda.io.OutputWriter;
 import jloda.util.Basic;
 import jloda.util.FileInputIterator;
 import jloda.util.ProgressPercentage;
@@ -27,7 +28,9 @@ import megan.classification.ClassificationManager;
 import megan.classification.IdMapper;
 import net.sf.picard.util.IntervalTree;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -315,31 +318,31 @@ public class GeneTableBuilder {
      * @throws IOException
      */
     private void writeTable(File file, final IntervalTree<GeneItem>[] refIndex2Intervals) throws IOException {
-        DataOutputStream outs = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-
-        outs.write(MAGIC_NUMBER, 0, MAGIC_NUMBER.length);
-
-        outs.writeInt(refIndex2Intervals.length);
 
         int totalRefWithAGene = 0;
-        ProgressPercentage progress = new ProgressPercentage("Writing file: " + file, refIndex2Intervals.length);
+        try (OutputWriter outs = new OutputWriter(file)) {
+            outs.write(MAGIC_NUMBER, 0, MAGIC_NUMBER.length);
 
-        for (IntervalTree<GeneItem> intervals : refIndex2Intervals) {
-            if (intervals == null) {
-                outs.writeInt(0);
-            } else {
-                outs.writeInt(intervals.size());
-                for (IntervalTree.Node<GeneItem> node : intervals) {
-                    outs.writeInt(node.getStart());
-                    outs.writeInt(node.getEnd());
-                    node.getValue().write(outs);
+            outs.writeInt(refIndex2Intervals.length);
+
+            ProgressPercentage progress = new ProgressPercentage("Writing file: " + file, refIndex2Intervals.length);
+
+            for (IntervalTree<GeneItem> intervals : refIndex2Intervals) {
+                if (intervals == null) {
+                    outs.writeInt(0);
+                } else {
+                    outs.writeInt(intervals.size());
+                    for (IntervalTree.Node<GeneItem> node : intervals) {
+                        outs.writeInt(node.getStart());
+                        outs.writeInt(node.getEnd());
+                        node.getValue().write(outs);
+                    }
+                    totalRefWithAGene++;
                 }
-                totalRefWithAGene++;
+                progress.incrementProgress();
             }
-            progress.incrementProgress();
+            progress.close();
         }
-        outs.close();
-        progress.close();
         System.err.println("Reference sequences with at least one gene: " + totalRefWithAGene + " of " + refIndex2Intervals.length);
     }
 

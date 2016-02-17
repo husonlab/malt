@@ -19,14 +19,16 @@
  */
 package malt.data;
 
-import jloda.map.IntFilePutter;
+import jloda.io.IntFilePutter;
+import jloda.io.OutputWriter;
 import jloda.util.Basic;
 import jloda.util.ProgressPercentage;
 import jloda.util.Single;
 import malt.util.MurmurHash3;
 import malt.util.Utilities;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -145,7 +147,7 @@ public class ReferencesHashTableBuilder {
      */
     private void saveTableIndex(long[] tableIndex, File tableIndexFile) throws IOException {
         final ProgressPercentage progress = new ProgressPercentage("Writing file: " + tableIndexFile, tableIndex.length);
-        try (DataOutputStream outs = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(tableIndexFile), 1024000))) {
+        try (OutputWriter outs = new OutputWriter(tableIndexFile)) {
             for (long value : tableIndex) {
                 outs.writeLong(value);
                 progress.incrementProgress();
@@ -458,13 +460,13 @@ public class ReferencesHashTableBuilder {
     public void saveIndexFile(File file) throws IOException {
         final ProgressPercentage progressPercentage = new ProgressPercentage("Writing file: " + file);
 
-        try (DataOutputStream outs = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file), 8192))) {
-            outs.write(MAGIC_NUMBER);
+        try (OutputWriter outs = new OutputWriter(file)) {
+            outs.write(MAGIC_NUMBER, 0, MAGIC_NUMBER.length);
             outs.writeInt(SequenceType.rankOf(referenceSequenceType));
             if (referenceSequenceType == SequenceType.Protein) {
-                byte[] bytes = alphabet.toString().getBytes();
+                final byte[] bytes = alphabet.toString().getBytes();
                 outs.writeInt(bytes.length);
-                outs.write(bytes);
+                outs.write(bytes, 0, bytes.length);
             }
             outs.writeInt(tableSize);
             outs.writeInt(hashMask);
@@ -472,7 +474,7 @@ public class ReferencesHashTableBuilder {
             outs.writeLong(theSize);
             outs.writeInt(stepSize);
 
-            byte[] shapeBytes = seedShape.getBytes();
+            final byte[] shapeBytes = seedShape.getBytes();
             outs.writeInt(shapeBytes.length);
             outs.write(shapeBytes, 0, shapeBytes.length);
         } finally {
