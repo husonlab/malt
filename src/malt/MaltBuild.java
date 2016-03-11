@@ -110,7 +110,7 @@ public class MaltBuild {
 
         final String[] availableFNames = ClassificationManager.getAllSupportedClassifications().toArray(new String[ClassificationManager.getAllSupportedClassifications().size()]);
         options.comment("Classification:");
-        String[] cNames = options.getOptionMandatory("-c", "classify", "Classifications (any of " + Basic.toString(availableFNames, " ") + ")", new String[]{Classification.Taxonomy});
+        String[] cNames = options.getOption("-c", "classify", "Classifications (any of " + Basic.toString(availableFNames, " ") + ")", new String[]{Classification.Taxonomy});
         for (String cName : cNames) {
             if (!ClassificationManager.getAllSupportedClassifications().contains(cName))
                 throw new UsageException("--classify: Unknown classification: " + cName);

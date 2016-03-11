@@ -24,6 +24,7 @@ import jloda.util.ProgressListener;
 import jloda.util.ProgressPercentage;
 import malt.data.ISequenceAccessor;
 import malt.data.RefIndex2ClassId;
+import megan.classification.Classification;
 import megan.classification.IdParser;
 
 import java.io.File;
@@ -54,7 +55,8 @@ public class Mapping extends RefIndex2ClassId {
      * @param progress
      */
     public static Mapping create(String fName, ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws CanceledException, IOException {
-        Mapping mapping = new Mapping(fName, referencesDB.getNumberOfSequences());
+        final Mapping mapping = new Mapping(fName, referencesDB.getNumberOfSequences());
+        final String tag = Classification.createShortTag(fName);
 
         progress.setMaximum(referencesDB.getNumberOfSequences());
         progress.setProgress(0);
@@ -63,7 +65,7 @@ public class Mapping extends RefIndex2ClassId {
             Integer classId = classificationMapper.getIdFromHeaderLine(header);
             if (classId != 0) {
                 mapping.put(i, classId);
-                referencesDB.extendHeader(i, fName.toLowerCase(), classId);
+                referencesDB.extendHeader(i, tag, classId);
             }
             progress.incrementProgress();
         }
@@ -98,4 +100,5 @@ public class Mapping extends RefIndex2ClassId {
     private static byte[] makeMagicNumber(String fName) {
         return ("MA" + fName + version).getBytes();
     }
+
 }

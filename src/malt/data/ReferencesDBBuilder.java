@@ -276,9 +276,9 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
             pos++;
         byte[] add;
         if (header[pos - 1] == '|')
-            add = String.format("%s|%d|", tag, id).getBytes();
+            add = String.format("%s%d|", tag, id).getBytes();
         else
-            add = String.format("|%s|%d|", tag, id).getBytes();
+            add = String.format("|%s%d|", tag, id).getBytes();
 
         byte[] newHeader = new byte[header.length + add.length];
         System.arraycopy(header, 0, newHeader, 0, pos);
