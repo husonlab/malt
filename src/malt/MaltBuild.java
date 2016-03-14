@@ -82,9 +82,9 @@ public class MaltBuild {
      */
     public void run(String[] args) throws Exception {
 // parse commandline options:
-        final ArgsOptions options = new ArgsOptions(args, this, "Build an index for MALT (MEGAN alignment tool)");
+        final ArgsOptions options = new ArgsOptions(args, ProgramProperties.getProgramName(), "MaltBuild", "Builds an index for MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
-        options.setVersion(malt.Version.SHORT_DESCRIPTION);
+        options.setVersion(ProgramProperties.getProgramVersion());
         options.setLicense("Copyright (C) 2016 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Input:");
@@ -128,7 +128,7 @@ public class MaltBuild {
         for (int i1 = 0; i1 < cNames.length; i1++) {
             String cName = cNames[i1];
             gi2FNames[i1] = options.getOption("-g2" + cName.toLowerCase(), "gi2" + cName.toLowerCase(), "GI-to-" + cName + " mapping file", "");
-            ref2FNames[i1] = options.getOption("-r2" + cName.toLowerCase(), "ref2" + cName.toLowerCase(), "RefSeq-to-" + cName + " mapping file", "");
+            ref2FNames[i1] = options.getOption("-a2" + cName.toLowerCase(), "accession2" + cName.toLowerCase(), "Accession-to-" + cName + " mapping file", "");
             synonyms2FNames[i1] = options.getOption("-s2" + cName.toLowerCase(), "syn2" + cName.toLowerCase(), "Synonyms-to-" + cName + " mapping file", "");
 
             if (cName.equalsIgnoreCase(Classification.Taxonomy))
@@ -222,7 +222,7 @@ public class MaltBuild {
             Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".map"), new File(indexDirectory, cNameLowerCase + ".map"));
 
             Utilities.loadMapping(synonyms2FNames[i], IdMapper.MapType.Synonyms, cName);
-            Utilities.loadMapping(ref2FNames[i], IdMapper.MapType.RefSeq, cName);
+            Utilities.loadMapping(ref2FNames[i], IdMapper.MapType.Accession, cName);
             Utilities.loadMapping(gi2FNames[i], IdMapper.MapType.GI, cName);
 
             final IdParser idParser = ClassificationManager.get(cName, true).getIdMapper().createIdParser();

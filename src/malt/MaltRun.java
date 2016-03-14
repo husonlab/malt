@@ -106,9 +106,9 @@ public class MaltRun {
         final AlignerOptions alignerOptions = new AlignerOptions();
 
         // parse commandline options:
-        final ArgsOptions options = new ArgsOptions(args, this, "Align sequences using MALT (MEGAN alignment tool)");
+        final ArgsOptions options = new ArgsOptions(args, this, ProgramProperties.getProgramName(), "Aligns sequences using MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
-        options.setVersion(malt.Version.SHORT_DESCRIPTION);
+        options.setVersion(ProgramProperties.getProgramVersion());
         options.setLicense("Copyright (C) 2016 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Mode:");
