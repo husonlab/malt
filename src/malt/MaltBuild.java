@@ -122,13 +122,13 @@ public class MaltBuild {
         final boolean parseTaxonNames = true;
 
         final String[] gi2FNames = new String[cNames.length];
-        final String[] ref2FNames = new String[cNames.length];
+        final String[] acc2FNames = new String[cNames.length];
         final String[] synonyms2FNames = new String[cNames.length];
 
         for (int i1 = 0; i1 < cNames.length; i1++) {
             String cName = cNames[i1];
             gi2FNames[i1] = options.getOption("-g2" + cName.toLowerCase(), "gi2" + cName.toLowerCase(), "GI-to-" + cName + " mapping file", "");
-            ref2FNames[i1] = options.getOption("-a2" + cName.toLowerCase(), "accession2" + cName.toLowerCase(), "Accession-to-" + cName + " mapping file", "");
+            acc2FNames[i1] = options.getOption("-a2" + cName.toLowerCase(), "acc2" + cName.toLowerCase(), "Accession-to-" + cName + " mapping file", "");
             synonyms2FNames[i1] = options.getOption("-s2" + cName.toLowerCase(), "syn2" + cName.toLowerCase(), "Synonyms-to-" + cName + " mapping file", "");
 
             if (cName.equalsIgnoreCase(Classification.Taxonomy))
@@ -138,6 +138,9 @@ public class MaltBuild {
         final String geneTableFile = options.getOption("-gif", "-geneInfoFile", "File containing gene information", "");
 
         options.comment(ArgsOptions.OTHER);
+        ProgramProperties.put(IdParser.PROPERTIES_FIRST_WORD_IS_ACCESSION, options.getOption("-fwa", "firstWordIsAccession", "First word in reference header is accession number", ProgramProperties.get(IdParser.PROPERTIES_FIRST_WORD_IS_ACCESSION, true)));
+        ProgramProperties.put(IdParser.PROPERTIES_ACCESSION_TAGS, options.getOption("-atags", "accessionTags", "List of accession tags", ProgramProperties.get(IdParser.PROPERTIES_ACCESSION_TAGS, IdParser.ACCESSION_TAGS)));
+
         final boolean saveFirstWordOfReferenceHeaderOnly = options.getOption("-fwo", "firstWordOnly", "Save only first word of reference header", false);
         final int randomSeed = options.getOption("rns", "random", "Random number generator seed", 666);
         final float hashTableLoadFactor = options.getOption("hsf", "hashScaleFactor", "Hash table scale factor", 0.9f, 0.1f, 1.0f);
@@ -222,7 +225,7 @@ public class MaltBuild {
             Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".map"), new File(indexDirectory, cNameLowerCase + ".map"));
 
             Utilities.loadMapping(synonyms2FNames[i], IdMapper.MapType.Synonyms, cName);
-            Utilities.loadMapping(ref2FNames[i], IdMapper.MapType.Accession, cName);
+            Utilities.loadMapping(acc2FNames[i], IdMapper.MapType.Accession, cName);
             Utilities.loadMapping(gi2FNames[i], IdMapper.MapType.GI, cName);
 
             final IdParser idParser = ClassificationManager.get(cName, true).getIdMapper().createIdParser();

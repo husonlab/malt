@@ -317,7 +317,7 @@ These are used
 by the program to map reference sequences or genes to taxonomic and/or functional classes.
 \begin{itemize}
 \setlength{\itemindent}{30pt}
-\item[\itt{-g2taxonomy}] \itt{-r2taxonomy} \itt{-s2taxonomy} Use to specify mapping files to map reference sequences to taxonomic identifiers (NCBI taxon integer ids).
+\item[\itt{-g2taxonomy}] \itt{-a2taxonomy} \itt{-s2taxonomy} Use to specify mapping files to map reference sequences to taxonomic identifiers (NCBI taxon integer ids).
 Use {\tt -g2taxonomy} for a file mapping GI numbers to taxon ids. Use {\tt -r2taxonomy} for a file mapping RefSeq identifiers to taxon ids.
 Use {\tt -s2taxonomy} for a file that maps \pconcept{synonyms} to taxon ids. A synonym is any word that may occur in
 the header line of a reference sequence.
@@ -384,7 +384,7 @@ OPTIONS
 	-r2seed, --ref2seed [string]         RefSeq-to-SEED mapping file. 
 	-s2seed, --syn2seed [string]         Synonyms-to-SEED mapping file. 
 	-g2taxonomy, --gi2taxonomy [string]   GI-to-Taxonomy mapping file. 
-	-r2taxonomy, --ref2taxonomy [string]   RefSeq-to-Taxonomy mapping file. 
+	-a2taxonomy, --ref2taxonomy [string]  Accession-to-Taxonomy mapping file.
 	-s2taxonomy, --syn2taxonomy [string]   Synonyms-to-Taxonomy mapping file. 
 	-tn, --parseTaxonNames               Parse taxon names. Default value: true.
 	-gif, -geneInfoFile [string]         File containing gene information. 
