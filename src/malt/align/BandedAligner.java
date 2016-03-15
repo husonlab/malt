@@ -628,7 +628,7 @@ public class BandedAligner {
                     if (refIndex >= referenceLength) { // out of range of the alignment
                         traceBackM[col][row] = traceBackIRef[col][row] = traceBackIQuery[col][row] = DONE;
                         matrixM[col][row] = matrixIRef[col][row] = matrixIQuery[col][row] = -gapOpenPenalty;
-                    } else if (refIndex < referenceLength) { // do the actual alignment:
+                    } else if (refIndex >= 0 && refIndex < referenceLength) { // do the actual alignment:
                         int bestMScore = Integer.MIN_VALUE;
                         // match or mismatch
                         {
