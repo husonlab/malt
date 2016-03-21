@@ -111,13 +111,13 @@ public class SeedShape {
     }
 
     /**
-     * are query and reference equal sequences at given offset for the given seed shape?
+     * are query and reference equalOverShorterOfBoth sequences at given offset for the given seed shape?
      *
      * @param query
      * @param qOffset
      * @param reference
      * @param rOffset
-     * @return true if equal for seed shape
+     * @return true if equalOverShorterOfBoth for seed shape
      */
     public boolean equalSequences(byte[] query, int qOffset, byte[] reference, int rOffset) {
         for (int i = 0; i < weight; i++) {

@@ -89,7 +89,7 @@ public class DNA5 implements IAlphabet {
      *
      * @param a
      * @param b
-     * @return true, if equal bases
+     * @return true, if equalOverShorterOfBoth bases
      */
     public boolean equal(byte a, byte b) {
         return normalizedLetters[a] == normalizedLetters[b];
@@ -100,7 +100,7 @@ public class DNA5 implements IAlphabet {
      *
      * @param a
      * @param b
-     * @return true, if equal DNA sequences
+     * @return true, if equalOverShorterOfBoth DNA sequences
      */
     public boolean equal(byte[] a, byte[] b) {
         if (a.length != b.length)

@@ -54,7 +54,7 @@ public class FixedSizePriorityQueue<E> {
     /**
      * Adds an element to the queue. If the queue contains {@code maxSize} elements, {@code e} will
      * be compared to the lowest element in the queue using {@code comparator}.
-     * If {@code e} is greater than or equal to the lowest element, that element will be removed and
+     * If {@code e} is greater than or equalOverShorterOfBoth to the lowest element, that element will be removed and
      * {@code e} will be added instead. Otherwise, the queue will not be modified
      * and {@code e} will not be added.
      *

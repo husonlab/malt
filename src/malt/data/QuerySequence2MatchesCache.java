@@ -219,13 +219,13 @@ public class QuerySequence2MatchesCache {
 
 
         /**
-         * check whether two strings are equal
+         * check whether two strings are equalOverShorterOfBoth
          *
          * @param a
          * @param aLength
          * @param b
          * @param bLength
-         * @return true, if equal
+         * @return true, if equalOverShorterOfBoth
          */
         private boolean equal(byte[] a, int aLength, byte[] b, int bLength) {
             if (aLength != bLength)

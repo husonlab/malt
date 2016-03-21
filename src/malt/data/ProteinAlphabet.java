@@ -59,7 +59,7 @@ public class ProteinAlphabet implements IAlphabet {
      *
      * @param a
      * @param b
-     * @return true, if equal bases
+     * @return true, if equalOverShorterOfBoth bases
      */
     public boolean equal(byte a, byte b) {
         return normalizedLetters[a] == normalizedLetters[b];

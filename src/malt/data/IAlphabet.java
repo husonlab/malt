@@ -37,7 +37,7 @@ public interface IAlphabet extends INormalizer {
      *
      * @param a
      * @param b
-     * @return true, if equal bases
+     * @return true, if equalOverShorterOfBoth bases
      */
     boolean equal(byte a, byte b);
 
