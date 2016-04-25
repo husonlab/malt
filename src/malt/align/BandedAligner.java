@@ -527,6 +527,8 @@ public class BandedAligner {
             for (int col = firstCol; col <= firstSeedCol; col++) {   // we never modify the first column or the first or last row
                 for (int row = 1; row <= lastRowToFill; row++) {
                     final int refIndex = row + col + refOffset;
+                    if (refIndex >= reference.length)
+                        continue; // todo: debug this, sometimes happens, but shouldn't
 
                     if (refIndex == -1) { // in column before reference starts, init
                         traceBackM[col][row] = traceBackIRef[col][row] = traceBackIQuery[col][row] = DONE;
@@ -573,7 +575,6 @@ public class BandedAligner {
                                 traceBackIRef[col][row] = IRef_FROM_IRef;
                             }
                             matrixIRef[col][row] = bestIRefScore;
-
                         }
 
                         // insertion in query:
@@ -593,10 +594,8 @@ public class BandedAligner {
                             }
                             matrixIQuery[col][row] = bestIQueryScore;
                         }
-
                     }
                     // else refIndex < -1
-
                 }
             }
         }

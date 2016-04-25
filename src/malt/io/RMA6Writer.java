@@ -121,7 +121,7 @@ public class RMA6Writer {
             final ReadMatch match = matchesArray[m];
             final byte[] matchText = match.getRMA3Text();
 
-            final int approximateLengthToAdd = matchesTextLength + matchesTextLength + queryName.length;
+            final int approximateLengthToAdd = matchesTextLength + matchText.length + queryName.length;
             if (approximateLengthToAdd + 100 > matchesText.length) {
                 byte[] tmp = new byte[approximateLengthToAdd + 10000];
                 System.arraycopy(matchesText, 0, tmp, 0, matchesTextLength);

@@ -118,7 +118,6 @@ public class Utilities {
         return result;
     }
 
-
     /**
      * resize array
      *
