@@ -198,11 +198,13 @@ public class MaltRun {
 
         maltOptions.setTopPercentLCA(options.getOption("top", "topPercent", "Top percent value for LCA algorithm", maltOptions.getTopPercentLCA()));
         maltOptions.setMinSupportPercentLCA(options.getOption("supp", "minSupportPercent", "Min support value for LCA algorithm as a percent of assigned reads (0==off)", maltOptions.getMinSupportPercentLCA()));
-        maltOptions.setMinSupportLCA(options.getOption("sup", "minSupport", "Min support value for LCA algorithm (overrides --minSupportPercent)", maltOptions.getMinSupportLCA()));
-        if (maltOptions.getMinSupportLCA() > 1) {
+        maltOptions.setMinSupportLCA(options.getOption("sup", "minSupport", "Min support value for LCA algorithm (overrides --minSupportPercent)", 0));
+        if (maltOptions.getMinSupportLCA() == 0) {
+            maltOptions.setMinSupportLCA(1);
+        } else if (maltOptions.getMinSupportLCA() > 0) {
             maltOptions.setMinSupportPercentLCA(0); // if user sets minSupport,then turn of minSupportPercentLCA
             if (options.isVerbose())
-                System.err.println("\t(--minSupportPercent overridden)");
+                System.err.println("\t(--minSupportPercent: overridden, set to 0)");
         }
         ReadMagnitudeParser.setEnabled(options.getOption("-mag", "magnitudes", "Reads have magnitudes (to be used in taxonomic or functional analysis)", false));
 
