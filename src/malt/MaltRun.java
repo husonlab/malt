@@ -199,6 +199,10 @@ public class MaltRun {
             }
         }
 
+        maltOptions.setUseWeightedLCA(options.getOption("wLCA", "--useWeightedLCA", "Use the weighted-LCA algorithm", maltOptions.isUseWeightedLCA()));
+        if (options.isDoHelp() || maltOptions.isUseWeightedLCA())
+            maltOptions.setWeightedLCAPercent(options.getOption("wLCAP", "--weightedLCAPercent", "Set the weighted-LCA percentage of weight to cover", maltOptions.getWeightedLCAPercent()));
+
         maltOptions.setTopPercentLCA(options.getOption("top", "topPercent", "Top percent value for LCA algorithm", maltOptions.getTopPercentLCA()));
         maltOptions.setMinSupportPercentLCA(options.getOption("supp", "minSupportPercent", "Min support value for LCA algorithm as a percent of assigned reads (0==off)", maltOptions.getMinSupportPercentLCA()));
         maltOptions.setMinSupportLCA(options.getOption("sup", "minSupport", "Min support value for LCA algorithm (overrides --minSupportPercent)", 0));

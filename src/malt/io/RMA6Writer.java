@@ -190,7 +190,9 @@ public class RMA6Writer {
             // we need to run data processor
 
             final Document doc = new Document();
-            doc.setTopPercent((float) maltOptions.getTopPercentLCA());
+            doc.setTopPercent(maltOptions.getTopPercentLCA());
+            doc.setWeightedLCA(maltOptions.isUseWeightedLCA());
+            doc.setWeightedLcaPercent(maltOptions.getWeightedLCAPercent());
             doc.setMinSupportPercent(maltOptions.getMinSupportPercentLCA());
             doc.setMinSupport(maltOptions.getMinSupportLCA());
             doc.setMaxExpected((float) maltOptions.getMaxExpected());

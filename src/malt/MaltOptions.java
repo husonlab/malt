@@ -65,6 +65,9 @@ public class MaltOptions {
     private boolean gzipAlignedReads = true;
     private boolean gzipUnalignedReads = true;
 
+    private boolean useWeightedLCA = false;
+    private float weightedLCAPercent = 80.0f;
+
     private float topPercentLCA = 10;
     private float minSupportPercentLCA = 0.001f;
     private int minSupportLCA = 1;
@@ -298,6 +301,21 @@ public class MaltOptions {
         this.useReplicateQueryCaching = useReplicateQueryCaching;
     }
 
+    public boolean isUseWeightedLCA() {
+        return useWeightedLCA;
+    }
+
+    public void setUseWeightedLCA(boolean useWeightedLCA) {
+        this.useWeightedLCA = useWeightedLCA;
+    }
+
+    public float getWeightedLCAPercent() {
+        return weightedLCAPercent;
+    }
+
+    public void setWeightedLCAPercent(float weightedLCAPercent) {
+        this.weightedLCAPercent = weightedLCAPercent;
+    }
 
     public boolean isPairedReads() {
         return pairedReads;
