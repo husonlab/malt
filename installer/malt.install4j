@@ -1490,7 +1490,7 @@ wizardContext.setCancelButtonVisible(false);</preActivation>
     </windows>
   </mediaSets>
   <buildIds buildAll="false">
-    <mediaSet refId="1691242149" />
+    <mediaSet refId="1691242146" />
   </buildIds>
   <buildOptions verbose="false" faster="false" disableSigning="false" disableJreBundling="false" debug="false" />
 </install4j>

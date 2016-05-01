@@ -190,12 +190,16 @@ public class RMA6Writer {
             // we need to run data processor
 
             final Document doc = new Document();
+            doc.setTopPercent(maltOptions.getTopPercentLCA());
+            doc.setWeightedLCA(maltOptions.isUseWeightedLCA());
+            doc.setWeightedLcaPercent(maltOptions.getWeightedLCAPercent());
             doc.setMinSupportPercent(maltOptions.getMinSupportPercentLCA());
             doc.setMinSupport(maltOptions.getMinSupportLCA());
             doc.setMaxExpected((float) maltOptions.getMaxExpected());
             doc.setMinScore((float) maltOptions.getMinBitScore());
             doc.setPairedReads(pairedReads);
             doc.setMaxExpected((float) maltOptions.getMaxExpected());
+            doc.setMinPercentIdentity(maltOptions.getMinPercentIdentityLCA());
 
             doc.getMeganFile().setFileFromExistingFile(rma6File, false);
             doc.loadMeganFile();

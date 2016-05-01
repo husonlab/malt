@@ -191,19 +191,29 @@ public class MaltRun {
 
         options.comment("LCA parameters:");
         final String[] cNames = (options.isDoHelp() ? ClassificationManager.getAllSupportedClassifications().toArray(new String[ClassificationManager.getAllSupportedClassifications().size()]) : MappingManager.determineAvailableMappings(indexDirectory));
-        for (String cName : cNames) {
-            final boolean useLCA = options.getOption("-l_" + cName.toLowerCase(), "lca_" + cName.toLowerCase(), "Use LCA for assigning to '" + cName + "' (otherwise 'best-hit')", ProgramProperties.get(cName + "UseLCA", cName.equals(Classification.Taxonomy)));
-            ProgramProperties.put(cName + "UseLCA", useLCA);
+
+        if (false) {
+            for (String cName : cNames) {
+                final boolean useLCA = options.getOption("-l_" + cName.toLowerCase(), "lca_" + cName.toLowerCase(), "Use LCA for assigning to '" + cName + "' (otherwise 'best-hit')", ProgramProperties.get(cName + "UseLCA", cName.equals(Classification.Taxonomy)));
+                ProgramProperties.put(cName + "UseLCA", useLCA);
+            }
         }
+
+        maltOptions.setUseWeightedLCA(options.getOption("wLCA", "--useWeightedLCA", "Use the weighted-LCA algorithm", maltOptions.isUseWeightedLCA()));
+        if (options.isDoHelp() || maltOptions.isUseWeightedLCA())
+            maltOptions.setWeightedLCAPercent(options.getOption("wLCAP", "--weightedLCAPercent", "Set the weighted-LCA percentage of weight to cover", maltOptions.getWeightedLCAPercent()));
 
         maltOptions.setTopPercentLCA(options.getOption("top", "topPercent", "Top percent value for LCA algorithm", maltOptions.getTopPercentLCA()));
         maltOptions.setMinSupportPercentLCA(options.getOption("supp", "minSupportPercent", "Min support value for LCA algorithm as a percent of assigned reads (0==off)", maltOptions.getMinSupportPercentLCA()));
-        maltOptions.setMinSupportLCA(options.getOption("sup", "minSupport", "Min support value for LCA algorithm (overrides --minSupportPercent)", maltOptions.getMinSupportLCA()));
-        if (maltOptions.getMinSupportLCA() > 1) {
+        maltOptions.setMinSupportLCA(options.getOption("sup", "minSupport", "Min support value for LCA algorithm (overrides --minSupportPercent)", 0));
+        if (maltOptions.getMinSupportLCA() == 0) {
+            maltOptions.setMinSupportLCA(1);
+        } else if (maltOptions.getMinSupportLCA() > 0) {
             maltOptions.setMinSupportPercentLCA(0); // if user sets minSupport,then turn of minSupportPercentLCA
             if (options.isVerbose())
-                System.err.println("\t(--minSupportPercent overridden)");
+                System.err.println("\t(--minSupportPercent: overridden, set to 0)");
         }
+        maltOptions.setMinPercentIdentityLCA(options.getOption("mpi", "minPercentIdentityLCA", "Min percent identity used by LCA algorithm", maltOptions.getMinPercentIdentityLCA()));
         ReadMagnitudeParser.setEnabled(options.getOption("-mag", "magnitudes", "Reads have magnitudes (to be used in taxonomic or functional analysis)", false));
 
         options.comment("Heuristics:");
