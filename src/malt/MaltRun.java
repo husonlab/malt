@@ -191,9 +191,12 @@ public class MaltRun {
 
         options.comment("LCA parameters:");
         final String[] cNames = (options.isDoHelp() ? ClassificationManager.getAllSupportedClassifications().toArray(new String[ClassificationManager.getAllSupportedClassifications().size()]) : MappingManager.determineAvailableMappings(indexDirectory));
-        for (String cName : cNames) {
-            final boolean useLCA = options.getOption("-l_" + cName.toLowerCase(), "lca_" + cName.toLowerCase(), "Use LCA for assigning to '" + cName + "' (otherwise 'best-hit')", ProgramProperties.get(cName + "UseLCA", cName.equals(Classification.Taxonomy)));
-            ProgramProperties.put(cName + "UseLCA", useLCA);
+
+        if (false) {
+            for (String cName : cNames) {
+                final boolean useLCA = options.getOption("-l_" + cName.toLowerCase(), "lca_" + cName.toLowerCase(), "Use LCA for assigning to '" + cName + "' (otherwise 'best-hit')", ProgramProperties.get(cName + "UseLCA", cName.equals(Classification.Taxonomy)));
+                ProgramProperties.put(cName + "UseLCA", useLCA);
+            }
         }
 
         maltOptions.setTopPercentLCA(options.getOption("top", "topPercent", "Top percent value for LCA algorithm", maltOptions.getTopPercentLCA()));
@@ -206,6 +209,7 @@ public class MaltRun {
             if (options.isVerbose())
                 System.err.println("\t(--minSupportPercent: overridden, set to 0)");
         }
+        maltOptions.setMinPercentIdentityLCA(options.getOption("mpi", "minPercentIdentityLCA", "Min percent identity used by LCA algorithm", maltOptions.getMinPercentIdentityLCA()));
         ReadMagnitudeParser.setEnabled(options.getOption("-mag", "magnitudes", "Reads have magnitudes (to be used in taxonomic or functional analysis)", false));
 
         options.comment("Heuristics:");

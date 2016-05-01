@@ -65,9 +65,10 @@ public class MaltOptions {
     private boolean gzipAlignedReads = true;
     private boolean gzipUnalignedReads = true;
 
-    private double topPercentLCA = 10;
+    private float topPercentLCA = 10;
     private float minSupportPercentLCA = 0.001f;
     private int minSupportLCA = 1;
+    private float minPercentIdentityLCA = 0.0f;
 
     private int maxSeedsPerReference = 20;
     private int maxSeedsPerOffsetPerFrame = 100;
@@ -249,11 +250,11 @@ public class MaltOptions {
         this.gzipUnalignedReads = gzipUnalignedReads;
     }
 
-    public double getTopPercentLCA() {
+    public float getTopPercentLCA() {
         return topPercentLCA;
     }
 
-    public void setTopPercentLCA(double topPercentLCA) {
+    public void setTopPercentLCA(float topPercentLCA) {
         this.topPercentLCA = topPercentLCA;
     }
 
@@ -271,6 +272,14 @@ public class MaltOptions {
 
     public void setMinSupportPercentLCA(float minSupportPercentLCA) {
         this.minSupportPercentLCA = minSupportPercentLCA;
+    }
+
+    public float getMinPercentIdentityLCA() {
+        return minPercentIdentityLCA;
+    }
+
+    public void setMinPercentIdentityLCA(float minPercentIdentityLCA) {
+        this.minPercentIdentityLCA = minPercentIdentityLCA;
     }
 
     public IAlphabet getQueryAlphabet() {
