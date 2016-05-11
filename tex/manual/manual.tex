@@ -602,14 +602,13 @@ OPTIONS
 	-fo, --forwardOnly                   Align query forward strand only. Default value: false.
 	-ro, --reverseOnly                   Align query reverse strand only. Default value: false.
  LCA:
-	-l_eggnog, --lca_eggnog              Use LCA for assigning to 'EGGNOG' (otherwise 'best-hit'). Default value: false.
-	-l_interpro2go, --lca_interpro2go    Use LCA for assigning to 'INTERPRO2GO' (otherwise 'best-hit'). Default value: false.
-	-l_kegg, --lca_kegg                  Use LCA for assigning to 'KEGG' (otherwise 'best-hit'). Default value: false.
-	-l_seed, --lca_seed                  Use LCA for assigning to 'SEED' (otherwise 'best-hit'). Default value: false.
-	-l_taxonomy, --lca_taxonomy          Use LCA for assigning to 'Taxonomy' (otherwise 'best-hit'). Default value: true.
+	-wLCA, --useWeightedLCA              Use the weighted-LCA algorithm. Default value: false.
+	-wLCAP, --weightedLCAPercent [number]   Set the weighted-LCA percentage of weight to cover. Default value: 80.0.
 	-top, --topPercent [number]          Top percent value for LCA algorithm. Default value: 10.0.
 	-supp, --minSupportPercent [number]   Min support value for LCA algorithm as a percent of assigned reads (0==off). Default value: 0.001.
 	-sup, --minSupport [number]          Min support value for LCA algorithm (overrides --minSupportPercent). Default value: 1.
+	-mpi, --minPercentIdentityLCA [number]   Min percent identity used by LCA algorithm. Default value: 0.0.
+	-mag, --magnitudes                   Reads have magnitudes (to be used in taxonomic or functional analysis). Default value: false.
  Heuristics:
 	-spf, --maxSeedsPerFrame [number]    Maximum number of seed matches per offset per read frame. Default value: 100.
 	-spr, --maxSeedsPerRef [number]      Maximum number of seed matches per read and reference. Default value: 20.
@@ -620,7 +619,6 @@ OPTIONS
 	-bd, --band [number]                 Band width/2 for banded alignment. Default value: 4.
  Other:
 	-rqcb, --replicateQueryCacheBits [number]   Bits used for caching replicate queries (size is then 2^bits). Default value: 20.
-	-xP, --xPart                         Show part of the table in human readable form for debugging. Default value: false.
 	-v, --verbose                        Echo commandline options and be verbose. Default value: false.
 	-h, --help                           Show program usage and quit.\end{verbatim}
 }
@@ -637,6 +635,5 @@ OPTIONS
 }
 
 \printindex
-
 
 \end{document}
