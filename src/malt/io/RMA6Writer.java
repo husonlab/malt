@@ -200,6 +200,7 @@ public class RMA6Writer {
             doc.setPairedReads(pairedReads);
             doc.setMaxExpected((float) maltOptions.getMaxExpected());
             doc.setMinPercentIdentity(maltOptions.getMinPercentIdentityLCA());
+            doc.setUseIdentityFilter(maltOptions.isUsePercentIdentityFilterLCA());
 
             doc.getMeganFile().setFileFromExistingFile(rma6File, false);
             doc.loadMeganFile();

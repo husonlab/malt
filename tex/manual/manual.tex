@@ -607,7 +607,8 @@ OPTIONS
 	-top, --topPercent [number]          Top percent value for LCA algorithm. Default value: 10.0.
 	-supp, --minSupportPercent [number]   Min support value for LCA algorithm as a percent of assigned reads (0==off). Default value: 0.001.
 	-sup, --minSupport [number]          Min support value for LCA algorithm (overrides --minSupportPercent). Default value: 1.
-	-mpi, --minPercentIdentityLCA [number]   Min percent identity used by LCA algorithm. Default value: 0.0.
+	-mpi, --minPercentIdentityLCA [number]   Min percent identity used by LCA algorithm. Default: 0.
+	-mif, --useMinPercentIdentityFilterLCA   Use min percent identity assignment filter (Species 99%, Genus 9\%, Family 95%, Order 90%, Class 85%, Phylum 80%).
 	-mag, --magnitudes                   Reads have magnitudes (to be used in taxonomic or functional analysis). Default value: false.
  Heuristics:
 	-spf, --maxSeedsPerFrame [number]    Maximum number of seed matches per offset per read frame. Default value: 100.

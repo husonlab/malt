@@ -73,6 +73,8 @@ public class MaltOptions {
     private int minSupportLCA = 1;
     private float minPercentIdentityLCA = 0.0f;
 
+    private boolean usePercentIdentityFilterLCA = false;
+
     private int maxSeedsPerReference = 20;
     private int maxSeedsPerOffsetPerFrame = 100;
 
@@ -323,6 +325,14 @@ public class MaltOptions {
 
     public void setPairedReads(boolean pairedReads) {
         this.pairedReads = pairedReads;
+    }
+
+    public boolean isUsePercentIdentityFilterLCA() {
+        return usePercentIdentityFilterLCA;
+    }
+
+    public void setUsePercentIdentityFilterLCA(boolean usePercentIdentityFilterLCA) {
+        this.usePercentIdentityFilterLCA = usePercentIdentityFilterLCA;
     }
 
     /**

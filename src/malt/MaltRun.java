@@ -199,9 +199,9 @@ public class MaltRun {
             }
         }
 
-        maltOptions.setUseWeightedLCA(options.getOption("wLCA", "--useWeightedLCA", "Use the weighted-LCA algorithm", maltOptions.isUseWeightedLCA()));
+        maltOptions.setUseWeightedLCA(options.getOption("wLCA", "useWeightedLCA", "Use the weighted-LCA algorithm", maltOptions.isUseWeightedLCA()));
         if (options.isDoHelp() || maltOptions.isUseWeightedLCA())
-            maltOptions.setWeightedLCAPercent(options.getOption("wLCAP", "--weightedLCAPercent", "Set the weighted-LCA percentage of weight to cover", maltOptions.getWeightedLCAPercent()));
+            maltOptions.setWeightedLCAPercent(options.getOption("wLCAP", "weightedLCAPercent", "Set the weighted-LCA percentage of weight to cover", maltOptions.getWeightedLCAPercent()));
 
         maltOptions.setTopPercentLCA(options.getOption("top", "topPercent", "Top percent value for LCA algorithm", maltOptions.getTopPercentLCA()));
         maltOptions.setMinSupportPercentLCA(options.getOption("supp", "minSupportPercent", "Min support value for LCA algorithm as a percent of assigned reads (0==off)", maltOptions.getMinSupportPercentLCA()));
@@ -214,7 +214,9 @@ public class MaltRun {
                 System.err.println("\t(--minSupportPercent: overridden, set to 0)");
         }
         maltOptions.setMinPercentIdentityLCA(options.getOption("mpi", "minPercentIdentityLCA", "Min percent identity used by LCA algorithm", maltOptions.getMinPercentIdentityLCA()));
-        ReadMagnitudeParser.setEnabled(options.getOption("-mag", "magnitudes", "Reads have magnitudes (to be used in taxonomic or functional analysis)", false));
+        ReadMagnitudeParser.setEnabled(options.getOption("mag", "magnitudes", "Reads have magnitudes (to be used in taxonomic or functional analysis)", false));
+
+        maltOptions.setUsePercentIdentityFilterLCA(options.getOption("mif", "useMinPercentIdentityFilterLCA", "Use percent identity assignment filter", maltOptions.isUsePercentIdentityFilterLCA()));
 
         options.comment("Heuristics:");
         maltOptions.setMaxSeedsPerOffsetPerFrame(options.getOption("spf", "maxSeedsPerFrame", "Maximum number of seed matches per offset per read frame", maltOptions.getMaxSeedsPerOffsetPerFrame()));
