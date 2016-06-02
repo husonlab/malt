@@ -192,7 +192,7 @@ public class RMA6Writer {
             final Document doc = new Document();
             doc.setTopPercent(maltOptions.getTopPercentLCA());
             doc.setWeightedLCA(maltOptions.isUseWeightedLCA());
-            doc.setWeightedLcaPercent(maltOptions.getWeightedLCAPercent());
+            doc.setWeightedLCAPercent(maltOptions.getWeightedLCAPercent());
             doc.setMinSupportPercent(maltOptions.getMinSupportPercentLCA());
             doc.setMinSupport(maltOptions.getMinSupportLCA());
             doc.setMaxExpected((float) maltOptions.getMaxExpected());
