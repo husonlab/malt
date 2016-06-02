@@ -5,7 +5,7 @@
     <!-- edit the following lines to your needs -->
     <property name="project_name" value="MALT"/>
     <property name="jlodaSrcDir" value="../../jloda/src"/>
-    <property name="meganSrcDir" value="../../megan6/src"/>
+    <property name="meganSrcDir" value="../../megan-ce/src"/>
     <property name="maltSrcDir" value="../../malt/src"/>
     <property name="srcDir" value="src"/>
     <property name="classDir" value="classes"/>
@@ -17,8 +17,8 @@
     <path id="build.classpath">
     	    <fileset dir="../../jloda/jars"  includes="*.jar"/>
 	    <fileset dir="../../jloda/jars/batik-1.8"  includes="*.jar"/>
-    	    <fileset dir="../../megan6/jars"  includes="*.jar"/>
-	    <fileset dir="../../megan6/jars/megan5server"  includes="*.jar"/>
+    	    <fileset dir="../../megan-ce/jars"  includes="*.jar"/>
+	    <fileset dir="../../megan-ce/jars/megan6server"  includes="*.jar"/>
 	    <fileset dir="../../malt/jars/"  includes="*.jar"/>
     </path>
 
