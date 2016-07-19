@@ -20,6 +20,7 @@
 package malt.align;
 
 import jloda.util.Basic;
+import jloda.util.Single;
 import megan.parsers.blast.BlastMode;
 import megan.util.BoyerMoore;
 
@@ -30,11 +31,12 @@ import java.util.Iterator;
  * Created by huson on 2/9/16.
  */
 public class SimpleAligner4DNA {
+    public enum OverlapType {Prefix, Infix, Suffix, None} // what is query?
+
     private final AlignerOptions alignerOptions;
     private final BandedAligner bandedAligner;
     private int minRawScore = 1;
     private float minPercentIdentity = 0;
-
 
     public SimpleAligner4DNA() {
         alignerOptions = new AlignerOptions();
@@ -126,24 +128,35 @@ public class SimpleAligner4DNA {
      * @return pos or reference.length
      */
     public int getPositionInReference(byte[] query, byte[] reference, boolean queryMustBeContained) {
-
-        if (getMinPercentIdentity() >= 100) {
-            return (new BoyerMoore(query, 127)).search(reference);
+        if (queryMustBeContained && getMinPercentIdentity() >= 100) {
+            return (new BoyerMoore(query, 0, query.length, 127)).search(reference);
         }
 
         final int k = Math.max(10, (int) (100.0 / (100.0 - minPercentIdentity + 1))); // determine smallest exact match that must be present
 
-        for (int i = 0; i < query.length - k + 1; i++) {
-            byte[] queryWord = new byte[k];
-            System.arraycopy(query, i, queryWord, 0, k);
-            BoyerMoore boyerMoore = new BoyerMoore(queryWord, 127);
+        int bestQueryPos = 0;
+        int bestRefPos = 0;
+        int bestScore = 0;
+
+        for (int queryPos = 0; queryPos < query.length - k + 1; queryPos += k) {
+            BoyerMoore boyerMoore = new BoyerMoore(query, queryPos, k, 127);
             for (Iterator<Integer> it = boyerMoore.iterator(reference); it.hasNext(); ) {
                 int refPos = it.next();
-                if ((!queryMustBeContained && computeAlignment(query, reference, 0, refPos, k))
-                        || (refPos <= reference.length - query.length && computeAlignment(query, reference, 0, refPos, k) && bandedAligner.getAlignmentLength() >= query.length)) {
-                    return refPos;
+                if ((!queryMustBeContained && computeAlignment(query, reference, queryPos, refPos, k))
+                        || (queryMustBeContained && refPos <= reference.length - query.length && computeAlignment(query, reference, queryPos, refPos, k) && bandedAligner.getAlignmentLength() >= query.length)) {
+                    {
+                        if (bandedAligner.getRawScore() > bestScore) {
+                            bestScore = bandedAligner.getRawScore();
+                            bestQueryPos = queryPos;
+                            bestRefPos = refPos;
+                        }
+                    }
                 }
             }
+        }
+        if (bestScore > 0) {
+            computeAlignment(query, reference, bestQueryPos, bestRefPos, k);
+            return bestRefPos;
         }
         return reference.length;
     }
@@ -157,6 +170,31 @@ public class SimpleAligner4DNA {
      */
     public boolean isContained(byte[] query, byte[] reference) {
         return getPositionInReference(query, reference, true) != reference.length;
+    }
+
+    /**
+     * gets the overlap type of the query in the reference
+     *
+     * @param query
+     * @param reference
+     * @param overlap   length
+     * @return type
+     */
+    public OverlapType getOverlap(byte[] query, byte[] reference, Single<Integer> overlap) {
+        if (getPositionInReference(query, reference, false) != reference.length) {
+            if (bandedAligner.getStartQuery() > 0 && bandedAligner.getStartReference() == 0 && bandedAligner.getAlignmentLength() < reference.length) {
+                overlap.set(query.length - bandedAligner.getStartQuery());
+                return OverlapType.Prefix;
+            } else if (bandedAligner.getStartQuery() == 0 && bandedAligner.getStartReference() > 0 && bandedAligner.getAlignmentLength() < query.length) {
+                overlap.set(bandedAligner.getEndQuery());
+                return OverlapType.Suffix;
+            } else if (bandedAligner.getStartQuery() == 0 && bandedAligner.getEndQuery() == query.length) {
+                overlap.set(query.length);
+                return OverlapType.Infix;
+            }
+        }
+        overlap.set(0);
+        return OverlapType.None;
     }
 
     /**
@@ -179,14 +217,18 @@ public class SimpleAligner4DNA {
         byte[] reference = "acttgcatcacgactacactgacacggctctttacatcggtatatcgctacacagtcacagactacacgtcacagcat".getBytes();
 
         //byte[] query="gactgtgtagcgatattaccgatgtaaagagcc".getBytes();
-        byte[] query = "ggctctttacatcggtaatatcgctacacagtc".getBytes();
+        String[] queries = {"ggtatatcgctacacagtcacagactacacgtcacagcataaaaaaaa",
+                "aaaaaaaaaaacttgcatcacgactacactgacacggctctttacatc"
+                , "tatatcgctacacagtcacagactacacgtcacagc"
+        };
 
         simpleAligner4DNA.setMinPercentIdentity(90);
 
-
-        if (simpleAligner4DNA.getPositionInReference(query, reference, false) != reference.length) {
+        for (String query : queries) {
+            final Single<Integer> overlap = new Single<>(0);
+            System.err.println("Overlap type: " + simpleAligner4DNA.getOverlap(query.getBytes(), reference, overlap) + ", length=" + overlap);
             System.err.println(simpleAligner4DNA.getAlignmentString());
-        } else System.err.println("No alignment found");
+        }
     }
 
 }
