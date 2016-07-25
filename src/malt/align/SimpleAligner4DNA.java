@@ -31,7 +31,7 @@ import java.util.Iterator;
  * Created by huson on 2/9/16.
  */
 public class SimpleAligner4DNA {
-    public enum OverlapType {Prefix, Infix, Suffix, None} // what is query?
+    public enum OverlapType {QuerySuffix2RefPrefix, QueryContainedInRef, QueryPrefix2RefSuffix, None} // what is query?
 
     private final AlignerOptions alignerOptions;
     private final BandedAligner bandedAligner;
@@ -132,12 +132,11 @@ public class SimpleAligner4DNA {
             return (new BoyerMoore(query, 0, query.length, 127)).search(reference);
         }
 
-        final int k = Math.max(10, (int) (100.0 / (100.0 - minPercentIdentity + 1))); // determine smallest exact match that must be present
-
         int bestQueryPos = 0;
         int bestRefPos = 0;
         int bestScore = 0;
 
+        final int k = Math.max(10, (int) (100.0 / (100.0 - minPercentIdentity + 1))); // determine smallest exact match that must be present
         for (int queryPos = 0; queryPos < query.length - k + 1; queryPos += k) {
             BoyerMoore boyerMoore = new BoyerMoore(query, queryPos, k, 127);
             for (Iterator<Integer> it = boyerMoore.iterator(reference); it.hasNext(); ) {
@@ -150,26 +149,15 @@ public class SimpleAligner4DNA {
                             bestQueryPos = queryPos;
                             bestRefPos = refPos;
                         }
+                        }
                     }
                 }
             }
-        }
         if (bestScore > 0) {
             computeAlignment(query, reference, bestQueryPos, bestRefPos, k);
             return bestRefPos;
         }
         return reference.length;
-    }
-
-    /**
-     * check whether the given query is contained with in the given reference at the set level of percent identity
-     *
-     * @param query
-     * @param reference
-     * @return true, if query has significant alignment into reference
-     */
-    public boolean isContained(byte[] query, byte[] reference) {
-        return getPositionInReference(query, reference, true) != reference.length;
     }
 
     /**
@@ -184,13 +172,13 @@ public class SimpleAligner4DNA {
         if (getPositionInReference(query, reference, false) != reference.length) {
             if (bandedAligner.getStartQuery() > 0 && bandedAligner.getStartReference() == 0 && bandedAligner.getAlignmentLength() < reference.length) {
                 overlap.set(query.length - bandedAligner.getStartQuery());
-                return OverlapType.Prefix;
+                return OverlapType.QuerySuffix2RefPrefix;
             } else if (bandedAligner.getStartQuery() == 0 && bandedAligner.getStartReference() > 0 && bandedAligner.getAlignmentLength() < query.length) {
                 overlap.set(bandedAligner.getEndQuery());
-                return OverlapType.Suffix;
+                return OverlapType.QueryPrefix2RefSuffix;
             } else if (bandedAligner.getStartQuery() == 0 && bandedAligner.getEndQuery() == query.length) {
                 overlap.set(query.length);
-                return OverlapType.Infix;
+                return OverlapType.QueryContainedInRef;
             }
         }
         overlap.set(0);
