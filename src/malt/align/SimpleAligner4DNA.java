@@ -202,7 +202,7 @@ public class SimpleAligner4DNA {
     public static void main(String[] args) {
         final SimpleAligner4DNA simpleAligner4DNA = new SimpleAligner4DNA();
 
-        byte[] reference = "acttgcatcacgactacactgacacggctctttacatcggtatatcgctacacagtcacagactacacgtcacagcat".getBytes();
+        byte[] reference = "acttgcatcacgactacactgacacggctctttacatcggtatatcgctacacagtcacagactacacgtcacagcattt".getBytes();
 
         //byte[] query="gactgtgtagcgatattaccgatgtaaagagcc".getBytes();
         String[] queries = {"ggtatatcgctacacagtcacagactacacgtcacagcataaaaaaaa",

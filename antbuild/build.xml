@@ -1,11 +1,4 @@
 <!-- file build.xml in your project root directory -->
-<!-- Ant build script for yfiles -->
-<!-- The java based Ant tool is available from -->
-<!-- http://jakarta.apache.org/ant -->
-<!-- This file demonstrates the use of the yGuard byte -->
-<!-- code obfuscator from yWorks Gmbh -->
-<!-- yGuard can be downloaded from -->
-<!--- http://www.yworks.com/products/yguard -->
 
 <project name="project" default="jar" basedir=".">
 
@@ -17,18 +10,17 @@
     <property name="srcDir" value="src"/>
     <property name="classDir" value="classes"/>
     <property name="jar" value="${project_name}.jar"/>
+    <property name="mainclass" value="malt.MaltBuild"/>
 
     <!-- class path -->
 
-    <path id="build.classpath"> 
-	    <fileset dir="../../jloda/jars"  includes="*.jar"/>
+    <path id="build.classpath">
+    	    <fileset dir="../../jloda/jars"  includes="*.jar"/>
 	    <fileset dir="../../jloda/jars/batik-1.8"  includes="*.jar"/>
-
-	   <fileset dir="../../megan-ce/jars/megan6server"  includes="*.jar"/>
-	<fileset dir="../../megan-ce/jars"  includes="*.jar"/>
-	    <fileset dir="../jars"  includes="*.jar"/>
-	    
-   </path>
+    	    <fileset dir="../../megan-ce/jars"  includes="*.jar"/>
+	    <fileset dir="../../megan-ce/jars/megan6server"  includes="*.jar"/>
+	    <fileset dir="../../malt/jars/"  includes="*.jar"/>
+    </path>
 
     <!-- init -->
     <target name="init">
@@ -39,52 +31,64 @@
 
     <!-- copy resources -->
     <target name="copy_resources" depends="init">
-	    <mkdir dir="${classDir}/resources"/>
-	    <mkdir dir="${classDir}/resources/css"/>
-	    <mkdir dir="${classDir}/resources/files"/>
-	    <copy todir="${classDir}">
-		    <fileset dir="../resources" includes="log4j.properties"/>
+        <copy todir="${classDir}/resources">
+            <fileset dir="../resources" excludes=".svn/**"/>
         </copy>
     </target>
 
     <!-- copy sources -->
     <target name="copy_sources" depends="copy_resources">
         <copy todir="${srcDir}">
-            <fileset dir="${jlodaSrcDir}" excludes=".svn/**"/>
-	    <fileset dir="${meganSrcDir}" excludes=".svn/**"/>
-	    <fileset dir="${maltSrcDir}" excludes=".svn/**"/>
+            <fileset dir="${jlodaSrcDir}"
+                     excludes=".svn/** jloda/matrix/** jloda/models/** test/** bioinf1/** gbi/** gitter/**"/>
+            <fileset dir="${meganSrcDir}" excludes=".svn/** test/** malt/**"/>
+            <fileset dir="${maltSrcDir}" excludes=".svn/** test/**"/>
         </copy>
     </target>
 
     <!-- compile  MALT -->
     <target name="compile" depends="copy_sources">
-	    <javac  includeantruntime="false"
-		    srcdir="${srcDir}"
+        <javac srcdir="${srcDir}"
                destdir="${classDir}"
-	       debug="on"
+               debug="on"
                compiler="javac1.7"
-	       source="1.7"
-	       target="1.7"
-	       classpathref="build.classpath">
-	       <compilerarg value="-XDignore.symbol.file=true"/> 
-        </javac>
+               classpathref="build.classpath"
+               source="1.7"
+               target="1.7"
+               includeantruntime="false"
+                />
     </target>
 
     <!-- create .jar -->
     <target name="jar" depends="compile">
         <jar jarfile="${jar}"
              basedir="${classDir}"
-	     includes="malt/**">
+             includes="jloda/** megan/** log4j.properties malt/** rusch/**">
         </jar>
     </target>
 
+    <!-- run project -->
+    <target name="run" depends="jar">
+        <java classname="${mainclass}" fork="true"
+              classpathref="build.classpath">
+            <classpath>
+                <pathelement location="${jar}"/>
+            </classpath>
+            <arg value="--help"/>
+            <jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
+            <jvmarg value="-server"/>
+            <jvmarg value="-d64"/>
+            <jvmarg value="-Xmx2000M"/>
+            <jvmarg value="-Duser.language=en"/>
+            <jvmarg value="-Duser.region=US"/>
+        </java>
+    </target>
 
     <!-- removes all that has been built -->
     <target name="clean">
-	    <delete dir="${classDir}" includeEmptyDirs="true"/>
-	    	<delete dir="${srcDir}" includeEmptyDirs="true"/>
-		<delete file="${jar}"/>
-        <delete file="yfiles.jar"/>
+        <delete dir="${classDir}" includeEmptyDirs="true"/>
+        <delete dir="src" includeEmptyDirs="true"/>
+        <delete file="MALT.jar"/>
     </target>
 </project>
 
