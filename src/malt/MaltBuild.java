@@ -85,7 +85,7 @@ public class MaltBuild {
         final ArgsOptions options = new ArgsOptions(args, ProgramProperties.getProgramName(), "MaltBuild", "Builds an index for MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
         options.setVersion(ProgramProperties.getProgramVersion());
-        options.setLicense("Copyright (C) 2016 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
+        options.setLicense("Copyright (C) 2017 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Input:");
         final List<String> inputFiles = options.getOptionMandatory("i", "input", "Input reference file(s)", new LinkedList<String>());
