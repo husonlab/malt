@@ -484,8 +484,8 @@ is allowed to use. This cannot be set from within the program but rather is set 
 The following options are used to filter matches by significance. Matches that do not meet all criteria specified are completely ignored.
 \begin{itemize}
 \setlength{\itemindent}{30pt}
-\item[\itt{--minBitScore}]          Minimum bit score. Default value: 50.0.
-\item[\itt{--maxExpected}]           Maximum expected score. Default value: 1.0.
+\item[\itt{--minBitScore}]          Minimum bit disjointScore. Default value: 50.0.
+\item[\itt{--maxExpected}]           Maximum expected disjointScore. Default value: 1.0.
 \item[{\itt{--minPercentIdentity}}]  Minimum percent identity. Default value: 0.0.
 \item[{\itt{--maxAlignmentsPerQuery}}]  Maximum number of alignments per query. Default value: 100.
 \item[{\itt{ --maxAlignmentsPerRef}}]   Maximum number of (non-overlapping) alignments  per reference. Default value: 1.
@@ -497,8 +497,8 @@ There are a number of options that are specific to the \concept{BlastN mode}. Th
 are also used in the computation of expected values.
 \begin{itemize}
 \setlength{\itemindent}{30pt}
-\item[\itt{--matchScore}]            Use to specify the alignment match score. Default value: 2.
-\item[\itt{--mismatchScore}]        Use to specify the alignment mis-match score. Default value: -3.
+\item[\itt{--matchScore}]            Use to specify the alignment match disjointScore. Default value: 2.
+\item[\itt{--mismatchScore}]        Use to specify the alignment mis-match disjointScore. Default value: -3.
 \item[\itt{--setLambda}]           Parameter Lambda \index{Lambda parameter} for \irm{BLASTN statistics}. Default value: 0.625.
 \item[\itt{--setK}]                   Parameter K \index{K parameter} for BLASTN statistics. Default value: 0.41.
 \end{itemize}
@@ -526,7 +526,7 @@ The program uses the LCA algorithm \cite{MEGAN2007} to assign reads to taxa. The
 \item[\itt{lca\_taxonomy}] Use to specify that the LCA algorithm should be applied to the taxonomy classification. Similar switches are available to turn on the use of the LCA algorithm for other classifications.
 But using the LCA algorithms only makes sense when providing additional taxonomic classifications such as the RDP tree.
 \item[\itt{--topPercent}]          Use to specify the \pconcept{top percent} value for LCA algorithm. Default value is 10\%. For each read,
-only those matches are used for taxonomic placement whose bit score is within 10\% of the best score for that read.
+only those matches are used for taxonomic placement whose bit disjointScore is within 10\% of the best disjointScore for that read.
 \item[\itt{--minSupport}]           Use to specify the \pconcept{min support} value for the LCA algorithm. 
 \end{itemize}
 
@@ -586,14 +586,14 @@ OPTIONS
 	-mt, --maxTables [number]            Set the maximum number of seed tables to use (0=all). Default value: 0.
 	-rqc, --replicateQueryCache          Cache results for replicated queries. Default value: false.
  Filter:
-	-b, --minBitScore [number]           Minimum bit score. Default value: 50.0.
-	-e, --maxExpected [number]           Maximum expected score. Default value: 1.0.
+	-b, --minBitScore [number]           Minimum bit disjointScore. Default value: 50.0.
+	-e, --maxExpected [number]           Maximum expected disjointScore. Default value: 1.0.
 	-id, --minPercentIdentity [number]   Minimum percent identity. Default value: 0.0.
 	-mq, --maxAlignmentsPerQuery [number]   Maximum number of alignments per query. Default value: 25.
 	-mrf, --maxAlignmentsPerRef [number]   Maximum number of (non-overlapping) alignments per reference. Default value: 1.
  BlastN parameters:
-	-ma, --matchScore [number]           Match score. Default value: 2.
-	-mm, --mismatchScore [number]        Mismatch score. Default value: -3.
+	-ma, --matchScore [number]           Match disjointScore. Default value: 2.
+	-mm, --mismatchScore [number]        Mismatch disjointScore. Default value: -3.
 	-la, --setLambda [number]            Parameter Lambda for BLASTN statistics. Default value: 0.625.
 	-K, --setK [number]                  Parameter K for BLASTN statistics. Default value: 0.41.
  BlastP and BlastX parameters:
