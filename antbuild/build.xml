@@ -32,17 +32,16 @@
     <!-- copy resources -->
     <target name="copy_resources" depends="init">
         <copy todir="${classDir}/resources">
-            <fileset dir="../resources" excludes=".svn/**"/>
+            <fileset dir="../resources"/>
         </copy>
     </target>
 
     <!-- copy sources -->
     <target name="copy_sources" depends="copy_resources">
         <copy todir="${srcDir}">
-            <fileset dir="${jlodaSrcDir}"
-                     excludes=".svn/** jloda/matrix/** jloda/models/** test/** bioinf1/** gbi/** gitter/**"/>
-            <fileset dir="${meganSrcDir}" excludes=".svn/** test/** malt/**"/>
-            <fileset dir="${maltSrcDir}" excludes=".svn/** test/**"/>
+            <fileset dir="${jlodaSrcDir}" excludes="com/apple/**"/>
+            <fileset dir="${meganSrcDir}"/>
+            <fileset dir="${maltSrcDir}"/>
         </copy>
     </target>
 
@@ -87,7 +86,7 @@
     <!-- removes all that has been built -->
     <target name="clean">
         <delete dir="${classDir}" includeEmptyDirs="true"/>
-        <delete dir="src" includeEmptyDirs="true"/>
+        <delete dir="${srcDir}" includeEmptyDirs="true"/>
         <delete file="MALT.jar"/>
     </target>
 </project>
