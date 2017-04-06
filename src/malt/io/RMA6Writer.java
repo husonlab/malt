@@ -208,7 +208,7 @@ public class RMA6Writer {
 
             // update and then save auxiliary data:
             final String sampleName = Basic.replaceFileSuffix(Basic.getFileNameWithoutPath(rma6File), "");
-            SyncArchiveAndDataTable.syncRecomputedArchive2Summary(sampleName, "LCA", doc.getBlastMode(), doc.getParameterString(), new RMA6Connector(rma6File), doc.getDataTable(), 0);
+            SyncArchiveAndDataTable.syncRecomputedArchive2Summary(true, sampleName, "LCA", doc.getBlastMode(), doc.getParameterString(), new RMA6Connector(rma6File), doc.getDataTable(), 0);
             doc.saveAuxiliaryData();
         } catch (CanceledException ex) {
             throw new IOException(ex); // this can't happen because ProgressPercent never throws CanceledException
