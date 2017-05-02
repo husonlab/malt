@@ -191,7 +191,7 @@ public class RMA6Writer {
 
             final Document doc = new Document();
             doc.setTopPercent(maltOptions.getTopPercentLCA());
-            doc.setLcaAlgorithm(maltOptions.isUseWeightedLCA() ? Document.LCAAlgorithm.Weighted : Document.LCAAlgorithm.Naive);
+            doc.setLcaAlgorithm(maltOptions.isUseWeightedLCA() ? Document.LCAAlgorithm.weighted : Document.LCAAlgorithm.naive);
             doc.setWeightedLCAPercent(maltOptions.getWeightedLCAPercent());
             doc.setMinSupportPercent(maltOptions.getMinSupportPercentLCA());
             doc.setMinSupport(maltOptions.getMinSupportLCA());
@@ -202,13 +202,15 @@ public class RMA6Writer {
             doc.setMinPercentIdentity(maltOptions.getMinPercentIdentityLCA());
             doc.setUseIdentityFilter(maltOptions.isUsePercentIdentityFilterLCA());
 
+            doc.setReadAssignmentMode(Document.ReadAssignmentMode.readCount); // todo: make this an option
+
             doc.getMeganFile().setFileFromExistingFile(rma6File, false);
             doc.loadMeganFile();
             doc.processReadHits();
 
             // update and then save auxiliary data:
             final String sampleName = Basic.replaceFileSuffix(Basic.getFileNameWithoutPath(rma6File), "");
-            SyncArchiveAndDataTable.syncRecomputedArchive2Summary(true, sampleName, "LCA", doc.getBlastMode(), doc.getParameterString(), new RMA6Connector(rma6File), doc.getDataTable(), 0);
+            SyncArchiveAndDataTable.syncRecomputedArchive2Summary(doc.getReadAssignmentMode(), sampleName, "LCA", doc.getBlastMode(), doc.getParameterString(), new RMA6Connector(rma6File), doc.getDataTable(), 0);
             doc.saveAuxiliaryData();
         } catch (CanceledException ex) {
             throw new IOException(ex); // this can't happen because ProgressPercent never throws CanceledException
