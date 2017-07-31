@@ -92,11 +92,11 @@ public class BandedAligner {
     private static final byte IQuery_FROM_IQuery = 7;
 
     // buffers:
-    private byte[] queryTrack = new byte[100000];
-    private byte[] midTrack = new byte[100000];
-    private byte[] referenceTrack = new byte[100000];
+    private byte[] queryTrack = new byte[1000];
+    private byte[] midTrack = new byte[1000];
+    private byte[] referenceTrack = new byte[1000];
 
-    private ReusableByteBuffer alignmentBuffer = new ReusableByteBuffer(100000);
+    private ReusableByteBuffer alignmentBuffer = new ReusableByteBuffer(10000);
 
     private int queryPos;
     private int refPos;
@@ -1315,8 +1315,10 @@ public class BandedAligner {
             alignmentBuffer.write(queryTrack, 0, length);
             alignmentBuffer.write('\t');
         }
-        int length = Utilities.getFirstWordSkipLeadingGreaterSign(referenceHeader, queryTrack);
-        alignmentBuffer.write(queryTrack, 0, length);
+        {
+            int length = Utilities.getFirstWordSkipLeadingGreaterSign(referenceHeader, queryTrack); // misuse query track
+            alignmentBuffer.write(queryTrack, 0, length);
+        }
         alignmentBuffer.write('\t');
         if (getExpected() == 0)
             alignmentBuffer.writeAsAscii(String.format("%.1f\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t0.0\t%d", ((100.0 * getIdentities()) / getAlignmentLength()), getAlignmentLength(),

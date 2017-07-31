@@ -228,6 +228,8 @@ public class Utilities {
         while (start < header.length && Character.isWhitespace(header[start])) {
             start++;
         }
+        if (start == header.length)
+            return 0;
         int end = start;
         while (end < header.length && !Character.isWhitespace(header[end]) && header[end] != 0) {
             end++;
