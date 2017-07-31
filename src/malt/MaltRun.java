@@ -273,6 +273,15 @@ public class MaltRun {
             throw new UsageException("You must specify at least one input file");
         Utilities.checkFileExists(new File(inputFileNames.iterator().next()));
 
+        for (String aName : outputRMAFileNames) {
+            if (outputAlignedFileNames.contains(aName))
+                throw new UsageException("-a and -o options: Illegal for both to contain the same file name: " + aName);
+        }
+        for (String aName : outputAlignedFileNames) {
+            if (outputRMAFileNames.contains(aName))
+                throw new UsageException("-a and -o options: Illegal for both to contain the same file name: " + aName);
+        }
+
         if (!maltOptions.isDoForward() && !maltOptions.isDoReverse())
             throw new UsageException("Illegal to specify both --forwardOnly and --reverseOnly");
 
