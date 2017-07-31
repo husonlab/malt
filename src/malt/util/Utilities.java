@@ -232,7 +232,7 @@ public class Utilities {
         while (end < header.length && !Character.isWhitespace(header[end]) && header[end] != 0) {
             end++;
         }
-        int length = end - start;
+        int length = Math.min(result.length, end - start);
         if (length > 0)
             System.arraycopy(header, start, result, 0, length);
         return length;

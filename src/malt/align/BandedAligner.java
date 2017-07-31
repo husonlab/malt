@@ -92,11 +92,11 @@ public class BandedAligner {
     private static final byte IQuery_FROM_IQuery = 7;
 
     // buffers:
-    private byte[] queryTrack = new byte[1000];
-    private byte[] midTrack = new byte[1000];
-    private byte[] referenceTrack = new byte[1000];
+    private byte[] queryTrack = new byte[100000];
+    private byte[] midTrack = new byte[100000];
+    private byte[] referenceTrack = new byte[100000];
 
-    private ReusableByteBuffer alignmentBuffer = new ReusableByteBuffer(10000);
+    private ReusableByteBuffer alignmentBuffer = new ReusableByteBuffer(100000);
 
     private int queryPos;
     private int refPos;
