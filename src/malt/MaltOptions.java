@@ -66,7 +66,7 @@ public class MaltOptions {
     private boolean gzipUnalignedReads = true;
 
     private boolean useWeightedLCA = false;
-    private float weightedLCAPercent = 80.0f;
+    private float lcaCoveragePercent = 80.0f;
 
     private float topPercentLCA = 10;
     private float minSupportPercentLCA = 0.001f;
@@ -311,12 +311,12 @@ public class MaltOptions {
         this.useWeightedLCA = useWeightedLCA;
     }
 
-    public float getWeightedLCAPercent() {
-        return weightedLCAPercent;
+    public float getLcaCoveragePercent() {
+        return lcaCoveragePercent;
     }
 
-    public void setWeightedLCAPercent(float weightedLCAPercent) {
-        this.weightedLCAPercent = weightedLCAPercent;
+    public void setLcaCoveragePercent(float lcaCoveragePercent) {
+        this.lcaCoveragePercent = lcaCoveragePercent;
     }
 
     public boolean isPairedReads() {
