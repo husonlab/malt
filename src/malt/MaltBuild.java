@@ -82,7 +82,7 @@ public class MaltBuild {
      */
     public void run(String[] args) throws Exception {
 // parse commandline options:
-        final ArgsOptions options = new ArgsOptions(args, ProgramProperties.getProgramName(), "MaltBuild", "Builds an index for MALT (MEGAN alignment tool)");
+        final ArgsOptions options = new ArgsOptions(args, this, "Builds an index for MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
         options.setVersion(ProgramProperties.getProgramVersion());
         options.setLicense("Copyright (C) 2017 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
