@@ -62,7 +62,7 @@
     <target name="jar" depends="compile">
         <jar jarfile="${jar}"
              basedir="${classDir}"
-             includes="jloda/** megan/** log4j.properties malt/** rusch/**">
+             includes="jloda/** megan/** log4j.properties malt/**">
         </jar>
     </target>
 
