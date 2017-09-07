@@ -55,7 +55,7 @@ public class RMA6Writer {
 
     private final MatchLineRMA6[] matches;
 
-    final int[][] match2classification2id;
+    private final int[][] match2classification2id;
 
     private byte[] queryText = new byte[10000];
     private byte[] matchesText = new byte[10000];

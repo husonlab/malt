@@ -78,11 +78,11 @@ public class AlignmentEngine {
     private final OrganismsProfile organismsProfile;
 
     // used for stats:
-    long countSequencesProcessed;
-    long countSequencesWithAlignments;
-    long countSeedMatches;
-    long countHashSeedMismatches;
-    long countAlignments;
+    private long countSequencesProcessed;
+    private long countSequencesWithAlignments;
+    private long countSeedMatches;
+    private long countHashSeedMismatches;
+    private long countAlignments;
 
     // used in inner loop:
     private final FixedSizePriorityQueue<ReadMatch> matchesQueue;
@@ -110,10 +110,10 @@ public class AlignmentEngine {
      * @param unalignedReadsWriter
      * @throws IOException
      */
-    public AlignmentEngine(final int threadNumber, final MaltOptions maltOptions, AlignerOptions alignerOptions, final ReferencesDBAccess referencesDB,
-                           final ReferencesHashTableAccess[] tables, final FastAReader fastAReader,
-                           final FileWriterRanked matchesWriter, final RMA6Writer rmaWriter, final OutputStream organismsOutStream,
-                           final FileWriterRanked alignedReadsWriter, final FileWriterRanked unalignedReadsWriter) throws IOException {
+    AlignmentEngine(final int threadNumber, final MaltOptions maltOptions, AlignerOptions alignerOptions, final ReferencesDBAccess referencesDB,
+                    final ReferencesHashTableAccess[] tables, final FastAReader fastAReader,
+                    final FileWriterRanked matchesWriter, final RMA6Writer rmaWriter, final OutputStream organismsOutStream,
+                    final FileWriterRanked alignedReadsWriter, final FileWriterRanked unalignedReadsWriter) throws IOException {
         this.threadNumber = threadNumber;
         this.maltOptions = maltOptions;
         this.referencesDB = referencesDB;
@@ -147,7 +147,6 @@ public class AlignmentEngine {
         xDrop = alignerOptions.getUngappedXDrop(maltOptions.getMode());
         minUngappedRawScore = alignerOptions.getUngappedMinRawScore(maltOptions.getMode());
 
-
         // data structures used in inner loop:
         matchesQueue = new FixedSizePriorityQueue<>(maltOptions.getMaxAlignmentsPerQuery(), ReadMatch.createComparator());
         recycledMatchesArray = new ReadMatch[maltOptions.getMaxAlignmentsPerQuery()];
@@ -168,7 +167,7 @@ public class AlignmentEngine {
     /**
      * The main outer loop. Grabs the next input read and determines all possible seed matches. Then calls the inner loop
      */
-    public void runOuterLoop() {
+    void runOuterLoop() {
         try {
             final int maxFramesPerQuery = Utilities.getMaxFramesPerQuery(maltOptions.getMode(), maltOptions.isDoForward(), maltOptions.isDoReverse());
 
@@ -226,7 +225,7 @@ public class AlignmentEngine {
      * @param dataForInnerLoop
      * @throws IOException
      */
-    public void runInnerLoop(final FastARecord query, final int totalSize, final DataForInnerLoop dataForInnerLoop) throws IOException {
+    private void runInnerLoop(final FastARecord query, final int totalSize, final DataForInnerLoop dataForInnerLoop) throws IOException {
         countSequencesProcessed++;
 
         // if cache active and query found, use the cached matches:
@@ -530,7 +529,7 @@ public class AlignmentEngine {
      * @param alignmentEngines
      * @return total
      */
-    public static long getTotalSequencesProcessed(final AlignmentEngine[] alignmentEngines) {
+    static long getTotalSequencesProcessed(final AlignmentEngine[] alignmentEngines) {
         long total = 0;
         for (AlignmentEngine alignmentEngine : alignmentEngines) {
             total += alignmentEngine.countSequencesProcessed;
@@ -544,7 +543,7 @@ public class AlignmentEngine {
      * @param alignmentEngines
      * @return total
      */
-    public static long getTotalSequencesWithAlignments(final AlignmentEngine[] alignmentEngines) {
+    static long getTotalSequencesWithAlignments(final AlignmentEngine[] alignmentEngines) {
         long total = 0;
         for (AlignmentEngine alignmentEngine : alignmentEngines) {
             total += alignmentEngine.countSequencesWithAlignments;
@@ -558,7 +557,7 @@ public class AlignmentEngine {
      * @param alignmentEngines
      * @return total
      */
-    public static long getTotalAlignments(final AlignmentEngine[] alignmentEngines) {
+    static long getTotalAlignments(final AlignmentEngine[] alignmentEngines) {
         long total = 0;
         for (AlignmentEngine alignmentEngine : alignmentEngines) {
             total += alignmentEngine.countAlignments;
@@ -570,7 +569,7 @@ public class AlignmentEngine {
         return organismsProfile;
     }
 
-    public BitSet getAlignedReferenceIds() {
+    BitSet getAlignedReferenceIds() {
         return alignedReferenceIds;
     }
 
@@ -581,7 +580,7 @@ public class AlignmentEngine {
      * @param newSize
      * @return new array
      */
-    public SeedMatchArray[] resizeAndConstructEntries(SeedMatchArray[] array, int newSize, int maxLength) {
+    private SeedMatchArray[] resizeAndConstructEntries(SeedMatchArray[] array, int newSize, int maxLength) {
         SeedMatchArray[] result = new SeedMatchArray[newSize];
         for (int i = array.length; i < newSize; i++)
             result[i] = new SeedMatchArray(maxLength);
@@ -592,7 +591,7 @@ public class AlignmentEngine {
     /**
      * initialize the read sequence 2 matches cache
      */
-    public static void activateReplicateQueryCaching(int bits) {
+    static void activateReplicateQueryCaching(int bits) {
         System.err.println("Using replicate query cache (cache size=" + (1 << bits) + ")");
         querySequence2MatchesCache = new QuerySequence2MatchesCache(bits);
     }
@@ -600,7 +599,7 @@ public class AlignmentEngine {
     /**
      * report on cache usage, if any
      */
-    public static void reportStats() {
+    static void reportStats() {
         if (querySequence2MatchesCache != null)
             querySequence2MatchesCache.reportStats();
     }
@@ -634,8 +633,8 @@ public class AlignmentEngine {
             return matches[i];
         }
 
-        public SeedMatch setNext(int queryOffset, int referenceOffset, int rank, int seedLength) {
-            return matches[size++].set(queryOffset, referenceOffset, rank, seedLength);
+        void setNext(int queryOffset, int referenceOffset, int rank, int seedLength) {
+            matches[size++].set(queryOffset, referenceOffset, rank, seedLength);
         }
 
         public void clear() {
