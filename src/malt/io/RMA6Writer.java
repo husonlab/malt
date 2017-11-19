@@ -27,6 +27,7 @@ import malt.Version;
 import malt.data.ReadMatch;
 import malt.mapping.MappingManager;
 import megan.classification.Classification;
+import megan.core.ContaminantManager;
 import megan.core.Document;
 import megan.core.SyncArchiveAndDataTable;
 import megan.data.IReadBlock;
@@ -154,7 +155,7 @@ public class RMA6Writer {
      * @throws IOException
      * @throws CanceledException
      */
-    public void close() throws IOException {
+    public void close(String contaminantsFile) throws IOException {
         try {
             System.err.println("Finishing file: " + rma6File);
 
@@ -203,6 +204,12 @@ public class RMA6Writer {
             doc.setUseIdentityFilter(maltOptions.isUsePercentIdentityFilterLCA());
 
             doc.setReadAssignmentMode(Document.ReadAssignmentMode.readCount); // todo: make this an option
+
+            if (Basic.fileExistsAndIsNonEmpty(contaminantsFile)) {
+                ContaminantManager contaminantManager = new ContaminantManager();
+                contaminantManager.read(contaminantsFile);
+                doc.getDataTable().setContaminants(contaminantManager.toString());
+            }
 
             doc.getMeganFile().setFileFromExistingFile(rma6File, false);
             doc.loadMeganFile();

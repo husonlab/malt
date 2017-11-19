@@ -87,6 +87,8 @@ public class MaltOptions {
 
     private boolean pairedReads = false;
 
+    private String contaminantsFile = "";
+
     /**
      * get seed shift step
      *
@@ -364,4 +366,11 @@ public class MaltOptions {
         return commandLine;
     }
 
+    public String getContaminantsFile() {
+        return contaminantsFile;
+    }
+
+    public void setContaminantsFile(String contaminantsFile) {
+        this.contaminantsFile = contaminantsFile;
+    }
 }
