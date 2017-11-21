@@ -208,7 +208,7 @@ public class RMA6Writer {
             if (Basic.fileExistsAndIsNonEmpty(contaminantsFile)) {
                 ContaminantManager contaminantManager = new ContaminantManager();
                 contaminantManager.read(contaminantsFile);
-                doc.getDataTable().setContaminants(contaminantManager.toString());
+                doc.getDataTable().setContaminants(contaminantManager.getTaxonIdsString());
             }
 
             doc.getMeganFile().setFileFromExistingFile(rma6File, false);
