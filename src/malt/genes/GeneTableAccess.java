@@ -1,19 +1,19 @@
 /**
- * GeneTableAccess.java 
+ * GeneTableAccess.java
  * Copyright (C) 2017 Daniel H. Huson
- *
+ * <p>
  * (Some files contain contributions from other authors, who are then mentioned separately.)
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -173,7 +173,12 @@ public class GeneTableAccess {
         String proteinId = null;
 
         if (tree != null) {
-            for (Interval<GeneItem> interval : tree.getIntervalsSortedByDecreasingCover(startReference < endReference ? startReference : -startReference, startReference < endReference ? endReference : -endReference)) {
+            // note that we use negative coordinates in the interval tree to start genes on the opposite strand
+            final Interval<GeneItem> alignmentInterval = new Interval<>(startReference < endReference ? startReference : -startReference, startReference < endReference ? endReference : -endReference, null);
+            for (Interval<GeneItem> interval : tree.getIntervalsSortedByDecreasingIntersectionLength(alignmentInterval.getStart(), alignmentInterval.getEnd())) {
+                if (alignmentInterval.intersectionLength(interval.getStart(), interval.getEnd()) < 0.9 * alignmentInterval.length())
+                    break; // require at least 90% of the alignment to be covered by the gene
+
                 final GeneItem geneItem = interval.getData();
                 if (kegg == 0)
                     kegg = geneItem.getKeggId();

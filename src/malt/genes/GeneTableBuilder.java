@@ -318,7 +318,7 @@ public class GeneTableBuilder {
                     int start = location[0];
                     int end = location[1];
 
-                    if (start > end) { // use negative coordinates for opposite strand
+                    if (start > end) { // note that we use negative coordinates in the interval tree to start genes on the opposite strand
                         start *= -1;
                         end *= -1;
                     }
@@ -336,7 +336,7 @@ public class GeneTableBuilder {
                         start = location[2];
                         end = location[3];
 
-                        if (start > end) { // use negative coordinates for opposite strand
+                        if (start > end) { // note that we use negative coordinates in the interval tree to start genes on the opposite strand
                             start *= -1;
                             end *= -1;
                         }
