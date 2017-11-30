@@ -25,6 +25,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class RandomReadExtractor {
@@ -66,6 +67,7 @@ public class RandomReadExtractor {
         final String inputFile = options.getOptionMandatory("-i", "input", "FastA file containing a single sequence", "");
         final String outputFile = options.getOptionMandatory("-o", "output", "Output file (.gz ok)", "");
         options.comment("Options");
+        final String startsFile = options.getOption("-sf", "startsFile", "Select the reads from the list of start positions given in this file (overrides -n)", "");
         final int numberOfReads = options.getOption("-n", "num", "Number of reads to extract", 10000);
         final int readLength = options.getOption("-l", "length", "Length of reads to extract", 100);
         final boolean forwardStrand = options.getOption("-fs", "forwardStrand", "From forward strand", true);
@@ -81,27 +83,38 @@ public class RandomReadExtractor {
         final FastA fastA = new FastA();
         fastA.read(new FileReader(inputFile));
         final String genome = fastA.getSequence(0);
+        final String reverse = SequenceUtils.getReverseComplement(genome);
 
-        System.err.println("Writing to file: " + outputFile);
-        try (BufferedWriter w = new BufferedWriter(new FileWriter(outputFile)); ProgressPercentage progress = new ProgressPercentage(numberOfReads)) {
-            final boolean forward = forwardStrand && !backwardStrand || (!backwardStrand || forwardStrand) && random.nextBoolean();
-
-            int start = random.nextInt(genome.length() - readLength);
-            final int end;
-            if (forward) {
-                end = start + readLength;
-            } else {
-                end = start;
-                start = end + readLength;
+        final ArrayList<Integer> starts = new ArrayList<>();
+        if (startsFile.length() > 0) {
+            try (FileInputIterator it = new FileInputIterator(startsFile, true)) {
+                while (it.hasNext()) {
+                    String aLine = it.next();
+                    if (Basic.isInteger(aLine))
+                        starts.add(Basic.parseInt(aLine)); // either start or -(start+readLength)
+                }
             }
+        } else {
+            final boolean forward = forwardStrand && !backwardStrand || (!backwardStrand || forwardStrand) && random.nextBoolean();
+            final int start = random.nextInt(genome.length() - readLength);
+            if (forward)
+                starts.add(start);
+            else
+                starts.add(-start);
+        }
 
-            for (int r = 0; r < numberOfReads; r++) {
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(outputFile)); ProgressPercentage progress = new ProgressPercentage("Writing file: " + outputFile, starts.size())) {
+            for (int r = 0; r < starts.size(); r++) {
+                final boolean forward = (starts.get(r) > 0);
+                final int start = Math.abs(starts.get(r));
+                final int end = start + readLength;
+
                 final String header = String.format(">r%06d %d-%d from %s", (r + 1), (start + 1), (end + 1), fastA.getHeader(0));
                 final String sequence;
                 if (forward) {
-                    sequence = genome.substring(start, start + readLength);
+                    sequence = genome.substring(start, end);
                 } else {
-                    sequence = SequenceUtils.getReverseComplement(genome.substring(end, start + readLength));
+                    sequence = reverse.substring(start, end);
                 }
                 w.write(header);
                 w.write("\n");

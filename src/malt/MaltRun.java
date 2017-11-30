@@ -332,8 +332,10 @@ public class MaltRun {
         }
 
         final GeneTableAccess geneTableAccess;
-        if (outputOrganismFileNames.size() > 0 && (new File(indexDirectory, "gene-table.idx")).exists())
+        if ((new File(indexDirectory, "gene-table.idx")).exists()) {
             geneTableAccess = new GeneTableAccess(new File(indexDirectory, "gene-table.idx"));
+            maltOptions.setParseHeaders(true);
+        }
         else
             geneTableAccess = null;
 
@@ -438,7 +440,7 @@ public class MaltRun {
                 public void run() {
                     try {
                         alignmentEngines[threadNumber] = new AlignmentEngine(threadNumber, maltOptions, alignerOptions, referencesDB, tables, fastAReader,
-                                matchesWriter, rmaWriter, organismOutStream, alignedReadsWriter, unalignedReadsWriter);
+                                matchesWriter, rmaWriter, organismOutStream, alignedReadsWriter, unalignedReadsWriter, geneTableAccess);
                         alignmentEngines[threadNumber].runOuterLoop();
                         alignmentEngines[threadNumber].finish();
                     } catch (Exception ex) {

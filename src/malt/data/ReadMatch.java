@@ -40,7 +40,7 @@ class ReadMatch {
     private int percentIdentity;
     private int referenceId;
     private byte[] text;      // match text
-    private byte[] rma3Text;
+    private byte[] rma6Text;
 
     private int startRef; // start position of match in reference sequence
     private int endRef;  // end position of match in reference sequence
@@ -58,7 +58,7 @@ class ReadMatch {
      * @return copy
      */
     public ReadMatch getCopy() {
-        return new ReadMatch(bitScore, expected, percentIdentity, referenceId, text, rma3Text, startRef, endRef);
+        return new ReadMatch(bitScore, expected, percentIdentity, referenceId, text, rma6Text, startRef, endRef);
     }
 
     /**
@@ -68,14 +68,14 @@ class ReadMatch {
      * @param referenceId
      * @param text
      */
-    public ReadMatch(float bitScore, float expected, int percentIdentity, int referenceId, byte[] text, byte[] rma3Text, int startRef, int endRef) {
+    public ReadMatch(float bitScore, float expected, int percentIdentity, int referenceId, byte[] text, byte[] rma6Text, int startRef, int endRef) {
         this.bitScore = bitScore;
         this.expected = expected;
         this.percentIdentity = percentIdentity;
         this.referenceId = referenceId;
         this.entryNumber = ++numberOfEntries;
         this.text = text;
-        this.rma3Text = rma3Text;
+        this.rma6Text = rma6Text;
         this.startRef = startRef;
         this.endRef = endRef;
     }
@@ -92,7 +92,7 @@ class ReadMatch {
         this.referenceId = referenceId;
         this.entryNumber = ++numberOfEntries;
         this.text = text;
-        this.rma3Text = rma3Text;
+        this.rma6Text = rma3Text;
         this.startRef = startRef;
         this.endRef = endRef;
     }
@@ -117,8 +117,8 @@ class ReadMatch {
         return text;
     }
 
-    public byte[] getRMA3Text() {
-        return rma3Text;
+    public byte[] getRMA6Text() {
+        return rma6Text;
     }
 
     public int getStartRef() {

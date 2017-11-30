@@ -89,6 +89,9 @@ public class MaltOptions {
 
     private String contaminantsFile = "";
 
+    private boolean parseHeaders;
+
+
     /**
      * get seed shift step
      *
@@ -372,5 +375,14 @@ public class MaltOptions {
 
     public void setContaminantsFile(String contaminantsFile) {
         this.contaminantsFile = contaminantsFile;
+    }
+
+
+    public boolean isParseHeaders() {
+        return parseHeaders;
+    }
+
+    public void setParseHeaders(boolean parseHeaders) {
+        this.parseHeaders = parseHeaders;
     }
 }

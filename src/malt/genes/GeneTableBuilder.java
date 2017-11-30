@@ -127,10 +127,13 @@ public class GeneTableBuilder {
                 public void run() {
                     try {
                         final TaggedValueIterator it = new TaggedValueIterator(true, true, ACCESSION_TAGS);
-                        for (int refIndex = threadNumber + 1; refIndex <= referencesDB.getNumberOfSequences(); refIndex += numberOfThreads) {
+                        for (int refIndex = threadNumber; refIndex < referencesDB.getNumberOfSequences(); refIndex += numberOfThreads) {
                             it.restart(Basic.toString(referencesDB.getHeader(refIndex)));
-                            while (it.hasNext())
-                                accession2refIndex.put(it.next(), refIndex);
+                            while (it.hasNext()) {
+                                synchronized (accession2refIndex) {
+                                    accession2refIndex.put(it.next(), refIndex);
+                                }
+                            }
                             progress.incrementProgress();
                         }
                     } catch (Exception ex) {
@@ -166,7 +169,7 @@ public class GeneTableBuilder {
      * @throws FileNotFoundException
      */
     private IntervalTree<GeneItem>[] computeTable(final ReferencesDBBuilder referencesDB, final Map<String, Integer> accession2refIndex, String geneTableFile, int numberOfThreads) throws IOException {
-        final IntervalTree<GeneItem>[] refIndex2Intervals = new IntervalTree[referencesDB.getNumberOfSequences() + 1];  // plus one because refindices start at 1
+        final IntervalTree<GeneItem>[] refIndex2Intervals = new IntervalTree[referencesDB.getNumberOfSequences()];  // plus one because refindices start at 1
 
         final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
         final CountDownLatch countDownLatch = new CountDownLatch(numberOfThreads);
@@ -212,7 +215,13 @@ public class GeneTableBuilder {
         }
         // add sentinels
         for (int i = 0; i < numberOfThreads; i++) {
-            queue.add(sentinel);
+            try {
+                queue.put(sentinel);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                while (countDownLatch.getCount() > 0)
+                    countDownLatch.countDown();
+            }
         }
 
         try {
@@ -245,7 +254,7 @@ public class GeneTableBuilder {
                 if (referenceAcc.length() == 0)
                     return false;
                 final Integer refIndex = accession2refIndex.get(referenceAcc);
-                if (refIndex == null || refIndex == 0)
+                if (refIndex == null)
                     return false;
 
                 int[] location;
@@ -266,8 +275,7 @@ public class GeneTableBuilder {
                 {
                     final Integer id = keggMapper.getIdFromAccession(accession);
                     if (id != null && id != 0) {
-                        final String name = String.format("K%05d", id);
-                        geneItem.setKeggId(name.getBytes());
+                        geneItem.setKeggId(id);
                     }
                 }
                 // set cog:
@@ -275,33 +283,27 @@ public class GeneTableBuilder {
                 {
                     final Integer id = cogMapper.getIdFromAccession(accession);
                     if (id != null && id != 0) {
-                        final String name = cogMapper.getName2IdMap().get(id);
-                        if (name != null)
-                            geneItem.setCogId(name.getBytes());
+                        geneItem.setCogId(id);
                     }
                 }
                 // set seed:
                 if (seedMapper != null) {
                     final Integer id = seedMapper.getIdFromAccession(accession);
                     if (id != null && id != 0) {
-                        final String name = seedMapper.getName2IdMap().get(id);
-                        if (name != null)
-                            geneItem.setSeedId(name.getBytes());
+                        geneItem.setSeedId(id);
                     }
                 }
                 // set interpro:
                 if (interproMapper != null) {
                     final Integer id = interproMapper.getIdFromAccession(accession);
                     if (id != null && id != 0) {
-                        final String name = interproMapper.getName2IdMap().get(id);
-                        if (name != null)
-                            geneItem.setInterproId(name.getBytes());
+                        geneItem.setInterproId(id);
                     }
                 }
 
                 geneItem.setProteinId(accession.getBytes());
-                geneItem.setGeneName(tokens[3].trim().getBytes());
-                geneItem.setProduct(tokens[4].trim().getBytes());
+                geneItem.setGeneName(tokens[2].trim().getBytes());
+                geneItem.setProduct(tokens[3].trim().getBytes());
 
                 if (accession.length() == 0 && geneItem.getProteinId().length == 0 && (geneItem.getGeneName() == null || geneItem.getGeneName().length == 0)
                         && (geneItem.getProduct() == null || geneItem.getProduct().length == 0))
@@ -315,7 +317,13 @@ public class GeneTableBuilder {
                     }
                     int start = location[0];
                     int end = location[1];
-                    if (start > 0 && end >= start + 50) {
+
+                    if (start > end) { // use negative coordinates for opposite strand
+                        start *= -1;
+                        end *= -1;
+                    }
+
+                    if (end >= start + 50) {
                         int length = end - start + 1;
                         if (length >= 20 && length <= 500000)
                             intervals.add(start, end, geneItem);
@@ -327,7 +335,13 @@ public class GeneTableBuilder {
                     if (location.length == 4) {
                         start = location[2];
                         end = location[3];
-                        if (start > 0 && end >= start + 50) {
+
+                        if (start > end) { // use negative coordinates for opposite strand
+                            start *= -1;
+                            end *= -1;
+                        }
+
+                        if (end >= start + 50) {
                             int length = end - start + 1;
                             if (length >= 20 && length <= 500000)
                                 intervals.add(start, end, geneItem);
@@ -387,6 +401,7 @@ public class GeneTableBuilder {
     /**
      * parses the location of a gene.
      * Possible formats
+     * START END
      * START..END,START..END,...
      * complement(START..END,..)
      * join(START..END,START..END,...)
@@ -401,6 +416,11 @@ public class GeneTableBuilder {
      * @return
      */
     static int[] parseLocations(String aLine) {
+        if (Basic.countOccurrences(aLine, ' ') == 1) {
+            int pos = aLine.indexOf(' ');
+            if (Basic.isInteger(aLine.substring(0, pos)) && Basic.isInteger(aLine.substring(pos + 1)))
+                return new int[]{Basic.parseInt(aLine.substring(0, pos)), Basic.parseInt(aLine.substring(pos + 1))};
+        }
         if (Basic.countOccurrences(aLine, '(') != Basic.countOccurrences(aLine, ')'))
             return null;
         int a = aLine.lastIndexOf("(");

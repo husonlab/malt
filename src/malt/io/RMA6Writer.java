@@ -49,6 +49,8 @@ public class RMA6Writer {
     private final RMA6FileCreator rma6FileCreator;
     private final String rma6File;
 
+    private final boolean parseHeaders;
+
     private final String[] cNames;
 
     private final int maxMatchesPerQuery;
@@ -72,6 +74,7 @@ public class RMA6Writer {
         System.err.println("Starting file: " + rma6File);
         this.maltOptions = maltOptions;
         this.rma6File = rma6File;
+        this.parseHeaders = maltOptions.isParseHeaders();
 
         maxMatchesPerQuery = maltOptions.getMaxAlignmentsPerQuery();
 
@@ -115,12 +118,17 @@ public class RMA6Writer {
         queryTextLength += querySequenceText.length;
         queryText[queryTextLength++] = '\n';
 
+        final String[] key = new String[cNames.length];
+        for (int i = 0; i < cNames.length; i++) {
+            key[i] = getKey(cNames[i]);
+        }
+
         // setup matches text:
         int matchesTextLength = 0;
         numberOfMatches = Math.min(maxMatchesPerQuery, numberOfMatches);
         for (int m = 0; m < numberOfMatches; m++) {
             final ReadMatch match = matchesArray[m];
-            final byte[] matchText = match.getRMA3Text();
+            final byte[] matchText = match.getRMA6Text();
 
             final int approximateLengthToAdd = matchesTextLength + matchText.length + queryName.length;
             if (approximateLengthToAdd + 100 > matchesText.length) {
@@ -139,14 +147,30 @@ public class RMA6Writer {
             matches[m].setBitScore(match.getBitScore());
             matches[m].setExpected(match.getExpected());
             matches[m].setPercentIdentity(match.getPercentIdentity());
+
+            final String refHeader = (parseHeaders ? getWordAsString(match.getRMA6Text(), 2) : null);
+
             for (int i = 0; i < cNames.length; i++) {
-                final int id = MappingManager.getMapping(i).get(match.getReferenceId());
+                int id = 0;
+                if (parseHeaders)
+                    id = parseIdInHeader(key[i], refHeader);
+                if (id == 0)
+                    id = MappingManager.getMapping(i).get(match.getReferenceId());
                 match2classification2id[m][i] = id;
                 matches[m].setFId(i, id);
             }
         }
 
         rma6FileCreator.addQuery(queryText, queryTextLength, numberOfMatches, matchesText, matchesTextLength, match2classification2id, 0);
+    }
+
+    private int parseIdInHeader(String key, String word) {
+        int pos = word.indexOf(key);
+        if (pos != -1) {
+            if (Basic.isInteger(word.substring(pos + key.length())))
+                return Basic.parseInt(word.substring(pos + key.length()));
+        }
+        return 0;
     }
 
     /**
@@ -202,6 +226,7 @@ public class RMA6Writer {
             doc.setMaxExpected((float) maltOptions.getMaxExpected());
             doc.setMinPercentIdentity(maltOptions.getMinPercentIdentityLCA());
             doc.setUseIdentityFilter(maltOptions.isUsePercentIdentityFilterLCA());
+            doc.getActiveViewers().addAll(Arrays.asList(MappingManager.getCNames()));
 
             doc.setReadAssignmentMode(Document.ReadAssignmentMode.readCount); // todo: make this an option
 
@@ -222,5 +247,48 @@ public class RMA6Writer {
         } catch (CanceledException ex) {
             throw new IOException(ex); // this can't happen because ProgressPercent never throws CanceledException
         }
+    }
+
+    /**
+     * get key
+     *
+     * @param fName
+     * @return key
+     */
+    private static String getKey(String fName) {
+        switch (fName.toLowerCase()) {
+            case "interpro2go":
+                return "ipr|";
+            case "eggnog":
+                return "cog|";
+            default:
+                return fName.toLowerCase() + "|";
+        }
+    }
+
+    /**
+     * get a word as string
+     *
+     * @param text
+     * @param whichWord
+     * @return string or null
+     */
+    private static String getWordAsString(byte[] text, int whichWord) {
+        int start = -1;
+        whichWord--;
+        for (int i = 0; i < text.length; i++) {
+            if (Character.isWhitespace(text[i])) {
+                if (whichWord > 0) {
+                    whichWord--;
+                    if (whichWord == 0)
+                        start = i;
+                } else if (whichWord == 0) {
+                    return new String(text, start, i - start);
+                }
+            }
+        }
+        if (start >= 0)
+            return new String(text, start, text.length - start);
+        return null;
     }
 }

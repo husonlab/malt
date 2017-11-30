@@ -20,9 +20,7 @@
 package malt.genes;
 
 import jloda.util.*;
-import malt.analysis.QueryItem;
 import malt.analysis.ReadMatchItem;
-import malt.data.ReadMatch;
 import megan.util.interval.Interval;
 import megan.util.interval.IntervalTree;
 
@@ -158,24 +156,63 @@ public class GeneTableAccess {
     }
 
     /**
-     * gets the KEGG id
-     *
-     * @param numberOfMatches
-     * @param readMatches
-     * @return kegg id or 0
+     * adds annotations to reference header
+     * @param referenceHeader
+     * @param refIndex
+     * @param startReference
+     * @param endReference
+     * @return annotations
      */
-    public int getKegg(final int numberOfMatches, final ReadMatch[] readMatches) {
-        if (numberOfMatches > 0) {
-            final GeneItem[] genes = new GeneItem[100];
-            final QueryItem queryItem = new QueryItem(null, numberOfMatches, readMatches);
-            int numberOfGenes = getGenes(null, queryItem.getReadMatchItems(), genes);
-            for (int i = 0; i < numberOfGenes; i++) {
-                if (genes[i].getKeggId() != null)
-                    return Basic.parseInt(Basic.toString(genes[i].getKeggId()));
+    public byte[] addAnnotationString(byte[] referenceHeader, Integer refIndex, int startReference, int endReference) {
+        final IntervalTree<GeneItem> tree = refIndex2IntervalsTable[refIndex];
+
+        int kegg = 0;
+        int cog = 0;
+        int seed = 0;
+        int interpro = 0;
+        String proteinId = null;
+
+        if (tree != null) {
+            for (Interval<GeneItem> interval : tree.getIntervalsSortedByDecreasingCover(startReference < endReference ? startReference : -startReference, startReference < endReference ? endReference : -endReference)) {
+                final GeneItem geneItem = interval.getData();
+                if (kegg == 0)
+                    kegg = geneItem.getKeggId();
+                if (cog == 0)
+                    cog = geneItem.getCogId();
+                if (seed == 0)
+                    seed = geneItem.getSeedId();
+                if (interpro == 0)
+                    interpro = geneItem.getInterproId();
+                if (proteinId == null && geneItem.getProteinId() != null)
+                    proteinId = Basic.toString(geneItem.getProteinId());
             }
+            final StringBuilder buf = new StringBuilder();
+            if (proteinId != null)
+                buf.append("|ref|").append(proteinId);
+            if (kegg != 0)
+                buf.append("|kegg|").append(kegg);
+            if (cog != 0)
+                buf.append("|cog|").append(cog);
+            if (seed != 0)
+                buf.append("|seed|").append(seed);
+            if (interpro != 0)
+                buf.append("|ipr|").append(interpro);
+            if (buf.length() > 0) {
+                String header = Basic.toString(referenceHeader);
+                String remainder;
+                int len = header.indexOf(' ');
+                if (len < header.length()) {
+                    remainder = header.substring(len); // keep space...
+                    header = header.substring(0, len);
+                } else
+                    remainder = "";
+                return (header + (header.endsWith("|") ? "" : "|") + "pos|" + startReference + ".." + endReference + buf.toString() + remainder).getBytes();
+            }
+
         }
-        return 0;
+        return referenceHeader;
     }
+
 
     /**
      * dump gene table to standard out
@@ -183,30 +220,28 @@ public class GeneTableAccess {
      * @param args
      */
     public static void main(String[] args) throws IOException, UsageException, CanceledException {
-        args = new String[]{"-i", "/Users/huson/data/ma/index/gene-table.idx"};
+        args = new String[]{"-i", "/Users/huson/data/malt/genes/index/gene-table.idx"};
 
         final ArgsOptions options = new ArgsOptions(args, null, "GeneTableDump", "Dump gene table");
         final String inputFile = options.getOptionMandatory("i", "input", "Gene table file", "index/gene-table.idx");
-        final String outputFile = options.getOption("o", "output", "Output file", Basic.replaceFileSuffix(inputFile, ".txt"));
+        final String outputFile = options.getOption("o", "output", "Output file (or stdout)", "stdout");
         options.done();
 
         final GeneTableAccess geneTableAccess = new GeneTableAccess(new File(inputFile));
 
-        Writer w = new BufferedWriter(new FileWriter(outputFile));
+        try (Writer w = new BufferedWriter(outputFile.equals("stdout") ? new OutputStreamWriter(System.out) : new FileWriter(outputFile))) {
+            for (int i = 0; i < geneTableAccess.refIndex2IntervalsTable.length; i++) {
+                final IntervalTree<GeneItem> tree = geneTableAccess.refIndex2IntervalsTable[i];
+                if (tree != null) {
+                    w.write("RefIndex=" + i + "\n");
 
-        for (int i = 0; i < geneTableAccess.refIndex2IntervalsTable.length; i++) {
-            final IntervalTree<GeneItem> tree = geneTableAccess.refIndex2IntervalsTable[i];
-            if (tree != null) {
-                w.write("RefIndex=" + i + "\n");
+                    for (Interval<GeneItem> interval : tree) {
+                        w.write(interval.getStart() + " " + interval.getEnd() + ": " + interval.getData() + "\n");
+                    }
 
-                for (Interval<GeneItem> gene : tree) {
-                    final GeneItem geneItem = gene.getData();
-                    w.write(geneItem.toString() + "\n");
+                    w.write("----\n");
                 }
-
-                w.write("----\n");
             }
         }
-        w.close();
     }
 }

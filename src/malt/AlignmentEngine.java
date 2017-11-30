@@ -1,19 +1,19 @@
 /**
- * AlignmentEngine.java 
+ * AlignmentEngine.java
  * Copyright (C) 2017 Daniel H. Huson
- *
+ * <p>
  * (Some files contain contributions from other authors, who are then mentioned separately.)
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -24,6 +24,7 @@ import malt.align.AlignerOptions;
 import malt.align.BandedAligner;
 import malt.analysis.OrganismsProfile;
 import malt.data.*;
+import malt.genes.GeneTableAccess;
 import malt.io.*;
 import malt.mapping.MappingManager;
 import malt.util.FixedSizePriorityQueue;
@@ -61,6 +62,8 @@ public class AlignmentEngine {
     private final FileWriterRanked alignedReadsWriter;
     private final FileWriterRanked unalignedReadsWriter;
     private final RMA6Writer rmaWriter;
+
+    private final GeneTableAccess geneTableAccess;
 
     // parameters
     private final double minRawScore;
@@ -113,7 +116,7 @@ public class AlignmentEngine {
     AlignmentEngine(final int threadNumber, final MaltOptions maltOptions, AlignerOptions alignerOptions, final ReferencesDBAccess referencesDB,
                     final ReferencesHashTableAccess[] tables, final FastAReader fastAReader,
                     final FileWriterRanked matchesWriter, final RMA6Writer rmaWriter, final OutputStream organismsOutStream,
-                    final FileWriterRanked alignedReadsWriter, final FileWriterRanked unalignedReadsWriter) throws IOException {
+                    final FileWriterRanked alignedReadsWriter, final FileWriterRanked unalignedReadsWriter, final GeneTableAccess geneTableAccess) throws IOException {
         this.threadNumber = threadNumber;
         this.maltOptions = maltOptions;
         this.referencesDB = referencesDB;
@@ -125,6 +128,7 @@ public class AlignmentEngine {
         this.organismsOutStream = organismsOutStream;
         this.alignedReadsWriter = alignedReadsWriter;
         this.unalignedReadsWriter = unalignedReadsWriter;
+        this.geneTableAccess = geneTableAccess;
 
         this.shift = maltOptions.getShift();
 
@@ -369,8 +373,22 @@ public class AlignmentEngine {
                                             }
 
                                             if (foundPlaceToKeepThisMatch) {
+                                                final byte[] referenceHeader;
+                                                if (geneTableAccess == null)
+                                                    referenceHeader = referencesDB.getHeader(refIndex);
+                                                else {
+                                                    int start = aligner.getStartReference();
+                                                    if (start == -1) {
+                                                        aligner.computeAlignmentByTraceBack();
+                                                        start = aligner.getStartReference();
+                                                    }
+                                                    int end = aligner.getEndReference();
+                                                    referenceHeader = geneTableAccess.addAnnotationString(referencesDB.getHeader(refIndex), refIndex, start, end);
+                                                    // System.err.println(Basic.toString(referenceHeader));
+                                                }
+
                                                 byte[] text = null;
-                                                byte[] rma3Text = null;
+                                                byte[] rma6Text = null;
                                                 if (matchesWriter != null) {
                                                     switch (matchOutputFormat) {
                                                         default:
@@ -379,21 +397,21 @@ public class AlignmentEngine {
                                                             break;
                                                         }
                                                         case Tab: {
-                                                            text = aligner.getAlignmentTab(dataForInnerLoop, null, referencesDB.getHeader(refIndex), seedMatch.getRank()); // don't pass queryHeader, it is added below
+                                                            text = aligner.getAlignmentTab(dataForInnerLoop, null, referenceHeader, seedMatch.getRank()); // don't pass queryHeader, it is added below
                                                             break;
                                                         }
                                                         case SAM: {
-                                                            rma3Text = text = aligner.getAlignmentSAM(dataForInnerLoop, null, query.getSequence(), referencesDB.getHeader(refIndex), seedMatch.getRank()); // don't pass queryHeader, it is added below
+                                                            rma6Text = text = aligner.getAlignmentSAM(dataForInnerLoop, null, query.getSequence(), referenceHeader, seedMatch.getRank()); // don't pass queryHeader, it is added below
                                                             break;
                                                         }
                                                     }
                                                 }
-                                                if (rmaWriter != null && rma3Text == null) {
-                                                    rma3Text = aligner.getAlignmentSAM(dataForInnerLoop, null, query.getSequence(), referencesDB.getHeader(refIndex), seedMatch.getRank()); // don't pass queryHeader, it is added below
+                                                if (rmaWriter != null && rma6Text == null) {
+                                                    rma6Text = aligner.getAlignmentSAM(dataForInnerLoop, null, query.getSequence(), referenceHeader, seedMatch.getRank()); // don't pass queryHeader, it is added below
                                                 }
                                                 if (percentIdentity > 0) // need to filter by percent identity. Can't do this earlier because number of matches not known until alignment has been computed
                                                 {
-                                                    if (text == null && rma3Text == null)  // haven't computed alignment, so number of matches not yet computed
+                                                    if (text == null && rma6Text == null)  // haven't computed alignment, so number of matches not yet computed
                                                         aligner.computeAlignmentByTraceBack(); // compute number of matches
                                                     if (aligner.getIdentities() < percentIdentity * aligner.getAlignmentLength()) {  // too few identities
                                                         if (incrementedNumberOfReadMatchesForRefIndex)
@@ -401,7 +419,7 @@ public class AlignmentEngine {
                                                         continue;
                                                     }
                                                 }
-                                                readMatch.set(aligner.getBitScore(), refIndex, text, rma3Text, aligner.getStartReference(), aligner.getEndReference());
+                                                readMatch.set(aligner.getBitScore(), refIndex, text, rma6Text, aligner.getStartReference(), aligner.getEndReference());
                                             }
                                             previous = seedMatch;
                                         }

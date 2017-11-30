@@ -242,19 +242,16 @@ public class GeneTableBuilderUsingGIs {
                     giNumber = Basic.parseLong(tokens[2].trim());
                 // set ko number:
                 if (keggMapper != null) {
-                    Integer ko = keggMapper.getIdFromGI(giNumber);
-                    if (ko != null && ko != 0) {
-                        geneItem.setKeggId(String.format("K%05d", ko).getBytes());
-                        // System.err.println("gi: "+geneItem.getGiNumber()+" ko: "+ko);
+                    Integer id = keggMapper.getIdFromGI(giNumber);
+                    if (id != null && id != 0) {
+                        geneItem.setKeggId(id);
                     }
                 }
                 // set cog:
                 if (cogMapper != null) {
-                    Integer cog = cogMapper.getIdFromGI(giNumber);
-                    if (cog != null && cog != 0) {
-                        String name = cogMapper.getName2IdMap().get(cog);
-                        if (name != null)
-                            geneItem.setCogId(name.getBytes());
+                    Integer id = cogMapper.getIdFromGI(giNumber);
+                    if (id != null && id != 0) {
+                        geneItem.setCogId(id);
                     }
                 }
 
