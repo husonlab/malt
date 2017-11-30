@@ -257,10 +257,12 @@ public class OrganismsProfileMerger extends OrganismsProfile {
                         String geneName = Basic.toString(geneItem.getGeneName());
                         if (!seen.contains(geneName)) {
                             seen.add(geneName);
-                            GeneType geneType = new GeneType();
+                            final GeneType geneType = new GeneType();
                             geneType.setValue(geneName);
+                            /* todo: replace GI number by accession?
                             if (geneItem.getGiNumber() != 0)
                                 geneType.setGi(BigInteger.valueOf(geneItem.getGiNumber()));
+                                */
                             if (geneItem.getProduct() != null)
                                 geneType.setProduct(Basic.toString(geneItem.getProduct()));
                             if (geneItem.getProteinId() != null)

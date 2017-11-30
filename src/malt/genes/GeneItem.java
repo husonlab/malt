@@ -27,25 +27,19 @@ import java.io.IOException;
 
 /**
  * a gene item
- * Daniel Huson, 8.2014
+ * Daniel Huson, 8.2014, 11.2017
+ *
  */
 public class GeneItem {
-    private long giNumber;
     private byte[] product;
     private byte[] geneName;
     private byte[] proteinId;
     private byte[] keggId;
     private byte[] cogId;
+    private byte[] seedId;
+    private byte[] interproId;
 
     public GeneItem() {
-    }
-
-    public long getGiNumber() {
-        return giNumber;
-    }
-
-    public void setGiNumber(long giNumber) {
-        this.giNumber = giNumber;
     }
 
     public byte[] getProduct() {
@@ -88,13 +82,31 @@ public class GeneItem {
         this.cogId = cogId;
     }
 
+    public byte[] getSeedId() {
+        return seedId;
+    }
+
+    public void setSeedId(byte[] seedId) {
+        this.seedId = seedId;
+    }
+
+    public byte[] getInterproId() {
+        return interproId;
+    }
+
+    public void setInterproId(byte[] interproId) {
+        this.interproId = interproId;
+    }
+
     public String toString() {
         return "gene=" + (geneName == null ? "null" : Basic.toString(geneName))
-                + " gi=" + giNumber
                 + ", product=" + (product == null ? "null" : Basic.toString(product))
                 + ", proteinId=" + (proteinId == null ? "null" : Basic.toString(proteinId))
                 + ", keggId=" + (keggId == null ? "null" : Basic.toString(keggId))
-                + ", cogId=" + (cogId == null ? "null" : Basic.toString(cogId));
+                + ", cogId=" + (cogId == null ? "null" : Basic.toString(cogId))
+                + ", seedId=" + (seedId == null ? "null" : Basic.toString(seedId))
+                + ", interproId=" + (interproId == null ? "null" : Basic.toString(interproId));
+
     }
 
     /**
@@ -104,7 +116,6 @@ public class GeneItem {
      * @throws java.io.IOException
      */
     public void write(OutputWriter outs) throws IOException {
-        outs.writeLong(giNumber);
         if (product == null || product.length == 0)
             outs.writeInt(0);
         else {
@@ -135,6 +146,19 @@ public class GeneItem {
             outs.writeInt(cogId.length);
             outs.write(cogId, 0, cogId.length);
         }
+        if (seedId == null || seedId.length == 0)
+            outs.writeInt(0);
+        else {
+            outs.writeInt(seedId.length);
+            outs.write(seedId, 0, seedId.length);
+        }
+        if (interproId == null || interproId.length == 0)
+            outs.writeInt(0);
+        else {
+            outs.writeInt(interproId.length);
+            outs.write(interproId, 0, interproId.length);
+        }
+
     }
 
     /**
@@ -144,7 +168,6 @@ public class GeneItem {
      * @throws IOException
      */
     public void read(DataInputStream ins) throws IOException {
-        giNumber = ins.readLong();
         int length = ins.readInt();
         if (length == 0)
             product = null;
@@ -183,6 +206,22 @@ public class GeneItem {
         else {
             cogId = new byte[length];
             if (ins.read(cogId, 0, length) != length)
+                throw new IOException("read failed");
+        }
+        length = ins.readInt();
+        if (length == 0)
+            seedId = null;
+        else {
+            seedId = new byte[length];
+            if (ins.read(seedId, 0, length) != length)
+                throw new IOException("read failed");
+        }
+        length = ins.readInt();
+        if (length == 0)
+            interproId = null;
+        else {
+            interproId = new byte[length];
+            if (ins.read(interproId, 0, length) != length)
                 throw new IOException("read failed");
         }
     }

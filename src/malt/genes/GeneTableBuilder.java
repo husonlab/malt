@@ -1,21 +1,20 @@
-/**
- * GeneTableBuilder.java 
- * Copyright (C) 2017 Daniel H. Huson
- *
- * (Some files contain contributions from other authors, who are then mentioned separately.)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/*
+ *  Copyright (C) 2015 Daniel H. Huson
+ *  
+ *  (Some files contain contributions from other authors, who are then mentioned separately.)
+ *  
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package malt.genes;
 
@@ -25,14 +24,17 @@ import jloda.util.ProgressPercentage;
 import malt.data.ReferencesDBBuilder;
 import megan.classification.ClassificationManager;
 import megan.classification.IdMapper;
+import megan.classification.util.TaggedValueIterator;
 import megan.io.OutputWriter;
-import net.sf.picard.util.IntervalTree;
+import megan.util.interval.Interval;
+import megan.util.interval.IntervalTree;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,15 +42,19 @@ import java.util.concurrent.Executors;
 
 /**
  * Builds a table mapping reference indices and positions to genes
- * Daniel Huson, 8.2014
+ * Daniel Huson, 8.2014, 11.2017
  */
 public class GeneTableBuilder {
-    final public static byte[] MAGIC_NUMBER = "MAGenesV0.3.".getBytes();
+    final public static byte[] MAGIC_NUMBER = "MAGenesV0.4.".getBytes();
+
+    public static final String[] ACCESSION_TAGS = new String[]{"gb|", "ref|"};
 
     private final int numberOfSyncObjects = 1024;
     private final Object[] syncObjects = new Object[numberOfSyncObjects];  // use lots of objects to synchronize on so that threads don't in each others way
     private final IdMapper keggMapper;
     private final IdMapper cogMapper;
+    private final IdMapper seedMapper;
+    private final IdMapper interproMapper;
 
     /**
      * constructor
@@ -60,14 +66,24 @@ public class GeneTableBuilder {
         for (int i = 0; i < numberOfSyncObjects; i++)
             syncObjects[i] = new Object();
 
-        if (ClassificationManager.get("KEGG", false).getIdMapper().isActiveMap(IdMapper.MapType.GI))
+        if (ClassificationManager.get("KEGG", false).getIdMapper().isActiveMap(IdMapper.MapType.Accession))
             keggMapper = ClassificationManager.get("KEGG", false).getIdMapper();
         else
             keggMapper = null;
-        if (ClassificationManager.get("EGGNOG", false).getIdMapper().isActiveMap(IdMapper.MapType.GI))
+        if (ClassificationManager.get("EGGNOG", false).getIdMapper().isActiveMap(IdMapper.MapType.Accession))
             cogMapper = ClassificationManager.get("EGGNOG", false).getIdMapper();
         else
             cogMapper = null;
+        if (ClassificationManager.get("SEED", false).getIdMapper().isActiveMap(IdMapper.MapType.Accession))
+            seedMapper = ClassificationManager.get("SEED", false).getIdMapper();
+        else
+            seedMapper = null;
+
+        if (ClassificationManager.get("INTERPRO2GO", false).getIdMapper().isActiveMap(IdMapper.MapType.Accession))
+            interproMapper = ClassificationManager.get("INTERPRO2GO", false).getIdMapper();
+        else
+            interproMapper = null;
+
     }
 
     /**
@@ -81,28 +97,28 @@ public class GeneTableBuilder {
      */
     public void buildAndSaveGeneTable(final ReferencesDBBuilder referencesDB, final String inputTableFile, final File indexFile, final int numberOfThreads) throws IOException {
         System.err.println("Building gene table...");
-        Map<Long, Integer> gi2refIndex = computeGi2RefIndex(referencesDB, numberOfThreads);
+        final Map<String, Integer> accession2refIndex = computeAccession2RefIndex(referencesDB, numberOfThreads);
 
-        IntervalTree<GeneItem>[] table = computeTable(referencesDB, gi2refIndex, inputTableFile, numberOfThreads);
-        gi2refIndex.clear();
+        final IntervalTree<GeneItem>[] table = computeTable(referencesDB, accession2refIndex, inputTableFile, numberOfThreads);
+        accession2refIndex.clear();
 
         writeTable(indexFile, table);
     }
 
     /**
-     * Compute the GI to references mapping
+     * Compute the accession to references mapping
      *
      * @param referencesDB
      * @param numberOfThreads
-     * @return gi to reference index mapping
+     * @return accession to reference index mapping
      */
-    private Map<Long, Integer> computeGi2RefIndex(final ReferencesDBBuilder referencesDB, final int numberOfThreads) {
-        final Map<Long, Integer> gi2refIndex = new HashMap<>(referencesDB.getNumberOfSequences(), 1f);
+    private Map<String, Integer> computeAccession2RefIndex(final ReferencesDBBuilder referencesDB, final int numberOfThreads) {
+        final Map<String, Integer> accession2refIndex = new HashMap<>(referencesDB.getNumberOfSequences(), 1f);
 
         final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
         final CountDownLatch countDownLatch = new CountDownLatch(numberOfThreads);
 
-        final ProgressPercentage progress = new ProgressPercentage("Mapping GI numbers to references...", referencesDB.getNumberOfSequences());
+        final ProgressPercentage progress = new ProgressPercentage("Mapping accessions to references...", referencesDB.getNumberOfSequences());
 
         // launch the worker threads
         for (int thread = 0; thread < numberOfThreads; thread++) {
@@ -110,10 +126,11 @@ public class GeneTableBuilder {
             executor.execute(new Runnable() {
                 public void run() {
                     try {
+                        final TaggedValueIterator it = new TaggedValueIterator(true, true, ACCESSION_TAGS);
                         for (int refIndex = threadNumber + 1; refIndex <= referencesDB.getNumberOfSequences(); refIndex += numberOfThreads) {
-                            long gi = parseGI(Basic.toString(referencesDB.getHeader(refIndex)));
-                            if (gi > 0)
-                                gi2refIndex.put(gi, refIndex);
+                            it.restart(Basic.toString(referencesDB.getHeader(refIndex)));
+                            while (it.hasNext())
+                                accession2refIndex.put(it.next(), refIndex);
                             progress.incrementProgress();
                         }
                     } catch (Exception ex) {
@@ -135,30 +152,30 @@ public class GeneTableBuilder {
             executor.shutdownNow();
         }
         progress.close();
-        return gi2refIndex;
+        return accession2refIndex;
     }
 
     /**
      * compute the gene location table
      *
      * @param referencesDB
-     * @param gi2refIndex
+     * @param accession2refIndex
      * @param geneTableFile
      * @param numberOfThreads
      * @return
      * @throws FileNotFoundException
      */
-    private IntervalTree<GeneItem>[] computeTable(final ReferencesDBBuilder referencesDB, final Map<Long, Integer> gi2refIndex, String geneTableFile, int numberOfThreads) throws IOException {
+    private IntervalTree<GeneItem>[] computeTable(final ReferencesDBBuilder referencesDB, final Map<String, Integer> accession2refIndex, String geneTableFile, int numberOfThreads) throws IOException {
         final IntervalTree<GeneItem>[] refIndex2Intervals = new IntervalTree[referencesDB.getNumberOfSequences() + 1];  // plus one because refindices start at 1
-        final FileInputIterator it = new FileInputIterator(geneTableFile);
-
-        final ProgressPercentage progress = new ProgressPercentage("Processing file: " + geneTableFile, (new File(geneTableFile)).length() / 100);
 
         final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
         final CountDownLatch countDownLatch = new CountDownLatch(numberOfThreads);
 
-        final long[] countLinesRead = new long[]{0L};
+        final long[] countLinesRead = new long[numberOfThreads];
         final long[] countLinesParsed = new long[numberOfThreads];
+
+        final ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(10 * numberOfThreads);
+        final String sentinel = "DONE!!!:";
 
         // launch the worker threads
         for (int thread = 0; thread < numberOfThreads; thread++) {
@@ -166,22 +183,15 @@ public class GeneTableBuilder {
             executor.execute(new Runnable() {
                 public void run() {
                     try {
-                        while (it.hasNext()) {
-                            String aLine;
-                            synchronized (refIndex2Intervals) {
-                                if (it.hasNext()) {
-                                    aLine = it.next();
-                                    progress.setProgress(it.getProgress());
-                                    countLinesRead[0]++;
-                                } else
-                                    return; // input has finished
-
-                            }
-                            if (processALine(aLine, referencesDB, gi2refIndex, refIndex2Intervals)) {
+                        while (true) {
+                            final String aLine = queue.take();
+                            if (aLine == sentinel)
+                                break;
+                            countLinesRead[threadNumber]++;
+                            if (processALine(aLine, referencesDB, accession2refIndex, refIndex2Intervals)) {
                                 countLinesParsed[threadNumber]++;
                             }
                         }
-
                     } catch (Exception ex) {
                         Basic.caught(ex);
                         System.exit(1);  // just die...
@@ -190,6 +200,19 @@ public class GeneTableBuilder {
                     }
                 }
             });
+        }
+        try (final FileInputIterator it = new FileInputIterator(geneTableFile, true)) {
+            while (it.hasNext()) {
+                try {
+                    queue.put(it.next());
+                } catch (InterruptedException e) {
+                    Basic.caught(e);
+                }
+            }
+        }
+        // add sentinels
+        for (int i = 0; i < numberOfThreads; i++) {
+            queue.add(sentinel);
         }
 
         try {
@@ -200,31 +223,28 @@ public class GeneTableBuilder {
             // shut down threads:
             executor.shutdownNow();
         }
-        it.close();
-        progress.close();
-        System.err.println("Lines parsed: " + Basic.getSum(countLinesParsed) + " of " + countLinesRead[0]);
+        System.err.println("Lines parsed: " + Basic.getSum(countLinesParsed) + " of " + Basic.getSum(countLinesRead));
         return refIndex2Intervals;
     }
 
     /**
      * processes a line of input and adds genes to appropriate interval tree
-     * todo: Format: reference-gi-number coordinates gene-gi-number protein-id gene-name product
+     * todo: Format: reference-accession coordinates gene-accession product
      *
      * @param aLine
-     * @param gi2refIndex
+     * @param accession2refIndex
      * @param refIndex2Intervals
      * @return true, if successfully parsed
      */
-    private boolean processALine(String aLine, final ReferencesDBBuilder referencesDB, final Map<Long, Integer> gi2refIndex, final IntervalTree<GeneItem>[] refIndex2Intervals) {
-
-        String[] tokens = aLine.split("\t");
-        if (tokens.length == 6) {
+    private boolean processALine(String aLine, final ReferencesDBBuilder referencesDB, final Map<String, Integer> accession2refIndex, final IntervalTree<GeneItem>[] refIndex2Intervals) {
+        final String[] tokens = aLine.split("\t");
+        if (tokens.length == 4) {
             try {
-                GeneItem geneItem = new GeneItem();
-                long referenceGi = Basic.parseLong(tokens[0].trim());
-                if (referenceGi == 0)
+                final GeneItem geneItem = new GeneItem();
+                final String referenceAcc = tokens[0].trim();
+                if (referenceAcc.length() == 0)
                     return false;
-                Integer refIndex = gi2refIndex.get(referenceGi);
+                final Integer refIndex = accession2refIndex.get(referenceAcc);
                 if (refIndex == null || refIndex == 0)
                     return false;
 
@@ -236,38 +256,54 @@ public class GeneTableBuilder {
                     if (location == null || location.length == 0)
                         return false; // no locations, skip
                 }
+                final String accession;
                 if (tokens[2].equals("*")) { // a "*" indicates to use the same GI number as reference
-                    geneItem.setGiNumber(referenceGi);
+                    accession = referenceAcc;
                 } else
-                    geneItem.setGiNumber(Basic.parseLong(tokens[2].trim()));
+                    accession = tokens[2].trim();
                 // set ko number:
                 if (keggMapper != null)
                 {
-                    Integer ko = keggMapper.getIdFromGI(geneItem.getGiNumber());
-                    if (ko != null && ko != 0) {
-                        geneItem.setKeggId(String.format("K%05d", ko).getBytes());
-                        // System.err.println("gi: "+geneItem.getGiNumber()+" ko: "+ko);
+                    final Integer id = keggMapper.getIdFromAccession(accession);
+                    if (id != null && id != 0) {
+                        final String name = String.format("K%05d", id);
+                        geneItem.setKeggId(name.getBytes());
                     }
                 }
                 // set cog:
                 if (cogMapper != null)
                 {
-                    Integer cog = cogMapper.getIdFromGI(geneItem.getGiNumber());
-                    if (cog != null && cog != 0) {
-                        String name = cogMapper.getName2IdMap().get(cog);
+                    final Integer id = cogMapper.getIdFromAccession(accession);
+                    if (id != null && id != 0) {
+                        final String name = cogMapper.getName2IdMap().get(id);
                         if (name != null)
                             geneItem.setCogId(name.getBytes());
                     }
                 }
+                // set seed:
+                if (seedMapper != null) {
+                    final Integer id = seedMapper.getIdFromAccession(accession);
+                    if (id != null && id != 0) {
+                        final String name = seedMapper.getName2IdMap().get(id);
+                        if (name != null)
+                            geneItem.setSeedId(name.getBytes());
+                    }
+                }
+                // set interpro:
+                if (interproMapper != null) {
+                    final Integer id = interproMapper.getIdFromAccession(accession);
+                    if (id != null && id != 0) {
+                        final String name = interproMapper.getName2IdMap().get(id);
+                        if (name != null)
+                            geneItem.setInterproId(name.getBytes());
+                    }
+                }
 
-                if (tokens.length > 3)
-                    geneItem.setProteinId(tokens[3].trim().getBytes());
-                if (tokens.length > 4)
-                    geneItem.setGeneName(tokens[4].trim().getBytes());
-                if (tokens.length > 5)
-                    geneItem.setProduct(tokens[5].trim().getBytes());
+                geneItem.setProteinId(accession.getBytes());
+                geneItem.setGeneName(tokens[3].trim().getBytes());
+                geneItem.setProduct(tokens[4].trim().getBytes());
 
-                if (geneItem.getGiNumber() == 0 && geneItem.getProteinId().length == 0 && (geneItem.getGeneName() == null || geneItem.getGeneName().length == 0)
+                if (accession.length() == 0 && geneItem.getProteinId().length == 0 && (geneItem.getGeneName() == null || geneItem.getGeneName().length == 0)
                         && (geneItem.getProduct() == null || geneItem.getProduct().length == 0))
                     return false; // no info, skip
 
@@ -282,10 +318,10 @@ public class GeneTableBuilder {
                     if (start > 0 && end >= start + 50) {
                         int length = end - start + 1;
                         if (length >= 20 && length <= 500000)
-                            intervals.put(start, end, geneItem);
+                            intervals.add(start, end, geneItem);
                         else
                             System.err.println("Unrealistic gene coordinates: " + start + " - " + end + ", length= "
-                                    + (end - start + 1) + " for gi number=" + referenceGi);
+                                    + (end - start + 1) + " for accession=" + accession);
                     }
 
                     if (location.length == 4) {
@@ -294,10 +330,10 @@ public class GeneTableBuilder {
                         if (start > 0 && end >= start + 50) {
                             int length = end - start + 1;
                             if (length >= 20 && length <= 500000)
-                                intervals.put(start, end, geneItem);
+                                intervals.add(start, end, geneItem);
                             else
                                 System.err.println("Unrealistic gene coordinates: " + start + " - " + end + ", length= "
-                                        + (end - start + 1) + " for gi number=" + referenceGi);
+                                        + (end - start + 1) + " for accession=" + accession);
                         }
                     }
                     return location.length > 0;
@@ -310,6 +346,7 @@ public class GeneTableBuilder {
         return false;
     }
 
+
     /**
      * write the table to the named file
      *
@@ -317,11 +354,11 @@ public class GeneTableBuilder {
      * @param refIndex2Intervals
      * @throws IOException
      */
-    private void writeTable(File file, final IntervalTree<GeneItem>[] refIndex2Intervals) throws IOException {
+    static void writeTable(File file, final IntervalTree<GeneItem>[] refIndex2Intervals) throws IOException {
 
         int totalRefWithAGene = 0;
         try (OutputWriter outs = new OutputWriter(file)) {
-            outs.write(MAGIC_NUMBER, 0, MAGIC_NUMBER.length);
+            outs.write(GeneTableBuilder.MAGIC_NUMBER, 0, GeneTableBuilder.MAGIC_NUMBER.length);
 
             outs.writeInt(refIndex2Intervals.length);
 
@@ -332,10 +369,10 @@ public class GeneTableBuilder {
                     outs.writeInt(0);
                 } else {
                     outs.writeInt(intervals.size());
-                    for (IntervalTree.Node<GeneItem> node : intervals) {
-                        outs.writeInt(node.getStart());
-                        outs.writeInt(node.getEnd());
-                        node.getValue().write(outs);
+                    for (Interval<GeneItem> interval : intervals) {
+                        outs.writeInt(interval.getStart());
+                        outs.writeInt(interval.getEnd());
+                        interval.getData().write(outs);
                     }
                     totalRefWithAGene++;
                 }
@@ -346,30 +383,6 @@ public class GeneTableBuilder {
         System.err.println("Reference sequences with at least one gene: " + totalRefWithAGene + " of " + refIndex2Intervals.length);
     }
 
-    /**
-     * gets gi number
-     *
-     * @param string
-     * @return accession
-     */
-    public static long parseGI(String string) {
-        try {
-            int a = string.indexOf("gi|");
-            if (a >= 0 && a + "gi|".length() < string.length()) {
-                a += "gi|".length();
-                while (!Character.isDigit(string.charAt(a)) && a < string.length())
-                    a++;
-                int b = a;
-                while (b < string.length() && Character.isDigit(string.charAt(b))) {
-                    b++;
-                }
-                if (a < b)
-                    return Basic.parseLong(string.substring(a, b));
-            }
-        } catch (Exception ex) {
-        }
-        return 0l;
-    }
 
     /**
      * parses the location of a gene.
@@ -387,7 +400,7 @@ public class GeneTableBuilder {
      * @param aLine
      * @return
      */
-    private static int[] parseLocations(String aLine) {
+    static int[] parseLocations(String aLine) {
         if (Basic.countOccurrences(aLine, '(') != Basic.countOccurrences(aLine, ')'))
             return null;
         int a = aLine.lastIndexOf("(");

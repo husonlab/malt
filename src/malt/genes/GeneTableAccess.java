@@ -23,12 +23,12 @@ import jloda.util.*;
 import malt.analysis.QueryItem;
 import malt.analysis.ReadMatchItem;
 import malt.data.ReadMatch;
-import net.sf.picard.util.IntervalTree;
+import megan.util.interval.Interval;
+import megan.util.interval.IntervalTree;
 
 import java.io.*;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -78,7 +78,7 @@ public class GeneTableAccess {
                     int end = ins.readInt();
                     GeneItem geneItem = new GeneItem();
                     geneItem.read(ins);
-                    intervals.put(start, end, geneItem);
+                    intervals.add(start, end, geneItem);
                     //System.err.println(refIndex+"("+start+"-"+end+") -> "+geneItem);
                     numberOfGeneLocations++;
                 }
@@ -142,14 +142,15 @@ public class GeneTableAccess {
         loop:
         for (ReadMatchItem match : sorted) {
             if (match.refIndex < refIndex2IntervalsTable.length) {
-                IntervalTree<GeneItem> intervals = refIndex2IntervalsTable[match.refIndex];
+                final IntervalTree<GeneItem> intervals = refIndex2IntervalsTable[match.refIndex];
                 if (intervals != null) {
-                    for (Iterator<IntervalTree.Node<GeneItem>> it = intervals.iterator(match.refStart, match.refEnd); it.hasNext(); ) {
-                        IntervalTree.Node<GeneItem> node = it.next();
-                        genes[numberOfGenes++] = node.getValue();
+
+                    for (Interval<GeneItem> interval : intervals.getIntervals(match.refStart, match.refEnd)) {
+                        genes[numberOfGenes++] = interval.getData();
                         if (numberOfGenes == genes.length)
                             break loop;
                     }
+
                 }
             }
         }
@@ -197,10 +198,12 @@ public class GeneTableAccess {
             final IntervalTree<GeneItem> tree = geneTableAccess.refIndex2IntervalsTable[i];
             if (tree != null) {
                 w.write("RefIndex=" + i + "\n");
-                for (IntervalTree.Node<GeneItem> gene : tree) {
-                    final GeneItem geneItem = gene.getValue();
+
+                for (Interval<GeneItem> gene : tree) {
+                    final GeneItem geneItem = gene.getData();
                     w.write(geneItem.toString() + "\n");
                 }
+
                 w.write("----\n");
             }
         }
