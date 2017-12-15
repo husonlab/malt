@@ -1,11 +1,14 @@
 package malt.tools;
 
 import jloda.util.*;
-import megan.classification.util.TaggedValueIterator;
+import malt.genes.CDS;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class FeatureTable2GeneTable {
     /**
@@ -42,69 +45,22 @@ public class FeatureTable2GeneTable {
         options.setLicense("Copyright (C) 2017 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
         options.setAuthors("Daniel H. Huson");
 
-        final String[] inputFiles = options.getOptionMandatory("-i", "input", "Feature tables obtained from NCBI (.gz ok)", new String[0]);
+        final List<String> inputFiles = options.getOptionMandatory("-i", "input", "Feature tables obtained from NCBI (.gz ok)", new LinkedList<String>());
         final String outputFile = options.getOption("-o", "output", "Output file (.gz ok, use 'stdout' for standard out)", "stdout");
         options.done();
 
-        final TaggedValueIterator vit = new TaggedValueIterator(false, true, "ref|");
-
-        int count = 0;
-
+        final Collection<CDS> list = CDS.parseGFFforCDS(inputFiles, new ProgressPercentage());
         System.err.println("Writing to file: " + outputFile);
-        try (BufferedWriter w = new BufferedWriter(new FileWriter(outputFile)); ProgressPercentage progress = new ProgressPercentage(100 * inputFiles.length)) {
-            for (String fileName : inputFiles) {
-                try (FileInputIterator it = new FileInputIterator(fileName)) {
-                    if (it.hasNext()) {
-                        {
-                            final String aLine = it.next();
-                            vit.restart(aLine);
-                            if (!vit.hasNext())
-                                throw new IOException("Can't find reference accession in file: '" + fileName + "', header line: '" + aLine + "'");
-                        }
-                        final String refAccession = vit.next();
-                        if (it.hasNext()) {
-                            String aLine = it.next();
-                            if (aLine.length() > 0 && Character.isDigit(aLine.charAt(0))) { // coordinates
-                                while (it.hasNext()) { // only makes sense to process if there are more lines to be read, even if aLine!=null
-                                    final String[] tokens = Basic.split(aLine, '\t');
-                                    if (tokens.length == 3 && tokens[2].endsWith("CDS")) {
-                                        int a = Basic.parseInt(tokens[0]);
-                                        int b = Basic.parseInt(tokens[1]);
-                                        String proteinId = null;
-                                        String product = null;
-                                        while (it.hasNext()) {
-                                            aLine = it.next();
-                                            if (aLine.length() > 0 && Character.isDigit(aLine.charAt(0)))
-                                                break; // this is start of next feature
-                                            else if (aLine.contains("protein_id")) {
-                                                vit.restart(aLine);
-                                                if (vit.hasNext()) {
-                                                    proteinId = vit.next();
-                                                }
-
-                                            } else if (aLine.contains("product")) {
-                                                product = aLine.replaceAll(".*\t", "").trim();
-                                            }
-                                        }
-                                        if (proteinId != null) {
-                                            w.write(String.format("%s\t%d %d\t%s\t%s\n", refAccession, a, b, proteinId, product));
-                                            count++;
-                                        }
-                                    } else
-                                        aLine = it.next();
-                                    progress.setProgress(progress.getProgress() + 100 * it.getProgress() / it.getMaximumProgress());
-
-                                }
-                            }
-
-                        }
-                    }
-                } catch (IOException ex) {
-                    Basic.caught(ex);
-                }
+        int count = 0;
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(outputFile)); ProgressPercentage progress = new ProgressPercentage(list.size())) {
+            for (CDS CDS : list) {
+                w.write(String.format("%s\t%d\t%d\t%s\n", CDS.getDnaAccession(),
+                        CDS.isReverse() ? CDS.getEnd() : CDS.getStart(), CDS.isReverse() ? CDS.getStart() : CDS.getEnd(),
+                        CDS.getProteinAccession()));
+                progress.incrementProgress();
+                count++;
             }
         }
         System.err.println(String.format("Lines: %,d", count));
     }
-
 }

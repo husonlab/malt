@@ -22,7 +22,6 @@ package malt;
 import jloda.util.*;
 import malt.data.*;
 import malt.genes.GeneTableBuilder;
-import malt.genes.GeneTableBuilderUsingGIs;
 import malt.mapping.Mapping;
 import malt.util.Utilities;
 import megan.classification.Classification;
@@ -89,8 +88,10 @@ public class MaltBuild {
         options.setLicense("Copyright (C) 2017 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Input:");
-        final List<String> inputFiles = options.getOptionMandatory("i", "input", "Input reference file(s)", new LinkedList<String>());
+        final List<String> inputFiles = options.getOptionMandatory("i", "input", "Input reference files in FastA format (or specify a single directory)", new LinkedList<String>());
         final SequenceType sequenceType = SequenceType.valueOfIgnoreCase(options.getOptionMandatory("s", "sequenceType", "Sequence type", SequenceType.values(), SequenceType.Protein.toString()));
+
+        final List<String> annotationFiles = options.getOption("-igff", "inputGFF", "Files that provide CDS annotations of DNA input files in GFF format (or specify a single directory)", new LinkedList<String>());
 
         options.comment("Output:");
         final String indexDirectoryName = options.getOptionMandatory("d", "index", "Name of index directory", "");
@@ -136,9 +137,6 @@ public class MaltBuild {
                 options.getOption("-tn", "parseTaxonNames", "Parse taxon names", true);
         }
 
-        final String geneTableFile = options.getOption("-gif", "geneInfoFile", "File containing gene information (tabbed line format: ref-accession ref-coordinates gene-accession product)", "");
-        final Boolean geneTableUsesGIs = options.getOption("-gis", "geneInfoUsesGIs", "File containing gene information uses GIs (deprecated) rather than accessions ", false);
-
         options.comment(ArgsOptions.OTHER);
         ProgramProperties.put(IdParser.PROPERTIES_FIRST_WORD_IS_ACCESSION, options.getOption("-fwa", "firstWordIsAccession", "First word in reference header is accession number", ProgramProperties.get(IdParser.PROPERTIES_FIRST_WORD_IS_ACCESSION, true)));
         ProgramProperties.put(IdParser.PROPERTIES_ACCESSION_TAGS, options.getOption("-atags", "accessionTags", "List of accession tags", ProgramProperties.get(IdParser.PROPERTIES_ACCESSION_TAGS, IdParser.ACCESSION_TAGS)));
@@ -155,6 +153,30 @@ public class MaltBuild {
 
         if (sequenceType == null)
             throw new IOException("Sequence type undefined");
+
+        if (inputFiles.size() == 1) {
+            File file = new File(inputFiles.get(0));
+            if (file.isDirectory()) {
+                inputFiles.clear();
+                for (File aFile : Basic.getAllFilesInDirectory(file, new FastaFileFilter(), true, new ProgressPercentage())) {
+                    inputFiles.add(aFile.getPath());
+                }
+                if (inputFiles.size() == 0)
+                    throw new IOException("No files found in directory: " + file);
+
+            }
+        }
+        if (annotationFiles.size() == 1) {
+            File file = new File(annotationFiles.get(0));
+            if (file.isDirectory()) {
+                annotationFiles.clear();
+                for (File aFile : Basic.getAllFilesInDirectory(file, new TextFileFilter(".gff", ".gff3"), true, new ProgressPercentage())) {
+                    annotationFiles.add(aFile.getPath());
+                }
+                if (annotationFiles.size() == 0)
+                    throw new IOException("No GFF files found in directory: " + file);
+            }
+        }
 
         System.err.println("Reference sequence type set to: " + sequenceType.toString());
         final IAlphabet referenceAlphabet;
@@ -240,14 +262,9 @@ public class MaltBuild {
         if (doBuildTables) // don't write until after running classification mappers, as they add tags to reference sequences
             referencesDB.save(new File(indexDirectory, "ref.idx"), new File(indexDirectory, "ref.db"), new File(indexDirectory, "ref.inf"), saveFirstWordOfReferenceHeaderOnly);
 
-        if (geneTableFile.length() > 0) {
-            if (geneTableUsesGIs) {
-                GeneTableBuilderUsingGIs geneTableBuilder = new GeneTableBuilderUsingGIs();
-                geneTableBuilder.buildAndSaveGeneTable(referencesDB, geneTableFile, new File(indexDirectory, "gene-table.idx"), numberOfThreads);
-            } else {
+        if (annotationFiles.size() > 0) {
                 GeneTableBuilder geneTableBuilder = new GeneTableBuilder();
-                geneTableBuilder.buildAndSaveGeneTable(referencesDB, geneTableFile, new File(indexDirectory, "gene-table.idx"), numberOfThreads);
-            }
+            geneTableBuilder.buildAndSaveGeneTable(referencesDB, annotationFiles, new File(indexDirectory, "gene-table.idx"), numberOfThreads);
         }
     }
 }
