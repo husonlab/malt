@@ -25,6 +25,7 @@ import jloda.util.ProgressPercentage;
 import malt.MaltOptions;
 import malt.Version;
 import malt.data.ReadMatch;
+import malt.mapping.Mapping;
 import malt.mapping.MappingManager;
 import megan.classification.Classification;
 import megan.core.ContaminantManager;
@@ -154,8 +155,11 @@ public class RMA6Writer {
                 int id = 0;
                 if (parseHeaders)
                     id = parseIdInHeader(key[i], refHeader);
-                if (id == 0)
-                    id = MappingManager.getMapping(i).get(match.getReferenceId());
+                if (id == 0) {
+                    Mapping mapping = MappingManager.getMapping(i);
+                    if (mapping != null)
+                        id = MappingManager.getMapping(i).get(match.getReferenceId());
+                }
                 match2classification2id[m][i] = id;
                 matches[m].setFId(i, id);
             }

@@ -193,7 +193,7 @@ public class GeneTableBuilder {
                             final CDS cds = queue.take();
                             if (cds == sentinel)
                                 break;
-                            final Integer refIndex = accession2refIndex.get(cds.getDnaAccession());
+                            final Integer refIndex = accession2refIndex.get(cds.getDnaId());
                             if (refIndex != null) {
                                 synchronized (syncObjects[refIndex % 1024]) {
                                     IntervalTree<GeneItem> tree = refIndex2Intervals[refIndex];
@@ -201,7 +201,7 @@ public class GeneTableBuilder {
                                         tree = refIndex2Intervals[refIndex] = new IntervalTree<>();
 
                                     final GeneItem geneItem = new GeneItem();
-                                    final String accession = cds.getProteinAccession();
+                                    final String accession = cds.getProteinId();
                                     geneItem.setProteinId(accession.getBytes());
                                     if (keggMapper != null) {
                                         final Integer id = keggMapper.getIdFromAccession(accession);
@@ -265,7 +265,7 @@ public class GeneTableBuilder {
         } finally {
             executor.shutdownNow();
         }
-        System.err.println("Count: " + Basic.getSum(counts));
+        System.err.println(String.format("Count:%,14d", Basic.getSum(counts)));
         return refIndex2Intervals;
     }
 
@@ -276,7 +276,7 @@ public class GeneTableBuilder {
      * @param refIndex2Intervals
      * @throws IOException
      */
-    static void writeTable(File file, final IntervalTree<GeneItem>[] refIndex2Intervals) throws IOException {
+    private static void writeTable(File file, final IntervalTree<GeneItem>[] refIndex2Intervals) throws IOException {
 
         int totalRefWithAGene = 0;
         try (OutputWriter outs = new OutputWriter(file)) {
@@ -302,7 +302,7 @@ public class GeneTableBuilder {
             }
             progress.close();
         }
-        System.err.println("Reference sequences with at least one gene: " + totalRefWithAGene + " of " + refIndex2Intervals.length);
+        System.err.println("Reference sequences with at least one annotation: " + totalRefWithAGene + " of " + refIndex2Intervals.length);
     }
 }
 

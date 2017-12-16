@@ -21,10 +21,7 @@ package malt.tools;
 
 import jloda.util.*;
 
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -81,9 +78,11 @@ public class RandomReadExtractor {
         int count = 0;
 
         final FastA fastA = new FastA();
-        fastA.read(new FileReader(inputFile));
+        try (Reader r = new InputStreamReader(Basic.getInputStreamPossiblyZIPorGZIP(inputFile))) {
+            fastA.read(r);
+            System.err.println(String.format("Sequence '%s' length: %,d", Basic.getFirstWord(fastA.getHeader(0)), fastA.getSequence(0).length()));
+        }
         final String genome = fastA.getSequence(0);
-        final String reverse = SequenceUtils.getReverseComplement(genome);
 
         final ArrayList<Integer> starts = new ArrayList<>();
         if (startsFile.length() > 0) {
@@ -91,16 +90,18 @@ public class RandomReadExtractor {
                 while (it.hasNext()) {
                     String aLine = it.next();
                     if (Basic.isInteger(aLine))
-                        starts.add(Basic.parseInt(aLine)); // either start or -(start+readLength)
+                        starts.add(Basic.parseInt(aLine)); // either start or -start to indicate reverse complement
                 }
             }
         } else {
-            final boolean forward = forwardStrand && !backwardStrand || (!backwardStrand || forwardStrand) && random.nextBoolean();
-            final int start = random.nextInt(genome.length() - readLength);
-            if (forward)
-                starts.add(start);
-            else
-                starts.add(-start);
+            for (int i = 0; i < numberOfReads; i++) {
+                final boolean forward = forwardStrand && !backwardStrand || (!backwardStrand || forwardStrand) && random.nextBoolean();
+                final int start = random.nextInt(genome.length() - readLength);
+                if (forward)
+                    starts.add(start);
+                else
+                    starts.add(-start);
+            }
         }
 
         try (BufferedWriter w = new BufferedWriter(new FileWriter(outputFile)); ProgressPercentage progress = new ProgressPercentage("Writing file: " + outputFile, starts.size())) {
@@ -114,7 +115,7 @@ public class RandomReadExtractor {
                 if (forward) {
                     sequence = genome.substring(start, end);
                 } else {
-                    sequence = reverse.substring(start, end);
+                    sequence = SequenceUtils.getReverseComplement(genome.substring(start, end));
                 }
                 w.write(header);
                 w.write("\n");

@@ -54,7 +54,11 @@ public class MappingManager {
                 taxonomyIndex = i;
             String fileName = cName.toLowerCase() + ".idx";
             ClassificationManager.ensureTreeIsLoaded(cName);
-            mappings[i] = new Mapping(cName, new File(indexDirectory, fileName));
+            final File file = new File(indexDirectory, fileName);
+            if (file.exists())
+                mappings[i] = new Mapping(cName, file);
+            else
+                mappings[i] = null;
         }
     }
 

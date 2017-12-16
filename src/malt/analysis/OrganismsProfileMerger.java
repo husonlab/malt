@@ -253,18 +253,12 @@ public class OrganismsProfileMerger extends OrganismsProfile {
                 organism.setGenes(new GenesType());
                 final Set<String> seen = new HashSet<>();
                 for (GeneItem geneItem : organismItem.genes) {
-                    if (geneItem.getGeneName() != null) {
-                        String geneName = Basic.toString(geneItem.getGeneName());
+                    if (geneItem.getProteinId() != null) {
+                        String geneName = Basic.toString(geneItem.getProteinId());
                         if (!seen.contains(geneName)) {
                             seen.add(geneName);
                             final GeneType geneType = new GeneType();
                             geneType.setValue(geneName);
-                            /* todo: replace GI number by accession?
-                            if (geneItem.getGiNumber() != 0)
-                                geneType.setGi(BigInteger.valueOf(geneItem.getGiNumber()));
-                                */
-                            if (geneItem.getProduct() != null)
-                                geneType.setProduct(Basic.toString(geneItem.getProduct()));
                             if (geneItem.getProteinId() != null)
                                 geneType.setProteinId(Basic.toString(geneItem.getProteinId()));
                             organism.getGenes().getGene().add(geneType);

@@ -27,12 +27,10 @@ import java.io.IOException;
 
 /**
  * a gene item
- * Daniel Huson, 8.2014, 11.2017
+ * Daniel Huson, 11.2017
  *
  */
 public class GeneItem {
-    private byte[] product;
-    private byte[] geneName;
     private byte[] proteinId;
     private int keggId;
     private int cogId;
@@ -40,22 +38,6 @@ public class GeneItem {
     private int interproId;
 
     public GeneItem() {
-    }
-
-    public byte[] getProduct() {
-        return product;
-    }
-
-    public void setProduct(byte[] product) {
-        this.product = product;
-    }
-
-    public byte[] getGeneName() {
-        return geneName;
-    }
-
-    public void setGeneName(byte[] geneName) {
-        this.geneName = geneName;
     }
 
     public byte[] getProteinId() {
@@ -99,9 +81,7 @@ public class GeneItem {
     }
 
     public String toString() {
-        return "gene=" + (geneName == null ? "null" : Basic.toString(geneName))
-                + ", product=" + (product == null ? "null" : Basic.toString(product))
-                + ", proteinId=" + (proteinId == null ? "null" : Basic.toString(proteinId))
+        return "proteinId=" + (proteinId == null ? "null" : Basic.toString(proteinId))
                 + ", keggId=" + keggId
                 + ", cogId=" + cogId
                 + ", seedId=" + seedId
@@ -116,18 +96,6 @@ public class GeneItem {
      * @throws java.io.IOException
      */
     public void write(OutputWriter outs) throws IOException {
-        if (product == null || product.length == 0)
-            outs.writeInt(0);
-        else {
-            outs.writeInt(product.length);
-            outs.write(product, 0, product.length);
-        }
-        if (geneName == null || geneName.length == 0)
-            outs.writeInt(0);
-        else {
-            outs.writeInt(geneName.length);
-            outs.write(geneName, 0, geneName.length);
-        }
         if (proteinId == null || proteinId.length == 0)
             outs.writeInt(0);
         else {
@@ -148,22 +116,6 @@ public class GeneItem {
      */
     public void read(DataInputStream ins) throws IOException {
         int length = ins.readInt();
-        if (length == 0)
-            product = null;
-        else {
-            product = new byte[length];
-            if (ins.read(product, 0, length) != length)
-                throw new IOException("read failed");
-        }
-        length = ins.readInt();
-        if (length == 0)
-            geneName = null;
-        else {
-            geneName = new byte[length];
-            if (ins.read(geneName, 0, length) != length)
-                throw new IOException("read failed");
-        }
-        length = ins.readInt();
         if (length == 0)
             proteinId = null;
         else {

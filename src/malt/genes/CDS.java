@@ -32,11 +32,11 @@ import java.util.Iterator;
  * Daniel Huson, 12.2017
  */
 public class CDS {
-    private String dnaAccession;
+    private String dnaId;
     private int start;
     private int end;
     private boolean reverse;
-    private String proteinAccession;
+    private String proteinId;
 
     /**
      * constructor
@@ -44,8 +44,8 @@ public class CDS {
     public CDS() {
     }
 
-    public void setDnaAccession(String dnaAccession) {
-        this.dnaAccession = dnaAccession;
+    public void setDnaId(String dnaId) {
+        this.dnaId = dnaId;
     }
 
     public void setStart(int start) {
@@ -60,12 +60,12 @@ public class CDS {
         this.reverse = reverse;
     }
 
-    public void setProteinAccession(String proteinAccession) {
-        this.proteinAccession = proteinAccession;
+    public void setProteinId(String proteinId) {
+        this.proteinId = proteinId;
     }
 
-    public String getDnaAccession() {
-        return dnaAccession;
+    public String getDnaId() {
+        return dnaId;
     }
 
     public int getStart() {
@@ -80,8 +80,8 @@ public class CDS {
         return reverse;
     }
 
-    public String getProteinAccession() {
-        return proteinAccession;
+    public String getProteinId() {
+        return proteinId;
     }
 
     /**
@@ -140,7 +140,7 @@ public class CDS {
                 final CDS cds = new CDS();
                 dnaAccessionIterator.restart(tokens[0]);
                 if (dnaAccessionIterator.hasNext()) {
-                    cds.setDnaAccession(dnaAccessionIterator.getFirst());
+                    cds.setDnaId(dnaAccessionIterator.getFirst());
                     cds.setStart(Integer.valueOf(tokens[3]));
                     cds.setEnd(Integer.valueOf(tokens[4]));
                     cds.setReverse(tokens[6].equals("-"));
@@ -148,10 +148,9 @@ public class CDS {
                         System.err.println("Expected + or - in line: " + aLine);
                     proteinAccessionIterator.restart(tokens[8]);
                     if (proteinAccessionIterator.hasNext()) {
-                        cds.setProteinAccession(proteinAccessionIterator.getFirst());
+                        cds.setProteinId(proteinAccessionIterator.getFirst());
                         list.add(cds);
-                    } else
-                        System.err.println("No protein id found for line: " + aLine);
+                    }  // else System.err.println("No protein id found for line: " + aLine);
                 }
             }
         }
@@ -192,11 +191,11 @@ public class CDS {
                         }
                         if (proteinId != null) {
                             CDS cds = new CDS();
-                            cds.setDnaAccession(dnaAccession);
+                            cds.setDnaId(dnaAccession);
                             cds.setStart(Math.min(a, b));
                             cds.setEnd(Math.max(a, b));
                             cds.setReverse(a > b);
-                            cds.setProteinAccession(proteinId);
+                            cds.setProteinId(proteinId);
                             list.add(cds);
 
                         }
@@ -206,8 +205,6 @@ public class CDS {
             }
 
         }
-
         return list;
     }
-
 }
