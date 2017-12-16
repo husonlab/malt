@@ -20,7 +20,6 @@
 package malt.data;
 
 import jloda.util.CanceledException;
-import jloda.util.ProgressListener;
 import jloda.util.ProgressPercentage;
 import malt.io.FastAFileIteratorBytes;
 import megan.io.OutputWriter;
@@ -122,7 +121,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
      * @throws IOException
      * @throws CanceledException
      */
-    public void loadFastAFiles(final List<String> fileNames, final IAlphabet alphabet) throws IOException, CanceledException {
+    public void loadFastAFiles(final List<String> fileNames, final IAlphabet alphabet) throws IOException {
         long totalSize = 0;
         for (String fileName : fileNames) {
             totalSize += (new File(fileName)).length();
@@ -130,8 +129,11 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
         int guessNumberOfSequences = (int) Math.min(Integer.MAX_VALUE, totalSize / 1000L);
         grow(guessNumberOfSequences);
 
-        for (String fileName : fileNames) {
-            loadFastAFile(fileName, new ProgressPercentage("Reading file: " + fileName), alphabet);
+        try (ProgressPercentage progress = new ProgressPercentage("Loading FastA files:", fileNames.size())) {
+            for (String fileName : fileNames) {
+                loadFastAFile(fileName, alphabet);
+                progress.incrementProgress();
+            }
         }
     }
 
@@ -141,24 +143,15 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
      * @param fileName
      * @throws FileNotFoundException
      */
-    public void loadFastAFile(final String fileName, final ProgressListener progressListener, final IAlphabet alphabet) throws IOException, CanceledException {
-        FastAFileIteratorBytes it = new FastAFileIteratorBytes(fileName, alphabet);
-        progressListener.setMaximum(it.getMaximumProgress());
-        progressListener.setProgress(0);
-
-        try {
+    private void loadFastAFile(final String fileName, final IAlphabet alphabet) throws IOException {
+        try (FastAFileIteratorBytes it = new FastAFileIteratorBytes(fileName, alphabet)) {
             while (it.hasNext()) {
                 byte[] header = it.next();
                 if (it.hasNext()) {
                     byte[] sequence = it.next();
                     add(header, sequence);
-                    progressListener.setProgress(it.getProgress());
                 }
             }
-        } finally {
-            if (progressListener instanceof ProgressPercentage)
-                progressListener.close();
-            it.close();
         }
     }
 
@@ -166,24 +159,15 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
      * save sequences in fastA format
      *
      * @param fileName
-     * @param progressListener
      * @throws IOException
      * @throws CanceledException
      */
-    public void saveFastAFile(String fileName, ProgressListener progressListener) throws IOException, CanceledException {
-        progressListener.setMaximum(numberOfSequences);
-        progressListener.setProgress(0);
-
+    public void saveFastAFile(String fileName) throws IOException {
         try (BufferedWriter w = new BufferedWriter(new FileWriter(fileName), 8192)) {
             for (int i = 0; i < numberOfSequences; i++) {
                 w.write(headers[i] + "\n");
                 w.write(sequences[i] + "\n");
-                progressListener.incrementProgress();
             }
-        } finally {
-            if (progressListener instanceof ProgressPercentage)
-                progressListener.close();
-
         }
     }
 
@@ -195,10 +179,10 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
      * @throws CanceledException
      */
     public void save(File refIndexFile, File refDBFile, File refInfFile, boolean saveFirstWordOnly) throws IOException, CanceledException {
-        final ProgressPercentage progress = new ProgressPercentage("Writing file: " + refIndexFile, numberOfLetters);
         System.err.println("Writing file: " + refDBFile);
 
-        try (final OutputWriter refDBOutputStream = new OutputWriter(refDBFile); OutputWriter refIndexOutputStream = new OutputWriter(refIndexFile)) {
+        try (ProgressPercentage progress = new ProgressPercentage("Writing file: " + refIndexFile, numberOfLetters);
+             final OutputWriter refDBOutputStream = new OutputWriter(refDBFile); OutputWriter refIndexOutputStream = new OutputWriter(refIndexFile)) {
             long dbFilePos = 0;
 
             for (int i = 0; i < numberOfSequences; i++) {
@@ -216,13 +200,12 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
 
                 progress.incrementProgress();
             }
-        } finally {
-            progress.close();
         }
-        final Writer writer = new FileWriter(refInfFile);
-        writer.write("sequences\t" + numberOfSequences + "\n");
-        writer.write("letters\t" + numberOfLetters + "\n");
-        writer.close();
+
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(refInfFile))) {
+            w.write("sequences\t" + numberOfSequences + "\n");
+            w.write("letters\t" + numberOfLetters + "\n");
+        }
     }
 
     /**

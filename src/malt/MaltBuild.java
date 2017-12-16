@@ -97,7 +97,7 @@ public class MaltBuild {
 
         options.comment("Performance:");
         final int numberOfThreads = options.getOption("-t", "threads", "Number of worker threads", Runtime.getRuntime().availableProcessors());
-        final int stepSize = options.getOption("-st", "step", "Step size used to advance seed, values greater than 1 reduce index size and sensitivity", 1, 1, 100);
+        final int stepSize = options.getOption("-st", "step", "Step size used to advance seed; a value greater than 1 will reduce index size, but also sensitivity", 1, 1, 100);
 
         options.comment("Seed:");
         String[] shapes = options.getOption("-ss", "shapes", "Seed shape(s)", new String[]{"default"});

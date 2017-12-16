@@ -96,7 +96,7 @@ public class CDS {
         progress.setProgress(0);
         final ArrayList<CDS> list = new ArrayList<>();
         for (String fileName : inputFiles) {
-            progress.setTasks("Parsing GFF files", fileName);
+            progress.setTasks("Loading GFF files", fileName);
 
             try (FileInputIterator it = new FileInputIterator(fileName)) {
                 if (it.hasNext()) {
