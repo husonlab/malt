@@ -34,58 +34,88 @@ import java.util.Map;
  * Daniel Huson, 8.2014
  */
 public class GeneTableAccess {
-    private final IntervalTree<GeneItem>[] refIndex2IntervalsTable;
+    private final int size;
+    private final long[] refIndex2FilePos;
+    private final IntervalTree<GeneItem>[] refIndex2Intervals;
+    private final RandomAccessFile dbRaf;
 
-    final static private Comparator<ReadMatchItem>
-            unweightedComparator = new Comparator<ReadMatchItem>() {
-        public int compare(ReadMatchItem a, ReadMatchItem b) {
-            if (a.score > b.score)
-                return -1;
-            else if (a.score < b.score)
-                return 1;
-            else
-                return 0;
-        }
-    };
-
+    private final int syncBits = 1023;
+    private final Object[] syncObjects = new Object[syncBits + 1];  // use lots of objects to synchronize on so that threads don't in each others way
 
     /**
      * construct the gene table from the gene-table index file
      *
-     * @param inputFile
+     * @param indexFile
+     * @param dbFile
      * @throws IOException
      */
-    public GeneTableAccess(File inputFile) throws IOException {
-
-        DataInputStream ins = new DataInputStream(new BufferedInputStream(new FileInputStream(inputFile)));
-
-        Basic.readAndVerifyMagicNumber(ins, GeneTableBuilder.MAGIC_NUMBER);
-
-        int tableLength = ins.readInt();
-        ProgressPercentage progress = new ProgressPercentage("Reading file: " + inputFile, tableLength);
-
-        long numberOfGeneLocations = 0;
-        refIndex2IntervalsTable = new IntervalTree[tableLength];
-
-        for (int refIndex = 0; refIndex < tableLength; refIndex++) {
-            int intervalsLength = ins.readInt();
-            if (intervalsLength > 0) {
-                IntervalTree<GeneItem> intervals = new IntervalTree<>();
-                for (int i = 0; i < intervalsLength; i++) {
-                    int start = ins.readInt();
-                    int end = ins.readInt();
-                    GeneItem geneItem = new GeneItem();
-                    geneItem.read(ins);
-                    intervals.add(start, end, geneItem);
-                    //System.err.println(refIndex+"("+start+"-"+end+") -> "+geneItem);
-                    numberOfGeneLocations++;
-                }
-                refIndex2IntervalsTable[refIndex] = intervals;
-            }
-            progress.incrementProgress();
+    public GeneTableAccess(File indexFile, File dbFile) throws IOException {
+        // create the synchronization objects
+        for (int i = 0; i < (syncBits + 1); i++) {
+            syncObjects[i] = new Object();
         }
-        progress.close();
-        System.err.println("Number of gene locations: " + numberOfGeneLocations);
+
+        try (DataInputStream ins = new DataInputStream(new BufferedInputStream(new FileInputStream(indexFile))); ProgressPercentage progress = new ProgressPercentage("Reading file: " + indexFile)) {
+            Basic.readAndVerifyMagicNumber(ins, GeneTableBuilder.MAGIC_NUMBER_IDX);
+            size = ins.readInt();
+            progress.setMaximum(size);
+            refIndex2FilePos = new long[size];
+            for (int i = 0; i < size; i++) {
+                refIndex2FilePos[i] = ins.readLong();
+                progress.incrementProgress();
+            }
+        }
+        refIndex2Intervals = (IntervalTree<GeneItem>[]) new IntervalTree[size];
+
+        try (DataInputStream ins = new DataInputStream(new BufferedInputStream(new FileInputStream(dbFile)))) {
+            Basic.readAndVerifyMagicNumber(ins, GeneTableBuilder.MAGIC_NUMBER_DB);
+            if (ins.readInt() != size)
+                throw new IOException("Sizes differ: " + indexFile + " vs " + dbFile);
+        }
+        dbRaf = new RandomAccessFile(dbFile, "r");
+    }
+
+    private int warned = 0;
+
+    /**
+     * get intervals for a given ref index
+     *
+     * @param refIndex
+     * @return intervals or null
+     * @throws IOException
+     */
+    private IntervalTree<GeneItem> getIntervals(int refIndex) {
+        synchronized (syncObjects[refIndex & syncBits]) {
+            if (refIndex2Intervals[refIndex] == null && refIndex2FilePos[refIndex] != 0) {
+                synchronized (dbRaf) {
+                    try {
+                        dbRaf.seek(refIndex2FilePos[refIndex]);
+                        int intervalsLength = dbRaf.readInt();
+                        if (intervalsLength > 0) {
+                            IntervalTree<GeneItem> intervals = new IntervalTree<>();
+                            for (int i = 0; i < intervalsLength; i++) {
+                                int start = dbRaf.readInt();
+                                int end = dbRaf.readInt();
+                                GeneItem geneItem = new GeneItem();
+                                geneItem.read(dbRaf);
+                                intervals.add(start, end, geneItem);
+                                //System.err.println(refIndex+"("+start+"-"+end+") -> "+geneItem);
+                            }
+                            refIndex2Intervals[refIndex] = intervals;
+                        }
+                    } catch (IOException ex) {
+                        if (warned < 10) {
+                            Basic.caught(ex);
+                            if (++warned == 0) {
+                                System.err.println("Suppressing all further such exceptions");
+                            }
+                        }
+                    }
+                }
+
+            }
+            return refIndex2Intervals[refIndex];
+        }
     }
 
     /**
@@ -113,22 +143,12 @@ public class GeneTableAccess {
                         else if (bWeight > aWeight)
                             return 1;
                         else {
-                            if (a.score > b.score)
-                                return -1;
-                            else if (a.score < b.score)
-                                return 1;
-                            else
-                                return 0;
+                            return Float.compare(b.score, a.score);
                         }
                     } else if (bWeight != null)
                         return 1;
                     else {       // both references have zero weight
-                        if (a.score > b.score)
-                            return -1;
-                        else if (a.score < b.score)
-                            return 1;
-                        else
-                            return 0;
+                        return Float.compare(b.score, a.score);
                     }
                 }
             });
@@ -139,16 +159,14 @@ public class GeneTableAccess {
         int numberOfGenes = 0;
         loop:
         for (ReadMatchItem match : sorted) {
-            if (match.refIndex < refIndex2IntervalsTable.length) {
-                final IntervalTree<GeneItem> intervals = refIndex2IntervalsTable[match.refIndex];
+            if (match.refIndex < size) {
+                final IntervalTree<GeneItem> intervals = getIntervals(match.refIndex);
                 if (intervals != null) {
-
                     for (Interval<GeneItem> interval : intervals.getIntervals(match.refStart, match.refEnd)) {
                         genes[numberOfGenes++] = interval.getData();
                         if (numberOfGenes == genes.length)
                             break loop;
                     }
-
                 }
             }
         }
@@ -157,67 +175,62 @@ public class GeneTableAccess {
 
     /**
      * adds annotations to reference header
+     *
      * @param referenceHeader
      * @param refIndex
-     * @param startReference
-     * @param endReference
-     * @return annotations
+     * @param alignStart
+     * @param alignEnd
+     * @return annotated reference header
      */
-    public byte[] addAnnotationString(byte[] referenceHeader, Integer refIndex, int startReference, int endReference) {
-        final IntervalTree<GeneItem> tree = refIndex2IntervalsTable[refIndex];
-
-        int kegg = 0;
-        int cog = 0;
-        int seed = 0;
-        int interpro = 0;
-        String proteinId = null;
+    public byte[] addAnnotationString(byte[] referenceHeader, Integer refIndex, int alignStart, int alignEnd) {
+        final IntervalTree<GeneItem> tree = getIntervals(refIndex);
 
         if (tree != null) {
-            // note that we use negative coordinates in the interval tree to start genes on the opposite strand
-            final Interval<GeneItem> alignmentInterval = new Interval<>(startReference < endReference ? startReference : -startReference, startReference < endReference ? endReference : -endReference, null);
-            for (Interval<GeneItem> interval : tree.getIntervalsSortedByDecreasingIntersectionLength(alignmentInterval.getStart(), alignmentInterval.getEnd())) {
-                if (alignmentInterval.intersectionLength(interval.getStart(), interval.getEnd()) < 0.9 * alignmentInterval.length())
-                    break; // require at least 90% of the alignment to be covered by the gene
+            final Interval<Object> alignInterval = new Interval<>(alignStart, alignEnd, null);
+            final Interval<GeneItem> refInterval = tree.getBestInterval(alignInterval, 0.9);
+            if (refInterval != null) {
+                final GeneItem geneItem = refInterval.getData();
 
-                final GeneItem geneItem = interval.getData();
-                if (kegg == 0)
-                    kegg = geneItem.getKeggId();
-                if (cog == 0)
-                    cog = geneItem.getCogId();
-                if (seed == 0)
-                    seed = geneItem.getSeedId();
-                if (interpro == 0)
-                    interpro = geneItem.getInterproId();
-                if (proteinId == null && geneItem.getProteinId() != null)
-                    proteinId = Basic.toString(geneItem.getProteinId());
-            }
-            final StringBuilder buf = new StringBuilder();
-            if (proteinId != null)
-                buf.append("|ref|").append(proteinId);
-            if (kegg != 0)
-                buf.append("|kegg|").append(kegg);
-            if (cog != 0)
-                buf.append("|cog|").append(cog);
-            if (seed != 0)
-                buf.append("|seed|").append(seed);
-            if (interpro != 0)
-                buf.append("|ipr|").append(interpro);
-            if (buf.length() > 0) {
-                String header = Basic.toString(referenceHeader);
-                String remainder;
-                int len = header.indexOf(' ');
-                if (len < header.length()) {
-                    remainder = header.substring(len); // keep space...
-                    header = header.substring(0, len);
-                } else
-                    remainder = "";
-                return (header + (header.endsWith("|") ? "" : "|") + "pos|" + startReference + ".." + endReference + buf.toString() + remainder).getBytes();
-            }
+                final StringBuilder buf = new StringBuilder();
+                buf.append("|ref|").append(Basic.toString(geneItem.getProteinId()));
+                if (geneItem.getKeggId() != 0)
+                    buf.append("|kegg|").append(geneItem.getKeggId());
+                if (geneItem.getCogId() != 0)
+                    buf.append("|cog|").append(geneItem.getCogId());
+                if (geneItem.getSeedId() != 0)
+                    buf.append("|seed|").append(geneItem.getSeedId());
+                if (geneItem.getInterproId() != 0)
+                    buf.append("|ipr|").append(geneItem.getInterproId());
+                if (buf.length() > 0) {
+                    String header = Basic.toString(referenceHeader);
+                    String remainder;
+                    int len = header.indexOf(' ');
+                    if (len < header.length()) {
+                        remainder = header.substring(len); // keep space...
+                        header = header.substring(0, len);
+                    } else
+                        remainder = "";
 
+                    return (header + (header.endsWith("|") ? "" : "|") + "pos|"
+                            + (geneItem.isReverse() ? refInterval.getEnd() + ".." + refInterval.getStart()
+                            : refInterval.getStart() + ".." + refInterval.getEnd())
+                            + buf.toString() + remainder).getBytes();
+                }
+            }
         }
         return referenceHeader;
     }
 
+    final static private Comparator<ReadMatchItem>
+            unweightedComparator = new Comparator<ReadMatchItem>() {
+        public int compare(ReadMatchItem a, ReadMatchItem b) {
+            return Float.compare(b.score, a.score);
+        }
+    };
+
+    public int size() {
+        return size;
+    }
 
     /**
      * dump gene table to standard out
@@ -225,26 +238,30 @@ public class GeneTableAccess {
      * @param args
      */
     public static void main(String[] args) throws IOException, UsageException, CanceledException {
-        args = new String[]{"-i", "/Users/huson/data/malt/genes/index/gene-table.idx"};
+        args = new String[]{"-i", "/Users/huson/data/malt/genes2/index/annotation.idx"};
 
         final ArgsOptions options = new ArgsOptions(args, null, "GeneTableDump", "Dump gene table");
-        final String inputFile = options.getOptionMandatory("i", "input", "Gene table file", "index/gene-table.idx");
+        final String idxFile = options.getOptionMandatory("i", "idxFile", "Input annotation.idx file", "index/annotation.idx");
+        final String dbFile = options.getOption("d", "dbFile", "Input annotation.db file", Basic.replaceFileSuffix(idxFile, ".db"));
         final String outputFile = options.getOption("o", "output", "Output file (or stdout)", "stdout");
         options.done();
 
-        final GeneTableAccess geneTableAccess = new GeneTableAccess(new File(inputFile));
+        final GeneTableAccess geneTableAccess = new GeneTableAccess(new File(idxFile), new File(dbFile));
 
         try (Writer w = new BufferedWriter(outputFile.equals("stdout") ? new OutputStreamWriter(System.out) : new FileWriter(outputFile))) {
-            for (int i = 0; i < geneTableAccess.refIndex2IntervalsTable.length; i++) {
-                final IntervalTree<GeneItem> tree = geneTableAccess.refIndex2IntervalsTable[i];
+            for (int idx = 0; idx < geneTableAccess.size(); idx++) {
+                final IntervalTree<GeneItem> tree = geneTableAccess.getIntervals(idx);
                 if (tree != null) {
-                    w.write("RefIndex=" + i + "\n");
+                    if (true) {
+                        System.err.println("Tree[" + idxFile + "]: " + Basic.abbreviateDotDotDot(tree.toString(), 1000));
+                    } else {
+                        w.write("RefIndex=" + idx + "\n");
 
-                    for (Interval<GeneItem> interval : tree) {
-                        w.write(interval.getStart() + " " + interval.getEnd() + ": " + interval.getData() + "\n");
+                        for (Interval<GeneItem> interval : tree) {
+                            w.write(interval.getStart() + " " + interval.getEnd() + ": " + interval.getData() + "\n");
+                        }
+                        w.write("----\n");
                     }
-
-                    w.write("----\n");
                 }
             }
         }

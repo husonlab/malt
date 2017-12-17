@@ -461,12 +461,12 @@ public class ReferencesHashTableBuilder {
         final ProgressPercentage progressPercentage = new ProgressPercentage("Writing file: " + file);
 
         try (OutputWriter outs = new OutputWriter(file)) {
-            outs.write(MAGIC_NUMBER, 0, MAGIC_NUMBER.length);
+            outs.write(MAGIC_NUMBER);
             outs.writeInt(SequenceType.rankOf(referenceSequenceType));
             if (referenceSequenceType == SequenceType.Protein) {
                 final byte[] bytes = alphabet.toString().getBytes();
                 outs.writeInt(bytes.length);
-                outs.write(bytes, 0, bytes.length);
+                outs.write(bytes);
             }
             outs.writeInt(tableSize);
             outs.writeInt(hashMask);
@@ -476,7 +476,7 @@ public class ReferencesHashTableBuilder {
 
             final byte[] shapeBytes = seedShape.getBytes();
             outs.writeInt(shapeBytes.length);
-            outs.write(shapeBytes, 0, shapeBytes.length);
+            outs.write(shapeBytes);
         } finally {
             progressPercentage.reportTaskCompleted();
 

@@ -332,8 +332,8 @@ public class MaltRun {
         }
 
         final GeneTableAccess geneTableAccess;
-        if ((new File(indexDirectory, "gene-table.idx")).exists()) {
-            geneTableAccess = new GeneTableAccess(new File(indexDirectory, "gene-table.idx"));
+        if ((new File(indexDirectory, "annotation.idx")).exists()) {
+            geneTableAccess = new GeneTableAccess(new File(indexDirectory, "annotation.idx"), new File(indexDirectory, "annotation.db"));
             maltOptions.setParseHeaders(true);
         }
         else

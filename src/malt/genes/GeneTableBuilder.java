@@ -27,11 +27,11 @@ import megan.classification.IdMapper;
 import megan.classification.util.TaggedValueIterator;
 import megan.io.OutputWriter;
 import megan.util.interval.Interval;
-import megan.util.interval.IntervalTree;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,16 +46,18 @@ import java.util.concurrent.Executors;
  * Daniel Huson, 8.2014, 11.2017
  */
 public class GeneTableBuilder {
-    final public static byte[] MAGIC_NUMBER = "MAGenesV0.4.".getBytes();
+    final static byte[] MAGIC_NUMBER_IDX = "MAAnnoIdxV0.1.".getBytes();
+    final static byte[] MAGIC_NUMBER_DB = "MAAnnoDbV0.1.".getBytes();
 
     public static final String[] ACCESSION_TAGS = new String[]{"gb|", "ref|"};
 
-    private final int numberOfSyncObjects = 1024;
-    private final Object[] syncObjects = new Object[numberOfSyncObjects];  // use lots of objects to synchronize on so that threads don't in each others way
     private final IdMapper keggMapper;
     private final IdMapper cogMapper;
     private final IdMapper seedMapper;
     private final IdMapper interproMapper;
+
+    private final int syncBits = 1023;
+    private final Object[] syncObjects = new Object[syncBits + 1];  // use lots of objects to synchronize on so that threads don't in each others way
 
     /**
      * constructor
@@ -64,8 +66,9 @@ public class GeneTableBuilder {
      */
     public GeneTableBuilder() throws IOException {
         // create the synchronization objects
-        for (int i = 0; i < numberOfSyncObjects; i++)
+        for (int i = 0; i < (syncBits + 1); i++) {
             syncObjects[i] = new Object();
+        }
 
         if (ClassificationManager.get("KEGG", false).getIdMapper().isActiveMap(IdMapper.MapType.Accession))
             keggMapper = ClassificationManager.get("KEGG", false).getIdMapper();
@@ -97,26 +100,26 @@ public class GeneTableBuilder {
      * @param numberOfThreads
      * @throws IOException
      */
-    public void buildAndSaveGeneTable(final ReferencesDBBuilder referencesDB, final Collection<String> gffFiles, final File indexFile, final int numberOfThreads) throws IOException, CanceledException {
-        System.err.println("Building gene table...");
-        final Map<String, Integer> accession2refIndex = computeAccession2RefIndex(referencesDB, numberOfThreads);
+    public void buildAndSaveAnnotations(final ReferencesDBBuilder referencesDB, final Collection<String> gffFiles, final File indexFile, final File dbFile, final int numberOfThreads) throws IOException, CanceledException {
+        System.err.println("Annotating reference sequences...");
+        final Map<String, Integer> refAccession2IndexMap = computeRefAccession2IndexMap(referencesDB, numberOfThreads);
 
         final Collection<CDS> annotations = CDS.parseGFFforCDS(gffFiles, new ProgressPercentage());
 
-        final IntervalTree<GeneItem>[] table = computeTable(referencesDB, accession2refIndex, annotations, numberOfThreads);
-        accession2refIndex.clear();
+        final ArrayList<Interval<GeneItem>>[] table = computeRefIndex2Intervals(referencesDB, refAccession2IndexMap, annotations, numberOfThreads);
+        refAccession2IndexMap.clear();
 
-        writeTable(indexFile, table);
+        writeTable(indexFile, dbFile, table);
     }
 
     /**
-     * Compute the accession to references mapping
+     * Compute the reference accessions to reference index mapping
      *
      * @param referencesDB
      * @param numberOfThreads
      * @return accession to reference index mapping
      */
-    private Map<String, Integer> computeAccession2RefIndex(final ReferencesDBBuilder referencesDB, final int numberOfThreads) {
+    private Map<String, Integer> computeRefAccession2IndexMap(final ReferencesDBBuilder referencesDB, final int numberOfThreads) {
         final Map<String, Integer> accession2refIndex = new HashMap<>(referencesDB.getNumberOfSequences(), 1f);
 
         final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
@@ -163,17 +166,17 @@ public class GeneTableBuilder {
     }
 
     /**
-     * compute the gene location table
+     * compute the reference Id to intervals mapping
      *
      * @param referencesDB
-     * @param accession2refIndex
+     * @param refAccession2IdMap
      * @param cdsList
      * @param numberOfThreads
      * @return
      * @throws FileNotFoundException
      */
-    private IntervalTree<GeneItem>[] computeTable(final ReferencesDBBuilder referencesDB, final Map<String, Integer> accession2refIndex, final Collection<CDS> cdsList, int numberOfThreads) throws IOException {
-        final IntervalTree<GeneItem>[] refIndex2Intervals = new IntervalTree[referencesDB.getNumberOfSequences()];
+    private ArrayList<Interval<GeneItem>>[] computeRefIndex2Intervals(final ReferencesDBBuilder referencesDB, final Map<String, Integer> refAccession2IdMap, final Collection<CDS> cdsList, int numberOfThreads) throws IOException {
+        final ArrayList<Interval<GeneItem>>[] refIndex2Intervals = new ArrayList[referencesDB.getNumberOfSequences()];
 
         final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
         final CountDownLatch countDownLatch = new CountDownLatch(numberOfThreads);
@@ -193,12 +196,12 @@ public class GeneTableBuilder {
                             final CDS cds = queue.take();
                             if (cds == sentinel)
                                 break;
-                            final Integer refIndex = accession2refIndex.get(cds.getDnaId());
+                            final Integer refIndex = refAccession2IdMap.get(cds.getDnaId());
                             if (refIndex != null) {
-                                synchronized (syncObjects[refIndex % 1024]) {
-                                    IntervalTree<GeneItem> tree = refIndex2Intervals[refIndex];
-                                    if (tree == null)
-                                        tree = refIndex2Intervals[refIndex] = new IntervalTree<>();
+                                synchronized (syncObjects[refIndex & syncBits]) {
+                                    ArrayList<Interval<GeneItem>> list = refIndex2Intervals[refIndex];
+                                    if (list == null)
+                                        list = refIndex2Intervals[refIndex] = new ArrayList<>();
 
                                     final GeneItem geneItem = new GeneItem();
                                     final String accession = cds.getProteinId();
@@ -230,11 +233,8 @@ public class GeneTableBuilder {
                                             geneItem.setInterproId(id);
                                         }
                                     }
-                                    if (cds.isReverse()) {
-                                        tree.add(-cds.getEnd(), -cds.getStart(), geneItem);
-                                    } else {
-                                        tree.add(cds.getStart(), cds.getEnd(), geneItem);
-                                    }
+                                    geneItem.setReverse(cds.isReverse());
+                                    list.add(new Interval<>(cds.getStart(), cds.getEnd(), geneItem));
                                     counts[threadNumber]++;
                                 }
                             }
@@ -270,28 +270,30 @@ public class GeneTableBuilder {
     }
 
     /**
-     * write the table to the named file
+     * save the annotations
      *
-     * @param file
+     * @param indexFile
      * @param refIndex2Intervals
      * @throws IOException
      */
-    private static void writeTable(File file, final IntervalTree<GeneItem>[] refIndex2Intervals) throws IOException {
+    private static void writeTable(File indexFile, File dbFile, final ArrayList<Interval<GeneItem>>[] refIndex2Intervals) throws IOException {
+        final long[] refIndex2FilePos = new long[refIndex2Intervals.length];
 
         int totalRefWithAGene = 0;
-        try (OutputWriter outs = new OutputWriter(file)) {
-            outs.write(GeneTableBuilder.MAGIC_NUMBER, 0, GeneTableBuilder.MAGIC_NUMBER.length);
+        try (OutputWriter outs = new OutputWriter(dbFile); ProgressPercentage progress = new ProgressPercentage("Writing file: " + dbFile, refIndex2Intervals.length)) {
+            outs.write(GeneTableBuilder.MAGIC_NUMBER_DB);
 
             outs.writeInt(refIndex2Intervals.length);
 
-            ProgressPercentage progress = new ProgressPercentage("Writing file: " + file, refIndex2Intervals.length);
-
-            for (IntervalTree<GeneItem> intervals : refIndex2Intervals) {
-                if (intervals == null) {
+            for (int i = 0; i < refIndex2Intervals.length; i++) {
+                final ArrayList<Interval<GeneItem>> list = refIndex2Intervals[i];
+                if (list == null) {
+                    refIndex2FilePos[i] = 0;
                     outs.writeInt(0);
                 } else {
-                    outs.writeInt(intervals.size());
-                    for (Interval<GeneItem> interval : intervals) {
+                    refIndex2FilePos[i] = outs.length();
+                    outs.writeInt(list.size());
+                    for (Interval<GeneItem> interval : Basic.randomize(list, 666)) { // need to save in random order
                         outs.writeInt(interval.getStart());
                         outs.writeInt(interval.getEnd());
                         interval.getData().write(outs);
@@ -300,9 +302,17 @@ public class GeneTableBuilder {
                 }
                 progress.incrementProgress();
             }
-            progress.close();
         }
-        System.err.println("Reference sequences with at least one annotation: " + totalRefWithAGene + " of " + refIndex2Intervals.length);
+        try (OutputWriter outs = new OutputWriter(indexFile); ProgressPercentage progress = new ProgressPercentage("Writing file: " + indexFile, refIndex2FilePos.length)) {
+            outs.write(GeneTableBuilder.MAGIC_NUMBER_IDX);
+            outs.writeInt(refIndex2FilePos.length);
+            for (long filePos : refIndex2FilePos) {
+                outs.writeLong(filePos);
+                progress.incrementProgress();
+            }
+        }
+
+        System.err.println(String.format("Reference sequences with at least one annotation: %,d of %,d", totalRefWithAGene, refIndex2Intervals.length));
     }
 }
 

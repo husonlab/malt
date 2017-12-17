@@ -22,8 +22,8 @@ package malt.genes;
 import jloda.util.Basic;
 import megan.io.OutputWriter;
 
-import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * a gene item
@@ -36,6 +36,7 @@ public class GeneItem {
     private int cogId;
     private int seedId;
     private int interproId;
+    private boolean reverse;
 
     public GeneItem() {
     }
@@ -80,12 +81,21 @@ public class GeneItem {
         this.interproId = interproId;
     }
 
+    public boolean isReverse() {
+        return reverse;
+    }
+
+    public void setReverse(boolean reverse) {
+        this.reverse = reverse;
+    }
+
     public String toString() {
         return "proteinId=" + (proteinId == null ? "null" : Basic.toString(proteinId))
                 + ", keggId=" + keggId
                 + ", cogId=" + cogId
                 + ", seedId=" + seedId
-                + ", interproId=" + interproId;
+                + ", interProId=" + interproId
+                + ", reverse=" + reverse;
 
     }
 
@@ -100,12 +110,13 @@ public class GeneItem {
             outs.writeInt(0);
         else {
             outs.writeInt(proteinId.length);
-            outs.write(proteinId, 0, proteinId.length);
+            outs.write(proteinId);
         }
         outs.writeInt(keggId);
         outs.writeInt(cogId);
         outs.writeInt(seedId);
         outs.writeInt(interproId);
+        outs.write(reverse ? 1 : 0);
     }
 
     /**
@@ -114,7 +125,7 @@ public class GeneItem {
      * @param ins
      * @throws IOException
      */
-    public void read(DataInputStream ins) throws IOException {
+    public void read(RandomAccessFile ins) throws IOException {
         int length = ins.readInt();
         if (length == 0)
             proteinId = null;
@@ -127,5 +138,6 @@ public class GeneItem {
         cogId = ins.readInt();
         seedId = ins.readInt();
         interproId = ins.readInt();
+        reverse = (ins.read() == 1);
     }
 }

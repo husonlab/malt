@@ -190,12 +190,12 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
 
                 final byte[] sequence = sequences[i];
                 refDBOutputStream.writeInt(sequence.length);
-                refDBOutputStream.write(sequence, 0, sequence.length);
+                refDBOutputStream.write(sequence);
                 dbFilePos += 4 + sequence.length;
 
                 final byte[] header = (saveFirstWordOnly ? getFirstWord(headers[i]) : headers[i]);
                 refDBOutputStream.writeInt(header.length);
-                refDBOutputStream.write(header, 0, header.length);
+                refDBOutputStream.write(header);
                 dbFilePos += 4 + header.length;
 
                 progress.incrementProgress();

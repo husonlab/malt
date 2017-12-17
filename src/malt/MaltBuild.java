@@ -271,7 +271,7 @@ public class MaltBuild {
 
         if (gffFiles.size() > 0) {
                 GeneTableBuilder geneTableBuilder = new GeneTableBuilder();
-            geneTableBuilder.buildAndSaveGeneTable(referencesDB, gffFiles, new File(indexDirectory, "gene-table.idx"), numberOfThreads);
+            geneTableBuilder.buildAndSaveAnnotations(referencesDB, gffFiles, new File(indexDirectory, "annotation.idx"), new File(indexDirectory, "annotation.db"), numberOfThreads);
         }
     }
 }

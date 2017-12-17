@@ -87,8 +87,8 @@ public class ReferencesDBAccess implements Closeable {
                 }
             }
         }
-        System.err.println(String.format("Number of sequences:%,13d", numberOfSequences));
-        System.err.println(String.format("Number of letters:%,15d", numberOfLetters));
+        System.err.println(String.format("Number of sequences:%,14d", numberOfSequences));
+        System.err.println(String.format("Number of letters:%,16d", numberOfLetters));
 
         if (numberOfSequences != refIndex.limit())
             throw new IOException("Expected " + numberOfSequences + "sequences , index contains: " + refIndex.limit());
