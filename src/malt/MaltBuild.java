@@ -152,7 +152,7 @@ public class MaltBuild {
         if (inputFiles.size() == 1) {
             final File file = new File(inputFiles.get(0));
             if (file.isDirectory()) {
-                System.err.println("Detecting FastA files in directory: " + file);
+                System.err.println("Looking for FastA files in directory: " + file);
                 inputFiles.clear();
                 for (File aFile : Basic.getAllFilesInDirectory(file, new FastaFileFilter(), true)) {
                     inputFiles.add(aFile.getPath());
@@ -160,14 +160,14 @@ public class MaltBuild {
                 if (inputFiles.size() == 0)
                     throw new IOException("No files found in directory: " + file);
                 else
-                    System.err.println(String.format("Files: %,d", inputFiles.size()));
+                    System.err.println(String.format("Found: %,d", inputFiles.size()));
 
             }
         }
         if (gffFiles.size() == 1) {
             final File file = new File(gffFiles.get(0));
             if (file.isDirectory()) {
-                System.err.println("Detecting GFF files in directory: " + file);
+                System.err.println("Looking for GFF files in directory: " + file);
                 gffFiles.clear();
                 for (File aFile : Basic.getAllFilesInDirectory(file, new GFF3FileFilter(), true)) {
                     gffFiles.add(aFile.getPath());
@@ -175,7 +175,7 @@ public class MaltBuild {
                 if (gffFiles.size() == 0)
                     throw new IOException("No GFF files found in directory: " + file);
                 else
-                    System.err.println(String.format("Files: %,d", inputFiles.size()));
+                    System.err.println(String.format("Found: %,d", inputFiles.size()));
             }
         }
 
