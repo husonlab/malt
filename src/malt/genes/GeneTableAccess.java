@@ -20,14 +20,10 @@
 package malt.genes;
 
 import jloda.util.*;
-import malt.analysis.ReadMatchItem;
 import megan.util.interval.Interval;
 import megan.util.interval.IntervalTree;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Map;
 
 /**
  * class used to access gene table
@@ -119,61 +115,6 @@ public class GeneTableAccess {
     }
 
     /**
-     * get genes associated with this read. Genes are reported by decreasing weight of the reference sequence and then decreasing bit score
-     *
-     * @param refIndex2weight
-     * @param matches
-     * @param genes
-     * @return number of genes returned in array "genes"
-     */
-    public int getGenes(final Map<Integer, Integer> refIndex2weight, final ReadMatchItem[] matches, GeneItem[] genes) {
-
-        ReadMatchItem[] sorted = new ReadMatchItem[matches.length];
-        System.arraycopy(matches, 0, sorted, 0, matches.length);
-
-        // sort matches by decreasing weight of reference sequence:
-        if (refIndex2weight != null) {
-            Arrays.sort(sorted, new Comparator<ReadMatchItem>() {
-                public int compare(ReadMatchItem a, ReadMatchItem b) {
-                    Integer aWeight = refIndex2weight.get(a.refIndex);
-                    Integer bWeight = refIndex2weight.get(b.refIndex);
-                    if (aWeight != null) {
-                        if (bWeight == null || bWeight < aWeight)
-                            return -1;
-                        else if (bWeight > aWeight)
-                            return 1;
-                        else {
-                            return Float.compare(b.score, a.score);
-                        }
-                    } else if (bWeight != null)
-                        return 1;
-                    else {       // both references have zero weight
-                        return Float.compare(b.score, a.score);
-                    }
-                }
-            });
-        } else {
-            Arrays.sort(sorted, unweightedComparator);
-        }
-
-        int numberOfGenes = 0;
-        loop:
-        for (ReadMatchItem match : sorted) {
-            if (match.refIndex < size) {
-                final IntervalTree<GeneItem> intervals = getIntervals(match.refIndex);
-                if (intervals != null) {
-                    for (Interval<GeneItem> interval : intervals.getIntervals(match.refStart, match.refEnd)) {
-                        genes[numberOfGenes++] = interval.getData();
-                        if (numberOfGenes == genes.length)
-                            break loop;
-                    }
-                }
-            }
-        }
-        return numberOfGenes;
-    }
-
-    /**
      * adds annotations to reference header
      *
      * @param referenceHeader
@@ -220,13 +161,6 @@ public class GeneTableAccess {
         }
         return referenceHeader;
     }
-
-    final static private Comparator<ReadMatchItem>
-            unweightedComparator = new Comparator<ReadMatchItem>() {
-        public int compare(ReadMatchItem a, ReadMatchItem b) {
-            return Float.compare(b.score, a.score);
-        }
-    };
 
     public int size() {
         return size;

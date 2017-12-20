@@ -1,4 +1,4 @@
-/**
+/*
  * MaltRun.java 
  * Copyright (C) 2017 Daniel H. Huson
  *
@@ -24,21 +24,21 @@ import malt.align.AlignerOptions;
 import malt.align.BlastStatisticsHelper;
 import malt.align.DNAScoringMatrix;
 import malt.align.ProteinScoringMatrix;
-import malt.analysis.OrganismsProfileMerger;
 import malt.data.*;
 import malt.genes.GeneTableAccess;
 import malt.io.*;
 import malt.mapping.MappingManager;
-import malt.util.ProfileUtilities;
 import malt.util.Utilities;
-import megan.classification.Classification;
 import megan.classification.ClassificationManager;
 import megan.core.Document;
 import megan.parsers.blast.BlastMode;
 import megan.util.ReadMagnitudeParser;
 
 import javax.xml.bind.JAXBException;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
@@ -61,11 +61,7 @@ public class MaltRun {
     private long totalAlignments = 0;
 
     /**
-     * run the MALT program
-     *
-     * @param args
-     * @throws jloda.util.UsageException
-     * @throws java.io.IOException
+     * launch the MALT program
      */
     public static void main(String[] args) {
         try {
@@ -96,10 +92,6 @@ public class MaltRun {
 
     /**
      * run the program
-     *
-     * @param args
-     * @throws jloda.util.UsageException
-     * @throws java.io.IOException
      */
     public void run(final String[] args) throws UsageException, IOException, CanceledException, JAXBException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
         version = Basic.getVersion(this.getClass());
@@ -138,15 +130,6 @@ public class MaltRun {
         }
         if (maltOptions.getMatchOutputFormat() == MaltOptions.MatchOutputFormat.SAM || options.isDoHelp()) {
             maltOptions.setSparseSAM(options.getOption("sps", "sparseSAM", "Produce sparse SAM format (smaller, faster, but only suitable for MEGAN)", maltOptions.isSparseSAM()));
-        }
-        final List<String> outputOrganismFileNames;
-        if (true) // do not allow organisms output
-            outputOrganismFileNames = new LinkedList<>();
-        else {
-            outputOrganismFileNames = options.getOption("oo", "outOrganism", "Organism profile XML output file(s) or directory or STDOUT", new LinkedList<String>());
-            if (outputOrganismFileNames.size() > 0 || options.isDoHelp()) {
-                maltOptions.setGzipOrganisms(options.getOption("zo", "gzipOrganism", "Compress organism output using gzip", maltOptions.isGzipOrganisms()));
-            }
         }
         final List<String> outputAlignedFileNames = options.getOption("oa", "outAligned", "Aligned reads output file(s) or directory or STDOUT", new LinkedList<String>());
         if (outputAlignedFileNames.size() > 0 || options.isDoHelp()) {
@@ -192,13 +175,6 @@ public class MaltRun {
 
         options.comment("LCA parameters:");
         final String[] cNames = (options.isDoHelp() ? ClassificationManager.getAllSupportedClassifications().toArray(new String[ClassificationManager.getAllSupportedClassifications().size()]) : MappingManager.determineAvailableMappings(indexDirectory));
-
-        if (false) {
-            for (String cName : cNames) {
-                final boolean useLCA = options.getOption("-l_" + cName.toLowerCase(), "lca_" + cName.toLowerCase(), "Use LCA for assigning to '" + cName + "' (otherwise 'best-hit')", ProgramProperties.get(cName + "UseLCA", cName.equals(Classification.Taxonomy)));
-                ProgramProperties.put(cName + "UseLCA", useLCA);
-            }
-        }
 
         maltOptions.setTopPercentLCA(options.getOption("top", "topPercent", "Top percent value for LCA algorithm", maltOptions.getTopPercentLCA()));
         maltOptions.setMinSupportPercentLCA(options.getOption("supp", "minSupportPercent", "Min support value for LCA algorithm as a percent of assigned reads (0==off)", maltOptions.getMinSupportPercentLCA()));
@@ -289,14 +265,6 @@ public class MaltRun {
 
         Utilities.checkFileExists(new File(indexDirectory));
 
-        if (outputOrganismFileNames.size() > 0) {
-            try {
-                Utilities.checkFileExists(new File(indexDirectory, "gene-table.idx"));
-            } catch (IOException ex) {
-                throw new IOException("Specified index does not support '--outOrganisms': " + ex);
-            }
-        }
-
         try {
             ReferencesHashTableAccess.checkFilesExist(indexDirectory, 0);
         } catch (IOException ex) {
@@ -327,7 +295,7 @@ public class MaltRun {
         // table.show();
 
         // load mapping files, if we are going to generate RMA
-        if ((outputRMAFileNames.size() > 0)) {
+        if (outputRMAFileNames.size() > 0) {
             MappingManager.loadMappings(cNames, indexDirectory);
         }
 
@@ -345,16 +313,14 @@ public class MaltRun {
         if (maltOptions.isUseReplicateQueryCaching())
             AlignmentEngine.activateReplicateQueryCaching(replicateQueryCacheBits);
 
-
         for (String inFile : inputFileNames) {
             try {
                 if ((new File(inFile).exists())) {
                     String rmaOutputFile = getOutputFileName(fileNumber, inputFileNames, outputRMAFileNames, ".rma6", false);
                     String matchesOutputFile = getOutputFileName(fileNumber, inputFileNames, outputMatchesFileNames, maltOptions.getMatchesOutputSuffix(), maltOptions.isGzipMatches());
-                    String organismProfileOutputFile = getOutputFileName(fileNumber, inputFileNames, outputOrganismFileNames, "-organisms.xml", maltOptions.isGzipOrganisms());
                     String alignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputAlignedFileNames, "-aligned.fna", maltOptions.isGzipAlignedReads());
                     String unalignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputUnAlignedFileNames, "-unaligned.fna", maltOptions.isGzipUnalignedReads());
-                    launchAlignmentThreads(alignerOptions, maltOptions, inFile, rmaOutputFile, matchesOutputFile, organismProfileOutputFile,
+                    launchAlignmentThreads(alignerOptions, maltOptions, inFile, rmaOutputFile, matchesOutputFile,
                             alignedReadsOutputFile, unalignedReadsOutputFile, referencesDB, hashTables, geneTableAccess);
                 } else {
                     System.err.println("File not found: '" + inFile + "', skipped");
@@ -385,18 +351,12 @@ public class MaltRun {
 
     /**
      * run search on file of input sequences
-     *
-     * @param maltOptions
-     * @param infile
-     * @param tables
-     * @throws jloda.util.CanceledException
-     * @throws java.io.IOException
      */
-    public void launchAlignmentThreads(final AlignerOptions alignerOptions, final MaltOptions maltOptions, final String infile, final String rmaOutputFile,
-                                       final String matchesOutputFile, final String organismProfileOutputFile,
-                                       final String alignedReadsOutputFile, final String unalignedReadsOutputFile,
-                                       final ReferencesDBAccess referencesDB, final ReferencesHashTableAccess[] tables,
-                                       final GeneTableAccess geneTableAccess) throws IOException, JAXBException {
+    private void launchAlignmentThreads(final AlignerOptions alignerOptions, final MaltOptions maltOptions, final String infile, final String rmaOutputFile,
+                                        final String matchesOutputFile,
+                                        final String alignedReadsOutputFile, final String unalignedReadsOutputFile,
+                                        final ReferencesDBAccess referencesDB, final ReferencesHashTableAccess[] tables,
+                                        final GeneTableAccess geneTableAccess) throws IOException, JAXBException {
 
         final ExecutorService executor = Executors.newFixedThreadPool(maltOptions.getNumberOfThreads());
         final CountDownLatch countDownLatch = new CountDownLatch(maltOptions.getNumberOfThreads());
@@ -418,8 +378,6 @@ public class MaltRun {
         final FileWriterRanked alignedReadsWriter = (alignedReadsOutputFile != null ? new FileWriterRanked(alignedReadsOutputFile, maltOptions.getNumberOfThreads(), 1) : null);
         final FileWriterRanked unalignedReadsWriter = (unalignedReadsOutputFile != null ? new FileWriterRanked(unalignedReadsOutputFile, maltOptions.getNumberOfThreads(), 1) : null);
 
-        final OutputStream organismOutStream = (organismProfileOutputFile != null ? new BufferedOutputStream(new FileOutputStream(organismProfileOutputFile)) : null);
-
         if (matchesWriter == null && rmaWriter == null && alignedReadsWriter == null && unalignedReadsWriter == null)
             System.err.println("Warning: no output specified");
 
@@ -440,7 +398,7 @@ public class MaltRun {
                 public void run() {
                     try {
                         alignmentEngines[threadNumber] = new AlignmentEngine(threadNumber, maltOptions, alignerOptions, referencesDB, tables, fastAReader,
-                                matchesWriter, rmaWriter, organismOutStream, alignedReadsWriter, unalignedReadsWriter, geneTableAccess);
+                                matchesWriter, rmaWriter, alignedReadsWriter, unalignedReadsWriter, geneTableAccess);
                         alignmentEngines[threadNumber].runOuterLoop();
                         alignmentEngines[threadNumber].finish();
                     } catch (Exception ex) {
@@ -515,13 +473,6 @@ public class MaltRun {
                 System.err.println("Deleted temporary file: " + matchesOutputFileUsed);
         }
 
-        if (organismOutStream != null) {
-            OrganismsProfileMerger organismsProfileMerger = new OrganismsProfileMerger(MappingManager.getTaxonomyMapping(), geneTableAccess);
-            organismsProfileMerger.setName(Basic.getFileBaseName(Basic.getFileNameWithoutPath(infile)));
-            organismsProfileMerger.mergeAndCompute(ProfileUtilities.getOrganismsProfiles(alignmentEngines));
-            organismsProfileMerger.write(organismOutStream);
-            organismOutStream.close();
-        }
         if (alignedReadsWriter != null) {
             // merge all thread-specific taxon profiles. This can be quite major computation...
             alignedReadsWriter.close();
@@ -547,13 +498,6 @@ public class MaltRun {
 
     /**
      * creates the output file name
-     *
-     * @param fileNumber
-     * @param inFiles
-     * @param outFiles
-     * @param suffix
-     * @return
-     * @throws IOException
      */
     private String getOutputFileName(final int fileNumber, final List<String> inFiles, final List<String> outFiles, final String suffix, final boolean gzip) throws IOException {
         if (outFiles.size() == 0)

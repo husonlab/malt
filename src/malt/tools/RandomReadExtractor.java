@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2015 Daniel H. Huson
+ *  Copyright (C) 2017 Daniel H. Huson
  *
  *  (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -28,10 +28,6 @@ import java.util.Random;
 public class RandomReadExtractor {
     /**
      * convert feature tables to gene table
-     *
-     * @param args
-     * @throws UsageException
-     * @throws java.io.FileNotFoundException
      */
     public static void main(String[] args) throws Exception {
         try {
@@ -51,8 +47,6 @@ public class RandomReadExtractor {
 
     /**
      * run the program
-     *
-     * @param args
      */
     public void run(String[] args) throws CanceledException, IOException, UsageException {
         final ArgsOptions options = new ArgsOptions(args, this, "Randomly cuts out reads from a single DNA sequence");

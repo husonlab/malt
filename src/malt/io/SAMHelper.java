@@ -436,7 +436,7 @@ public class SAMHelper {
             case BlastX:
                 return String.format(FILE_HEADER_BLASTX_TEMPLATE, (commandLine != null ? commandLine:""));
             default:
-                return null;
+                return "???";
         }
     }
 }

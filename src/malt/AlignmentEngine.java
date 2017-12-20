@@ -22,17 +22,14 @@ package malt;
 import jloda.util.Basic;
 import malt.align.AlignerOptions;
 import malt.align.BandedAligner;
-import malt.analysis.OrganismsProfile;
 import malt.data.*;
 import malt.genes.GeneTableAccess;
 import malt.io.*;
-import malt.mapping.MappingManager;
 import malt.util.FixedSizePriorityQueue;
 import malt.util.Utilities;
 import megan.parsers.blast.BlastMode;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -57,7 +54,6 @@ public class AlignmentEngine {
     // io:
     private final FastAReader fastAReader;
     private final MaltOptions.MatchOutputFormat matchOutputFormat;
-    private final OutputStream organismsOutStream;
     private final FileWriterRanked matchesWriter;
     private final FileWriterRanked alignedReadsWriter;
     private final FileWriterRanked unalignedReadsWriter;
@@ -77,8 +73,6 @@ public class AlignmentEngine {
 
     // keep track of all used references:
     private final BitSet alignedReferenceIds;
-
-    private final OrganismsProfile organismsProfile;
 
     // used for stats:
     private long countSequencesProcessed;
@@ -102,20 +96,10 @@ public class AlignmentEngine {
 
     /**
      * construct an instance of the alignment engine. Each instance is run in a separate thread
-     *
-     * @param maltOptions
-     * @param alignerOptions
-     * @param referencesDB
-     * @param tables
-     * @param fastAReader
-     * @param matchesWriter
-     * @param alignedReadsWriter
-     * @param unalignedReadsWriter
-     * @throws IOException
      */
     AlignmentEngine(final int threadNumber, final MaltOptions maltOptions, AlignerOptions alignerOptions, final ReferencesDBAccess referencesDB,
                     final ReferencesHashTableAccess[] tables, final FastAReader fastAReader,
-                    final FileWriterRanked matchesWriter, final RMA6Writer rmaWriter, final OutputStream organismsOutStream,
+                    final FileWriterRanked matchesWriter, final RMA6Writer rmaWriter,
                     final FileWriterRanked alignedReadsWriter, final FileWriterRanked unalignedReadsWriter, final GeneTableAccess geneTableAccess) throws IOException {
         this.threadNumber = threadNumber;
         this.maltOptions = maltOptions;
@@ -125,7 +109,6 @@ public class AlignmentEngine {
         this.matchOutputFormat = maltOptions.getMatchOutputFormat();
         this.matchesWriter = matchesWriter;
         this.rmaWriter = rmaWriter;
-        this.organismsOutStream = organismsOutStream;
         this.alignedReadsWriter = alignedReadsWriter;
         this.unalignedReadsWriter = unalignedReadsWriter;
         this.geneTableAccess = geneTableAccess;
@@ -158,12 +141,6 @@ public class AlignmentEngine {
         readMatchesForRefIndex = new ReadMatch[maltOptions.getMaxAlignmentsPerReference()];
         for (int i = 0; i < readMatchesForRefIndex.length; i++)
             readMatchesForRefIndex[i] = new ReadMatch();
-
-        if (organismsOutStream != null) {
-            organismsProfile = new OrganismsProfile(MappingManager.getTaxonomyMapping());
-            organismsProfile.setTopPercent(maltOptions.getTopPercentLCA());
-        } else
-            organismsProfile = null;
 
         seedArrays = resizeAndConstructEntries(new SeedMatchArray[0], 1000, maltOptions.getMaxSeedsPerReference());
     }
@@ -223,11 +200,6 @@ public class AlignmentEngine {
 
     /**
      * run the inner loop. This tries to extend all found seed matches. If caching is used, first tries to find alignments in cache
-     *
-     * @param query
-     * @param totalSize
-     * @param dataForInnerLoop
-     * @throws IOException
      */
     private void runInnerLoop(final FastARecord query, final int totalSize, final DataForInnerLoop dataForInnerLoop) throws IOException {
         countSequencesProcessed++;
@@ -494,10 +466,6 @@ public class AlignmentEngine {
                 }
             }
 
-            if (organismsOutStream != null) {
-                organismsProfile.addRead(Utilities.getFirstWordSkipLeadingGreaterSign(query.getHeader()), numberOfMatches, matchesArray);
-            }
-
             if (alignedReadsWriter != null) {
                 alignedReadsWriter.writeByRank(threadNumber, query.getId(), Utilities.getFirstWordEnsureLeadingGreaterSign(query.getHeader()), Utilities.copy0Terminated(query.getSequence()));
             }
@@ -519,10 +487,6 @@ public class AlignmentEngine {
             if (rmaWriter != null && maltOptions.isSaveUnalignedToRMA()) {
                 rmaWriter.processMatches(query.getHeaderString(), query.getSequenceString(), matchesArray, 0);
             }
-            if (organismsOutStream != null) {
-                organismsProfile.addNoHitsRead();
-            }
-
             if (alignedReadsWriter != null) {
                 alignedReadsWriter.skipByRank(threadNumber, query.getId());
             }
@@ -536,16 +500,10 @@ public class AlignmentEngine {
      * finish up after outer loop completed
      */
     public void finish() {
-        if (organismsOutStream != null) {
-            organismsProfile.finishAnalysis();
-        }
     }
 
     /**
      * compute total sequences processed
-     *
-     * @param alignmentEngines
-     * @return total
      */
     static long getTotalSequencesProcessed(final AlignmentEngine[] alignmentEngines) {
         long total = 0;
@@ -557,9 +515,6 @@ public class AlignmentEngine {
 
     /**
      * compute total with alignments
-     *
-     * @param alignmentEngines
-     * @return total
      */
     static long getTotalSequencesWithAlignments(final AlignmentEngine[] alignmentEngines) {
         long total = 0;
@@ -571,9 +526,6 @@ public class AlignmentEngine {
 
     /**
      * compute total number of alignments
-     *
-     * @param alignmentEngines
-     * @return total
      */
     static long getTotalAlignments(final AlignmentEngine[] alignmentEngines) {
         long total = 0;
@@ -583,20 +535,12 @@ public class AlignmentEngine {
         return total;
     }
 
-    public OrganismsProfile getOrganismsProfile() {
-        return organismsProfile;
-    }
-
     BitSet getAlignedReferenceIds() {
         return alignedReferenceIds;
     }
 
     /**
      * resize the array of seed match arrays
-     *
-     * @param array
-     * @param newSize
-     * @return new array
      */
     private SeedMatchArray[] resizeAndConstructEntries(SeedMatchArray[] array, int newSize, int maxLength) {
         SeedMatchArray[] result = new SeedMatchArray[newSize];
