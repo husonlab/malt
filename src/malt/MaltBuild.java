@@ -222,6 +222,7 @@ public class MaltBuild {
 
         // load the reference file:
         final ReferencesDBBuilder referencesDB = new ReferencesDBBuilder();
+        System.err.println(String.format("Number input files: %,12d", inputFiles.size()));
         referencesDB.loadFastAFiles(inputFiles, referenceAlphabet);
         System.err.println(String.format("Number of sequences:%,12d", referencesDB.getNumberOfSequences()));
         System.err.println(String.format("Number of letters:%,14d", referencesDB.getNumberOfLetters()));
