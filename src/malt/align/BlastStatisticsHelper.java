@@ -1,5 +1,5 @@
 /**
- * BlastStatisticsHelper.java 
+ * BlastStatisticsHelper.java
  * Copyright (C) 2017 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
@@ -25,7 +25,7 @@ import jloda.util.Pair;
 import java.io.IOException;
 
 /**
- * DESCRIPTION
+ * blast statistics helper
  * Daniel Huson, 8.2014
  */
 public class BlastStatisticsHelper {
