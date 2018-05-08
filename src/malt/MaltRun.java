@@ -320,6 +320,7 @@ public class MaltRun {
                     String matchesOutputFile = getOutputFileName(fileNumber, inputFileNames, outputMatchesFileNames, maltOptions.getMatchesOutputSuffix(), maltOptions.isGzipMatches());
                     String alignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputAlignedFileNames, "-aligned.fna", maltOptions.isGzipAlignedReads());
                     String unalignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputUnAlignedFileNames, "-unaligned.fna", maltOptions.isGzipUnalignedReads());
+
                     launchAlignmentThreads(alignerOptions, maltOptions, inFile, rmaOutputFile, matchesOutputFile,
                             alignedReadsOutputFile, unalignedReadsOutputFile, referencesDB, hashTables, geneTableAccess);
                 } else {

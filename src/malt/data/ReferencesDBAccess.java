@@ -48,7 +48,6 @@ public class ReferencesDBAccess implements Closeable {
     private final ILongGetter refIndex;
     private final IByteGetter refDB;
 
-
     /**
      * construct from an input file
      *

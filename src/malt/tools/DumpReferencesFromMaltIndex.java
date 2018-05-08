@@ -32,7 +32,7 @@ public class DumpReferencesFromMaltIndex {
     /**
      * dump references from malt index
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         try {
             ProgramProperties.setProgramName("DumpReferencesFromMaltIndex");
             ProgramProperties.setProgramVersion(megan.main.Version.SHORT_DESCRIPTION);

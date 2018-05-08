@@ -123,12 +123,13 @@ public class GeneTableAccess {
      * @param alignEnd
      * @return annotated reference header
      */
-    public byte[] addAnnotationString(byte[] referenceHeader, Integer refIndex, int alignStart, int alignEnd) {
+    public String annotateRefString(String referenceHeader, Integer refIndex, int alignStart, int alignEnd) {
         final IntervalTree<GeneItem> tree = getIntervals(refIndex);
 
         if (tree != null) {
             final Interval<Object> alignInterval = new Interval<>(alignStart, alignEnd, null);
             final Interval<GeneItem> refInterval = tree.getBestInterval(alignInterval, 0.9);
+
             if (refInterval != null) {
                 final GeneItem geneItem = refInterval.getData();
 
@@ -143,10 +144,10 @@ public class GeneTableAccess {
                 if (geneItem.getInterproId() != 0)
                     buf.append("|ipr|").append(geneItem.getInterproId());
                 if (buf.length() > 0) {
-                    String header = Basic.toString(referenceHeader);
-                    String remainder;
-                    int len = header.indexOf(' ');
-                    if (len < header.length()) {
+                    String header = referenceHeader;
+                    final String remainder;
+                    final int len = header.indexOf(' ');
+                    if (len >= 0 && len < header.length()) {
                         remainder = header.substring(len); // keep space...
                         header = header.substring(0, len);
                     } else
@@ -155,7 +156,7 @@ public class GeneTableAccess {
                     return (header + (header.endsWith("|") ? "" : "|") + "pos|"
                             + (geneItem.isReverse() ? refInterval.getEnd() + ".." + refInterval.getStart()
                             : refInterval.getStart() + ".." + refInterval.getEnd())
-                            + buf.toString() + remainder).getBytes();
+                            + buf.toString() + remainder);
                 }
             }
         }

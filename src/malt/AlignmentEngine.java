@@ -355,7 +355,7 @@ public class AlignmentEngine {
                                                         start = aligner.getStartReference();
                                                     }
                                                     int end = aligner.getEndReference();
-                                                    referenceHeader = geneTableAccess.addAnnotationString(referencesDB.getHeader(refIndex), refIndex, start, end);
+                                                    referenceHeader = geneTableAccess.annotateRefString(Basic.toString(referencesDB.getHeader(refIndex)), refIndex, start, end).getBytes();
                                                     // System.err.println(Basic.toString(referenceHeader));
                                                 }
 
