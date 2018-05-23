@@ -1,19 +1,19 @@
 /**
- * MaltBuild.java 
+ * MaltBuild.java
  * Copyright (C) 2018 Daniel H. Huson
- *
+ * <p>
  * (Some files contain contributions from other authors, who are then mentioned separately.)
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -175,7 +175,7 @@ public class MaltBuild {
                 if (gffFiles.size() == 0)
                     throw new IOException("No GFF files found in directory: " + file);
                 else
-                    System.err.println(String.format("Found: %,d", inputFiles.size()));
+                    System.err.println(String.format("Found: %,d", gffFiles.size()));
             }
         }
 
@@ -271,7 +271,7 @@ public class MaltBuild {
             referencesDB.save(new File(indexDirectory, "ref.idx"), new File(indexDirectory, "ref.db"), new File(indexDirectory, "ref.inf"), saveFirstWordOfReferenceHeaderOnly);
 
         if (gffFiles.size() > 0) {
-                GeneTableBuilder geneTableBuilder = new GeneTableBuilder();
+            GeneTableBuilder geneTableBuilder = new GeneTableBuilder();
             geneTableBuilder.buildAndSaveAnnotations(referencesDB, gffFiles, new File(indexDirectory, "annotation.idx"), new File(indexDirectory, "annotation.db"), numberOfThreads);
         }
     }

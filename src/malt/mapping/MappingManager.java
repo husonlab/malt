@@ -39,6 +39,7 @@ public class MappingManager {
 
     /**
      * load all mappings
+     *
      * @param cNames
      * @param indexDirectory
      * @throws IOException
@@ -64,6 +65,7 @@ public class MappingManager {
 
     /**
      * get all names of loaded mappings
+     *
      * @return names
      */
     public static String[] getCNames() {
@@ -82,6 +84,7 @@ public class MappingManager {
 
     /**
      * gets the taxonomy mapping
+     *
      * @return taxonomy mapping
      */
     public static Mapping getTaxonomyMapping() {
@@ -93,6 +96,7 @@ public class MappingManager {
 
     /**
      * determine all available classifications
+     *
      * @param indexDirectory
      * @return list of available classifications
      */

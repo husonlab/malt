@@ -117,7 +117,7 @@ public class MaltRun {
         options.comment("Output:");
         final List<String> outputRMAFileNames = options.getOption("o", "output", "Output RMA file(s) or directory", new LinkedList<String>());
         if (outputRMAFileNames.size() > 0 || options.isDoHelp())
-            maltOptions.setSaveUnalignedToRMA(options.getOption("iu", "includeUnaligned", "Include unaligned queries in RMA output file",false));
+            maltOptions.setSaveUnalignedToRMA(options.getOption("iu", "includeUnaligned", "Include unaligned queries in RMA output file", false));
 
         final List<String> outputMatchesFileNames = options.getOption("a", "alignments", "Output alignment file(s) or directory or STDOUT", new LinkedList<String>());
         if (outputMatchesFileNames.size() > 0 || options.isDoHelp()) {
@@ -303,8 +303,7 @@ public class MaltRun {
         if ((new File(indexDirectory, "annotation.idx")).exists()) {
             geneTableAccess = new GeneTableAccess(new File(indexDirectory, "annotation.idx"), new File(indexDirectory, "annotation.db"));
             maltOptions.setParseHeaders(true);
-        }
-        else
+        } else
             geneTableAccess = null;
 
         // run alignment for each input file:

@@ -1,25 +1,26 @@
 /**
- * GeneItem.java 
+ * GeneItem.java
  * Copyright (C) 2018 Daniel H. Huson
- *
+ * <p>
  * (Some files contain contributions from other authors, who are then mentioned separately.)
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package malt.genes;
 
 import jloda.util.Basic;
+import megan.io.InputReader;
 import megan.io.OutputWriter;
 
 import java.io.IOException;
@@ -126,6 +127,28 @@ public class GeneItem {
      * @throws IOException
      */
     public void read(RandomAccessFile ins) throws IOException {
+        int length = ins.readInt();
+        if (length == 0)
+            proteinId = null;
+        else {
+            proteinId = new byte[length];
+            if (ins.read(proteinId, 0, length) != length)
+                throw new IOException("read failed");
+        }
+        keggId = ins.readInt();
+        cogId = ins.readInt();
+        seedId = ins.readInt();
+        interproId = ins.readInt();
+        reverse = (ins.read() == 1);
+    }
+
+    /**
+     * read
+     *
+     * @param ins
+     * @throws IOException
+     */
+    public void read(InputReader ins) throws IOException {
         int length = ins.readInt();
         if (length == 0)
             proteinId = null;

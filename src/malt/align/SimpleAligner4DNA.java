@@ -149,10 +149,10 @@ public class SimpleAligner4DNA {
                             bestQueryPos = queryPos;
                             bestRefPos = refPos;
                         }
-                        }
                     }
                 }
             }
+        }
         if (bestScore > 0) {
             computeAlignment(query, reference, bestQueryPos, bestRefPos, k);
             return bestRefPos;

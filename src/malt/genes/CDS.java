@@ -38,6 +38,8 @@ public class CDS {
     private boolean reverse;
     private String proteinId;
 
+    private static final String[] tags = {"protein_id=", "name=", "sequence:RefSeq:"};
+
     /**
      * constructor
      */
@@ -96,7 +98,7 @@ public class CDS {
         progress.setProgress(0);
         final ArrayList<CDS> list = new ArrayList<>();
         for (String fileName : inputFiles) {
-            progress.setTasks("Loading GFF files", fileName);
+            progress.setTasks("Processing GFF files", fileName);
 
             try (FileInputIterator it = new FileInputIterator(fileName)) {
                 if (it.hasNext()) {
@@ -130,7 +132,6 @@ public class CDS {
      */
     private static Collection<CDS> parseGFF3forCDS(Iterator<String> iterator) {
         final TaggedValueIterator dnaAccessionIterator = new TaggedValueIterator(true, true);
-        final TaggedValueIterator proteinAccessionIterator = new TaggedValueIterator(false, true, "protein_id=", "name=", "sequence:RefSeq:");
 
         final ArrayList<CDS> list = new ArrayList<>(100000);
         while (iterator.hasNext()) {
@@ -146,9 +147,9 @@ public class CDS {
                     cds.setReverse(tokens[6].equals("-"));
                     if (!"+-".contains(tokens[6]))
                         System.err.println("Expected + or - in line: " + aLine);
-                    proteinAccessionIterator.restart(tokens[8]);
-                    if (proteinAccessionIterator.hasNext()) {
-                        cds.setProteinId(proteinAccessionIterator.getFirst());
+                    final String accession = getFirstTaggedAccession(tokens[8], tags);
+                    if (accession != null) {
+                        cds.setProteinId(accession);
                         list.add(cds);
                     }  // else System.err.println("No protein id found for line: " + aLine);
                 }
@@ -206,5 +207,28 @@ public class CDS {
 
         }
         return list;
+    }
+
+    /**
+     * gets the first tagged accession
+     *
+     * @param reference
+     * @param tags
+     * @return first tagged accession
+     */
+    public static String getFirstTaggedAccession(String reference, String... tags) {
+        for (String tag : tags) {
+            int pos = reference.indexOf(tag);
+            while (pos != -1) {
+                final int a = pos + tag.length();
+                int b = a;
+                while (b < reference.length() && (Character.isLetterOrDigit(reference.charAt(b)) || reference.charAt(b) == '_'))
+                    b++;
+                if (b > a)
+                    return reference.substring(a, b);
+                pos = reference.indexOf(tag, a);
+            }
+        }
+        return null;
     }
 }

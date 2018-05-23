@@ -43,7 +43,7 @@ import java.util.Arrays;
 
 /**
  * Create an RMA6 file from SAM data in Malt
- *
+ * <p>
  * Daniel Huson, 6.2015
  */
 public class RMA6Writer {
