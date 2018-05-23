@@ -85,24 +85,27 @@ public class AAddRun {
 
         final Map<String, Pair<Long, IntervalTree<GeneItem>>> ref2PosAndTree;
         final File indexFile = new File(indexDirectory, "aadd.idx");
-        final File dbFile = new File(indexDirectory, "aadd.dbx");
+
         try (InputReader ins = new InputReader(indexFile); ProgressPercentage progress = new ProgressPercentage("Reading file: " + indexFile)) {
             readAndVerifyMagicNumber(ins, AAddBuild.MAGIC_NUMBER_IDX);
             final int entries = ins.readInt();
+            progress.setMaximum(entries);
 
-            ref2PosAndTree = new HashMap<>((int) (1.2 * entries));
+            ref2PosAndTree = new HashMap<>(2 * entries);
 
             for (int t = 0; t < entries; t++) {
                 final String dnaId = ins.readString();
                 final long pos = ins.readLong();
                 ref2PosAndTree.put(dnaId, new Pair<Long, IntervalTree<GeneItem>>(pos, null));
+                progress.incrementProgress();
             }
         }
 
         final IntervalTree<GeneItem> emptyTree = new IntervalTree<>();
 
-
+        final File dbFile = new File(indexDirectory, "aadd.dbx");
         try (FileRandomAccessReadOnlyAdapter dbxIns = new FileRandomAccessReadOnlyAdapter(dbFile)) {
+            System.err.println("Opening file: " + dbFile);
 
             for (int i = 0; i < inputFiles.length; i++) {
                 File inputFile = new File(inputFiles[i]);
@@ -149,23 +152,24 @@ public class AAddRun {
 
                                             int intervalsLength = dbxIns.readInt();
                                             if (intervalsLength > 0) {
-                                                final IntervalTree<GeneItem> intervals = new IntervalTree<>();
+                                                tree = new IntervalTree<>();
                                                 for (int t = 0; t < intervalsLength; t++) {
                                                     int start = dbxIns.readInt();
                                                     int end = dbxIns.readInt();
                                                     GeneItem geneItem = new GeneItem();
                                                     geneItem.read(dbxIns);
-                                                    intervals.add(start, end, geneItem);
+                                                    tree.add(start, end, geneItem);
                                                     //System.err.println(refIndex+"("+start+"-"+end+") -> "+geneItem);
                                                 }
-                                                pair.setSecond(intervals);
                                                 countReferencesLoaded++;
-                                            } else
-                                                pair.setSecond(emptyTree);
+                                            } else {
+                                                tree = emptyTree;
+                                            }
+                                            pair.setSecond(tree);
+                                        } else {
+                                            tree = pair.getSecond();
                                         }
-                                    }
-                                    tree = pair.getSecond();
-                                    if (tree == null) {
+                                    } else {
                                         System.err.println("Ref not found: " + ref);
                                         continue;
                                     }

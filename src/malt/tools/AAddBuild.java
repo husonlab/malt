@@ -68,6 +68,8 @@ public class AAddBuild {
         options.comment("Input Output");
         final List<String> gffFiles = options.getOptionMandatory("-igff", "inputGFF", "Input GFF3 files or directory (.gz ok)", new LinkedList<String>());
         final String indexDirectory = options.getOptionMandatory("-d", "index", "Index directory", "");
+        options.comment(ArgsOptions.OTHER);
+        final boolean lookInside = options.getOption("-ex", "extraStrict", "When given an input directory, look inside every input file to check that it is indeed in GFF3 format", false);
         options.done();
 
         if (gffFiles.size() == 1) {
@@ -75,7 +77,7 @@ public class AAddBuild {
             if (file.isDirectory()) {
                 System.err.println("Collecting all GFF3 files in directory: " + file);
                 gffFiles.clear();
-                for (File aFile : Basic.getAllFilesInDirectory(file, new GFF3FileFilter(), true)) {
+                for (File aFile : Basic.getAllFilesInDirectory(file, new GFF3FileFilter(true, lookInside), true)) {
                     gffFiles.add(aFile.getPath());
                 }
                 if (gffFiles.size() == 0)
