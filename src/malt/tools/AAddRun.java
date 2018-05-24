@@ -27,9 +27,7 @@ import megan.util.interval.Interval;
 import megan.util.interval.IntervalTree;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -62,7 +60,7 @@ public class AAddRun {
      * run the program
      */
     public void run(String[] args) throws CanceledException, IOException, UsageException {
-        final ArgsOptions options = new ArgsOptions(args, this, "Adds functional annotations to DNA alignments");
+        final ArgsOptions options = new ArgsOptions(args, this, "Adds functional accessions to DNA alignments");
         options.setVersion(ProgramProperties.getProgramVersion());
         options.setLicense("Copyright (C) 2018 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
         options.setAuthors("Daniel H. Huson");
@@ -71,7 +69,8 @@ public class AAddRun {
         final String[] inputFiles = options.getOptionMandatory("-i", "input", "Input SAM file(s) (.gz ok)", new String[0]);
         final String indexDirectory = options.getOptionMandatory("-d", "index", "AAdd index directory", "");
         final String[] outputFiles = options.getOptionMandatory("-o", "output", "Output file(s) (.gz ok) or directory", new String[0]);
-        //options.comment(ArgsOptions.OTHER);
+        options.comment(ArgsOptions.OTHER);
+        final boolean reportUnmappedAccessions = options.getOption("-rnf", "reportNotFound", "Report the names of DNA reference for which no functional accession is available", false);
         options.done();
 
         final File outputDir;
@@ -104,6 +103,7 @@ public class AAddRun {
         final IntervalTree<GeneItem> emptyTree = new IntervalTree<>();
 
         final File dbFile = new File(indexDirectory, "aadd.dbx");
+
         try (FileRandomAccessReadOnlyAdapter dbxIns = new FileRandomAccessReadOnlyAdapter(dbFile)) {
             System.err.println("Opening file: " + dbFile);
 
@@ -123,6 +123,7 @@ public class AAddRun {
                 long countAnnotated = 0;
                 long countReferencesLoaded = 0;
 
+                final Set<String> refNotFound = new HashSet<>();
 
                 try (final FileInputIterator it = new FileInputIterator(inputFile, true);
                      final BufferedWriter w = new BufferedWriter(new OutputStreamWriter(gzipOutput ? new GZIPOutputStream(new FileOutputStream(outputFile)) : new FileOutputStream(outputFile)))) {
@@ -170,7 +171,11 @@ public class AAddRun {
                                             tree = pair.getSecond();
                                         }
                                     } else {
-                                        System.err.println("Ref not found: " + ref);
+                                        if (!refNotFound.contains(ref)) {
+                                            refNotFound.add(ref);
+                                            if (reportUnmappedAccessions)
+                                                System.err.println("Reference not found: " + ref);
+                                        }
                                         continue;
                                     }
                                 }
@@ -213,8 +218,9 @@ public class AAddRun {
                 System.err.println(String.format("Lines:     %,11d", countLines));
                 System.err.println(String.format("Alignments:%,11d", countAlignments));
                 System.err.println(String.format("Annotated: %,11d", countAnnotated));
-                System.err.println(String.format("(Loaded refs:%,10d)", countReferencesLoaded));
-
+                System.err.println(String.format("(Loaded refs:%,9d)", countReferencesLoaded));
+                if (refNotFound.size() > 0)
+                    System.err.println(String.format("(Missing refs:%,8d)", refNotFound.size()));
             }
         }
     }

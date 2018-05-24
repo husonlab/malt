@@ -253,9 +253,9 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     public void extendHeader(int index, String tag, Integer id) {
         byte[] header = headers[index];
         int pos = 0;
-        while (Character.isWhitespace(header[pos]) && pos < header.length) // skip leading white space
+        while (Character.isWhitespace(header[pos]) && pos < header.length - 1) // skip leading white space
             pos++;
-        while (!Character.isWhitespace(header[pos]) && pos < header.length) // go to next white space or end
+        while (!Character.isWhitespace(header[pos]) && pos < header.length - 1) // go to next white space or end
             pos++;
         byte[] add;
         if (header[pos - 1] == '|')
@@ -266,7 +266,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
         byte[] newHeader = new byte[header.length + add.length];
         System.arraycopy(header, 0, newHeader, 0, pos);
         System.arraycopy(add, 0, newHeader, pos, add.length);
-        if (pos < header.length) {
+        if (pos < header.length - 1) {
             System.arraycopy(header, pos, newHeader, add.length + pos, header.length - pos);
         }
         headers[index] = newHeader;
