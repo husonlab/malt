@@ -19,7 +19,6 @@
 	    <fileset dir="../../jloda/jars/batik-1.8"  includes="*.jar"/>
     	    <fileset dir="../../megan-ce/jars"  includes="*.jar"/>
 	    <fileset dir="../../megan-ce/jars/megan6server"  includes="*.jar"/>
-	    <fileset dir="../../malt/jars/"  includes="*.jar"/>
     </path>
 
     <!-- init -->
