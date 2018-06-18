@@ -22,6 +22,10 @@ package malt.tools;
 import jloda.util.*;
 import malt.genes.CDS;
 import malt.genes.GeneItem;
+import malt.genes.GeneItemCreator;
+import megan.classification.Classification;
+import megan.classification.ClassificationManager;
+import megan.classification.IdMapper;
 import megan.io.OutputWriter;
 import megan.util.interval.Interval;
 
@@ -34,8 +38,8 @@ import java.util.*;
  * Daniel Huson, 5.2018
  */
 public class AAddBuild {
-    final static byte[] MAGIC_NUMBER_IDX = "AAddIdxV0.1.".getBytes();
-    final static byte[] MAGIC_NUMBER_DBX = "AAddDbxV0.1.".getBytes();
+    final public static byte[] MAGIC_NUMBER_IDX = "AAddIdxV0.1.".getBytes();
+    final public static byte[] MAGIC_NUMBER_DBX = "AAddDbxV0.1.".getBytes();
 
     /**
      * add functional annotations to DNA alignments
@@ -68,10 +72,41 @@ public class AAddBuild {
         options.comment("Input Output");
         final List<String> gffFiles = options.getOptionMandatory("-igff", "inputGFF", "Input GFF3 files or directory (.gz ok)", new LinkedList<String>());
         final String indexDirectory = options.getOptionMandatory("-d", "index", "Index directory", "");
+
+        options.comment("Classification mapping");
+
+        final HashMap<String, String> class2AccessionFile = new HashMap<>();
+
+        final String acc2TaxaFile = options.getOption("-a2t", "acc2taxa", "Accession-to-Taxonomy mapping file", "");
+
+        for (String cName : ClassificationManager.getAllSupportedClassificationsExcludingNCBITaxonomy()) {
+            class2AccessionFile.put(cName, options.getOption("-a2" + cName.toLowerCase(), "acc2" + cName.toLowerCase(), "Accession-to-" + cName + " mapping file", ""));
+        }
+
         options.comment(ArgsOptions.OTHER);
         final boolean lookInside = options.getOption("-ex", "extraStrict", "When given an input directory, look inside every input file to check that it is indeed in GFF3 format", false);
         options.done();
 
+        // setup the gff file:
+        setupGFFFiles(gffFiles, lookInside);
+
+        // setup gene item creator, in particular accession mapping
+        final GeneItemCreator creator = setupCreator(acc2TaxaFile, class2AccessionFile);
+
+        // obtains the gene annotations:
+        Map<String, ArrayList<Interval<GeneItem>>> dnaId2list = computeAnnotations(creator, gffFiles);
+
+        saveIndex(creator, indexDirectory, dnaId2list);
+    }
+
+    /**
+     * setup the GFF files
+     *
+     * @param gffFiles
+     * @param lookInside
+     * @throws IOException
+     */
+    public static void setupGFFFiles(List<String> gffFiles, boolean lookInside) throws IOException {
         if (gffFiles.size() == 1) {
             final File file = new File(gffFiles.get(0));
             if (file.isDirectory()) {
@@ -86,30 +121,82 @@ public class AAddBuild {
                     System.err.println(String.format("Found: %,d", gffFiles.size()));
             }
         }
+    }
 
-
-        // obtains the gene annotations:
-        Map<String, ArrayList<Interval<GeneItem>>> dnaId2list = new HashMap<>();
+    /**
+     * setup the gene item creator
+     *
+     * @param acc2TaxaFile
+     * @param class2AccessionFile
+     * @return gene item creator
+     * @throws CanceledException
+     */
+    public static GeneItemCreator setupCreator(String acc2TaxaFile, Map<String, String> class2AccessionFile) throws CanceledException {
+        final String[] cNames;
         {
-            final Collection<CDS> annotations = CDS.parseGFFforCDS(gffFiles, new ProgressPercentage("Processing GFF files"));
-
-            try (ProgressListener progress = new ProgressPercentage("Building annotation list", annotations.size())) {
-                for (CDS cds : annotations) {
-                    ArrayList<Interval<GeneItem>> list = dnaId2list.get(cds.getDnaId());
-                    if (list == null) {
-                        list = new ArrayList<>();
-                        dnaId2list.put(cds.getDnaId(), list);
-                    }
-                    final GeneItem geneItem = new GeneItem();
-                    final String accession = cds.getProteinId();
-                    geneItem.setProteinId(accession.getBytes());
-                    geneItem.setReverse(cds.isReverse());
-                    list.add(new Interval<>(cds.getStart(), cds.getEnd(), geneItem));
-                    progress.incrementProgress();
-                }
-            }
+            final ArrayList<String> list = new ArrayList<>();
+            if (acc2TaxaFile.length() > 0)
+                list.add(Classification.Taxonomy);
+            for (String cName : class2AccessionFile.keySet())
+                if (class2AccessionFile.get(cName).length() > 0 && !list.contains(cName))
+                    list.add(cName);
+            cNames = list.toArray(new String[0]);
         }
 
+        final IdMapper[] idMappers = new IdMapper[cNames.length];
+
+        for (int i = 0; i < cNames.length; i++) {
+            final String cName = cNames[i];
+            idMappers[i] = ClassificationManager.get(cName, true).getIdMapper();
+            if (cName.equals(Classification.Taxonomy))
+                idMappers[i].loadMappingFile(acc2TaxaFile, IdMapper.MapType.Accession, false, new ProgressPercentage());
+            else
+                idMappers[i].loadMappingFile(class2AccessionFile.get(cName), IdMapper.MapType.Accession, false, new ProgressPercentage());
+        }
+        return new GeneItemCreator(cNames, idMappers);
+    }
+
+    /**
+     * compute annotations
+     *
+     * @param creator
+     * @param gffFiles
+     * @return
+     * @throws IOException
+     * @throws CanceledException
+     */
+    public static Map<String, ArrayList<Interval<GeneItem>>> computeAnnotations(GeneItemCreator creator, Collection<String> gffFiles) throws IOException, CanceledException {
+        Map<String, ArrayList<Interval<GeneItem>>> dnaId2list = new HashMap<>();
+
+        final Collection<CDS> annotations = CDS.parseGFFforCDS(gffFiles, new ProgressPercentage("Processing GFF files"));
+
+        try (ProgressListener progress = new ProgressPercentage("Building annotation list", annotations.size())) {
+            for (CDS cds : annotations) {
+                ArrayList<Interval<GeneItem>> list = dnaId2list.get(cds.getDnaId());
+                if (list == null) {
+                    list = new ArrayList<>();
+                    dnaId2list.put(cds.getDnaId(), list);
+                }
+                final GeneItem geneItem = creator.createGeneItem();
+                final String accession = cds.getProteinId();
+                geneItem.setProteinId(accession.getBytes());
+                geneItem.setReverse(cds.isReverse());
+                list.add(new Interval<>(cds.getStart(), cds.getEnd(), geneItem));
+                progress.incrementProgress();
+            }
+        }
+        return dnaId2list;
+    }
+
+    /**
+     * save the index
+     *
+     * @param creator
+     * @param indexDirectory
+     * @param dnaId2list
+     * @throws IOException
+     */
+    public static void saveIndex(GeneItemCreator creator, String indexDirectory, Map<String, ArrayList<Interval<GeneItem>>> dnaId2list) throws IOException {
         // writes the index file:
         long totalRefWithAGene = 0;
 
@@ -117,10 +204,16 @@ public class AAddBuild {
         final File dbFile = new File(indexDirectory, "aadd.dbx");
         try (OutputWriter idxWriter = new OutputWriter(indexFile); OutputWriter dbxWriter = new OutputWriter(dbFile);
              ProgressPercentage progress = new ProgressPercentage("Writing files: " + indexFile + "\n               " + dbFile, dnaId2list.size())) {
-            idxWriter.write(MAGIC_NUMBER_IDX);
-            dbxWriter.write(MAGIC_NUMBER_DBX);
 
+            idxWriter.write(MAGIC_NUMBER_IDX);
             idxWriter.writeInt(dnaId2list.size());
+
+            dbxWriter.write(MAGIC_NUMBER_DBX);
+            // write the list of classifications:
+            dbxWriter.writeInt(creator.numberOfClassifications());
+            for (String cName : creator.cNames()) {
+                dbxWriter.writeString(cName);
+            }
 
             for (String dnaId : dnaId2list.keySet()) {
                 idxWriter.writeString(dnaId);

@@ -21,7 +21,9 @@ package malt.tools;
 
 import jloda.util.*;
 import malt.genes.GeneItem;
-import megan.io.FileRandomAccessReadOnlyAdapter;
+import malt.genes.GeneItemCreator;
+import megan.classification.IdMapper;
+import megan.io.IInputReader;
 import megan.io.InputReader;
 import megan.util.interval.Interval;
 import megan.util.interval.IntervalTree;
@@ -104,8 +106,15 @@ public class AAddRun {
 
         final File dbFile = new File(indexDirectory, "aadd.dbx");
 
-        try (FileRandomAccessReadOnlyAdapter dbxIns = new FileRandomAccessReadOnlyAdapter(dbFile)) {
+        try (InputReader dbxIns = new InputReader(dbFile)) {
             System.err.println("Opening file: " + dbFile);
+
+            readAndVerifyMagicNumber(dbxIns, AAddBuild.MAGIC_NUMBER_DBX);
+            final String[] cNames = new String[dbxIns.readInt()];
+            for (int i = 0; i < cNames.length; i++) {
+                cNames[i] = dbxIns.readString();
+            }
+            final GeneItemCreator creator = new GeneItemCreator(cNames, new IdMapper[0]);
 
             for (int i = 0; i < inputFiles.length; i++) {
                 File inputFile = new File(inputFiles[i]);
@@ -155,9 +164,9 @@ public class AAddRun {
                                             if (intervalsLength > 0) {
                                                 tree = new IntervalTree<>();
                                                 for (int t = 0; t < intervalsLength; t++) {
-                                                    int start = dbxIns.readInt();
-                                                    int end = dbxIns.readInt();
-                                                    GeneItem geneItem = new GeneItem();
+                                                    final int start = dbxIns.readInt();
+                                                    final int end = dbxIns.readInt();
+                                                    final GeneItem geneItem = creator.createGeneItem();
                                                     geneItem.read(dbxIns);
                                                     tree.add(start, end, geneItem);
                                                     //System.err.println(refIndex+"("+start+"-"+end+") -> "+geneItem);
@@ -195,8 +204,7 @@ public class AAddRun {
                                         annotatedRef = annotatedRef.substring(0, len);
                                     } else
                                         remainder = "";
-                                    annotatedRef += (annotatedRef.endsWith("|") ? "pos|" : "|pos|") + (geneItem.isReverse() ? refInterval.getEnd() + ".." + refInterval.getStart()
-                                            : refInterval.getStart() + ".." + refInterval.getEnd()) + "|ref|" + Basic.toString(geneItem.getProteinId()) + remainder;
+                                    annotatedRef += (annotatedRef.endsWith("|") ? "" : "|") + geneItem.getAnnotation(refInterval) + remainder;
                                 }
                                 for (int t = 0; t < tokens.length; t++) {
                                     if (t > 0)
@@ -249,7 +257,7 @@ public class AAddRun {
      * @param expectedMagicNumber
      * @throws java.io.IOException
      */
-    public static void readAndVerifyMagicNumber(InputReader ins, byte[] expectedMagicNumber) throws IOException {
+    public static void readAndVerifyMagicNumber(IInputReader ins, byte[] expectedMagicNumber) throws IOException {
         byte[] magicNumber = new byte[expectedMagicNumber.length];
         if (ins.read(magicNumber, 0, magicNumber.length) != expectedMagicNumber.length || !Basic.equal(magicNumber, expectedMagicNumber)) {
             System.err.println("Expected: " + Basic.toString(expectedMagicNumber));
@@ -257,5 +265,4 @@ public class AAddRun {
             throw new IOException("Index is too old or incorrect file (wrong magic number). Please recompute index.");
         }
     }
-
 }

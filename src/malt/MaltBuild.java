@@ -21,13 +21,16 @@ package malt;
 
 import jloda.util.*;
 import malt.data.*;
-import malt.genes.GeneTableBuilder;
+import malt.genes.GeneItem;
+import malt.genes.GeneItemCreator;
 import malt.mapping.Mapping;
+import malt.tools.AAddBuild;
 import malt.util.Utilities;
 import megan.classification.Classification;
 import megan.classification.ClassificationManager;
 import megan.classification.IdMapper;
 import megan.classification.IdParser;
+import megan.util.interval.Interval;
 
 import java.io.File;
 import java.io.IOException;
@@ -110,24 +113,30 @@ public class MaltBuild {
             proteinReduction = "";
 
         options.comment("Classification:");
-        final boolean parseTaxonNames = true;
+        final boolean parseTaxonNames = options.getOption("-tn", "parseTaxonNames", "Parse taxon names", true);
+        final String gi2TaxaFile = options.getOption("-g2t", "gi2taxa", "GI-to-Taxonomy mapping file", "");
+        final String acc2TaxaFile = options.getOption("-a2t", "acc2taxa", "Accession-to-Taxonomy mapping file", "");
+        final String synonyms2TaxaFile = options.getOption("-s2t", "syn2taxa", "Synonyms-to-Taxonomy mapping file", "");
 
-        final Map<String, String> cName2GIFileName = new HashMap<>();
-        final Map<String, String> cName2AcessionFileName = new HashMap<>();
-        final Map<String, String> cName2SynonymsFileName = new HashMap<>();
+        final HashMap<String, String> class2GIFile = new HashMap<>();
+        final HashMap<String, String> class2AccessionFile = new HashMap<>();
+        final HashMap<String, String> class2SynonymsFile = new HashMap<>();
 
         final Set<String> classificationsToUse = new TreeSet<>();
 
-        for (String cName : ClassificationManager.getAllSupportedClassifications()) {
-            cName2GIFileName.put(cName, options.getOption("-g2" + cName.toLowerCase(), "gi2" + cName.toLowerCase(), "GI-to-" + cName + " mapping file (deprecated)", ""));
-            cName2AcessionFileName.put(cName, options.getOption("-a2" + cName.toLowerCase(), "acc2" + cName.toLowerCase(), "Accession-to-" + cName + " mapping file", ""));
-            cName2SynonymsFileName.put(cName, options.getOption("-s2" + cName.toLowerCase(), "syn2" + cName.toLowerCase(), "Synonyms-to-" + cName + " mapping file", ""));
+        for (String cName : ClassificationManager.getAllSupportedClassificationsExcludingNCBITaxonomy()) {
+            class2GIFile.put(cName, options.getOption("-g2" + cName.toLowerCase(), "gi2" + cName.toLowerCase(), "GI-to-" + cName + " mapping file", ""));
+            class2AccessionFile.put(cName, options.getOption("-a2" + cName.toLowerCase(), "acc2" + cName.toLowerCase(), "Accession-to-" + cName + " mapping file", ""));
+            class2SynonymsFile.put(cName, options.getOption("-s2" + cName.toLowerCase(), "syn2" + cName.toLowerCase(), "Synonyms-to-" + cName + " mapping file", ""));
+            final String tags = options.getOption("-t4" + cName.toLowerCase(), "tags4" + cName.toLowerCase(), "Tags for " + cName + " id parsing (must set to activate id parsing)", "").trim();
+            if (tags.length() > 0)
+                ProgramProperties.put(cName + "Tags", tags);
+            ProgramProperties.put(cName + "ParseIds", tags.length() > 0);
+            // final boolean useLCA = options.getOption("-l_" + cName.toLowerCase(), "lca" + cName.toLowerCase(), "Use LCA for assigning to '" + cName + "', alternative: best hit", ProgramProperties.get(cName + "UseLCA", cName.equals(Classification.Taxonomy)));
+            // ProgramProperties.put(cName + "UseLCA", useLCA);
 
-            if (cName2GIFileName.get(cName).length() > 0 || cName2AcessionFileName.get(cName).length() > 0 || cName2SynonymsFileName.get(cName).length() > 0)
+            if (class2GIFile.get(cName).length() > 0 || class2AccessionFile.get(cName).length() > 0 || class2AccessionFile.get(cName).length() > 0)
                 classificationsToUse.add(cName);
-
-            if (cName.equalsIgnoreCase(Classification.Taxonomy))
-                options.getOption("-tn", "parseTaxonNames", "Parse taxon names", true);
         }
 
         final boolean functionalClassification = !options.getOption("-nf", "noFun", "Turn off functional classifications for provided mapping files (set this when using GFF files for DNA references)", false);
@@ -142,6 +151,8 @@ public class MaltBuild {
         //final boolean buildTableInMemory = options.getOption("btm", "buildTableInMemory", "Build the hash table in memory and then save (more memory, much faster)", true);
         final boolean buildTableInMemory = true; // don't make this an option because it is really slow...
         final boolean doBuildTables = !options.getOption("!xX", "xSkipTable", "Don't recompute index and tables, just compute profile support", false);
+
+        final boolean lookInside = options.getOption("-ex", "extraStrict", "When given an input directory, look inside every GFF file to check that it is indeed in GFF3 format", false);
 
         options.done();
         Basic.setDebugMode(options.isVerbose());
@@ -164,20 +175,7 @@ public class MaltBuild {
 
             }
         }
-        if (gffFiles.size() == 1) {
-            final File file = new File(gffFiles.get(0));
-            if (file.isDirectory()) {
-                System.err.println("Looking for GFF files in directory: " + file);
-                gffFiles.clear();
-                for (File aFile : Basic.getAllFilesInDirectory(file, new GFF3FileFilter(), true)) {
-                    gffFiles.add(aFile.getPath());
-                }
-                if (gffFiles.size() == 0)
-                    throw new IOException("No GFF files found in directory: " + file);
-                else
-                    System.err.println(String.format("Found: %,d", gffFiles.size()));
-            }
-        }
+        AAddBuild.setupGFFFiles(gffFiles, lookInside);
 
         System.err.println("Reference sequence type set to: " + sequenceType.toString());
         final IAlphabet referenceAlphabet;
@@ -240,7 +238,9 @@ public class MaltBuild {
             }
         }
 
-        // setup classification support
+        if (gi2TaxaFile.length() > 0 || acc2TaxaFile.length() > 0 || synonyms2TaxaFile.length() > 0)
+            classificationsToUse.add(Classification.Taxonomy);
+
         for (String cName : classificationsToUse) {
             final String cNameLowerCase = cName.toLowerCase();
             final String sourceName = (cName.equals(Classification.Taxonomy) ? "ncbi" : cNameLowerCase);
@@ -250,12 +250,12 @@ public class MaltBuild {
             Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".tre"), new File(indexDirectory, cNameLowerCase + ".tre"));
             Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".map"), new File(indexDirectory, cNameLowerCase + ".map"));
 
-            if (cName2SynonymsFileName.get(cName).length() > 0)
-                Utilities.loadMapping(cName2SynonymsFileName.get(cName), IdMapper.MapType.Synonyms, cName);
-            if (cName2AcessionFileName.get(cName).length() > 0)
-                Utilities.loadMapping(cName2AcessionFileName.get(cName), IdMapper.MapType.Accession, cName);
-            if (cName2GIFileName.get(cName).length() > 0)
-                Utilities.loadMapping(cName2GIFileName.get(cName), IdMapper.MapType.GI, cName);
+            if (class2SynonymsFile.get(cName) != null)
+                Utilities.loadMapping(class2SynonymsFile.get(cName), IdMapper.MapType.Synonyms, cName);
+            if (class2AccessionFile.get(cName) != null)
+                Utilities.loadMapping(class2AccessionFile.get(cName), IdMapper.MapType.Accession, cName);
+            if (class2GIFile.get(cName) != null)
+                Utilities.loadMapping(class2GIFile.get(cName), IdMapper.MapType.GI, cName);
 
             final IdParser idParser = ClassificationManager.get(cName, true).getIdMapper().createIdParser();
             if (cName.equals(Classification.Taxonomy))
@@ -271,8 +271,13 @@ public class MaltBuild {
             referencesDB.save(new File(indexDirectory, "ref.idx"), new File(indexDirectory, "ref.db"), new File(indexDirectory, "ref.inf"), saveFirstWordOfReferenceHeaderOnly);
 
         if (gffFiles.size() > 0) {
-            GeneTableBuilder geneTableBuilder = new GeneTableBuilder();
-            geneTableBuilder.buildAndSaveAnnotations(referencesDB, gffFiles, new File(indexDirectory, "annotation.idx"), new File(indexDirectory, "annotation.db"), numberOfThreads);
+            // setup gene item creator, in particular accession mapping
+            final GeneItemCreator creator = AAddBuild.setupCreator(acc2TaxaFile, class2AccessionFile);
+
+            // obtains the gene annotations:
+            Map<String, ArrayList<Interval<GeneItem>>> dnaId2list = AAddBuild.computeAnnotations(creator, gffFiles);
+
+            AAddBuild.saveIndex(creator, indexDirectory.getPath(), dnaId2list);
         }
     }
 }

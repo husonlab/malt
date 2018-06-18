@@ -356,7 +356,7 @@ public class MaltRun {
                                         final String matchesOutputFile,
                                         final String alignedReadsOutputFile, final String unalignedReadsOutputFile,
                                         final ReferencesDBAccess referencesDB, final ReferencesHashTableAccess[] tables,
-                                        final GeneTableAccess geneTableAccess) throws IOException, JAXBException {
+                                        final GeneTableAccess geneTableAccess) throws IOException {
 
         final ExecutorService executor = Executors.newFixedThreadPool(maltOptions.getNumberOfThreads());
         final CountDownLatch countDownLatch = new CountDownLatch(maltOptions.getNumberOfThreads());

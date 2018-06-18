@@ -1,4 +1,4 @@
-/**
+/*
  * GeneTableAccess.java
  * Copyright (C) 2018 Daniel H. Huson
  * <p>
@@ -20,6 +20,10 @@
 package malt.genes;
 
 import jloda.util.*;
+import malt.tools.AAddBuild;
+import malt.tools.AAddRun;
+import megan.classification.IdMapper;
+import megan.io.InputReader;
 import megan.util.interval.Interval;
 import megan.util.interval.IntervalTree;
 
@@ -27,13 +31,15 @@ import java.io.*;
 
 /**
  * class used to access gene table
- * Daniel Huson, 8.2014
+ * Daniel Huson, 6.2018
  */
 public class GeneTableAccess {
     private final int size;
     private final long[] refIndex2FilePos;
     private final IntervalTree<GeneItem>[] refIndex2Intervals;
     private final RandomAccessFile dbRaf;
+
+    private final GeneItemCreator creator;
 
     private final int syncBits = 1023;
     private final Object[] syncObjects = new Object[syncBits + 1];  // use lots of objects to synchronize on so that threads don't in each others way
@@ -51,22 +57,28 @@ public class GeneTableAccess {
             syncObjects[i] = new Object();
         }
 
-        try (DataInputStream ins = new DataInputStream(new BufferedInputStream(new FileInputStream(indexFile))); ProgressPercentage progress = new ProgressPercentage("Reading file: " + indexFile)) {
-            Basic.readAndVerifyMagicNumber(ins, GeneTableBuilder.MAGIC_NUMBER_IDX);
+        try (InputReader ins = new InputReader(indexFile); ProgressPercentage progress = new ProgressPercentage("Reading file: " + indexFile)) {
+            AAddRun.readAndVerifyMagicNumber(ins, AAddBuild.MAGIC_NUMBER_IDX);
             size = ins.readInt();
             progress.setMaximum(size);
             refIndex2FilePos = new long[size];
             for (int i = 0; i < size; i++) {
-                refIndex2FilePos[i] = ins.readLong();
+                final String notUsed = ins.readString();
+                final long pos = ins.readLong();
+                refIndex2FilePos[i] = pos;
                 progress.incrementProgress();
             }
         }
         refIndex2Intervals = (IntervalTree<GeneItem>[]) new IntervalTree[size];
 
-        try (DataInputStream ins = new DataInputStream(new BufferedInputStream(new FileInputStream(dbFile)))) {
-            Basic.readAndVerifyMagicNumber(ins, GeneTableBuilder.MAGIC_NUMBER_DB);
-            if (ins.readInt() != size)
-                throw new IOException("Sizes differ: " + indexFile + " vs " + dbFile);
+        try (InputReader dbxIns = new InputReader(dbFile)) {
+            AAddRun.readAndVerifyMagicNumber(dbxIns, AAddBuild.MAGIC_NUMBER_DBX);
+            final String[] cNames = new String[dbxIns.readInt()];
+            for (int i = 0; i < cNames.length; i++) {
+                cNames[i] = dbxIns.readString();
+                System.err.println(cNames[i]);
+            }
+            creator = new GeneItemCreator(cNames, new IdMapper[0]);
         }
         dbRaf = new RandomAccessFile(dbFile, "r");
     }
@@ -85,14 +97,15 @@ public class GeneTableAccess {
             if (refIndex2Intervals[refIndex] == null && refIndex2FilePos[refIndex] != 0) {
                 synchronized (dbRaf) {
                     try {
-                        dbRaf.seek(refIndex2FilePos[refIndex]);
+                        final long pos = refIndex2FilePos[refIndex];
+                        dbRaf.seek(pos);
                         int intervalsLength = dbRaf.readInt();
                         if (intervalsLength > 0) {
                             IntervalTree<GeneItem> intervals = new IntervalTree<>();
                             for (int i = 0; i < intervalsLength; i++) {
                                 int start = dbRaf.readInt();
                                 int end = dbRaf.readInt();
-                                GeneItem geneItem = new GeneItem();
+                                GeneItem geneItem = new GeneItem(creator);
                                 geneItem.read(dbRaf);
                                 intervals.add(start, end, geneItem);
                                 //System.err.println(refIndex+"("+start+"-"+end+") -> "+geneItem);
@@ -133,31 +146,7 @@ public class GeneTableAccess {
             if (refInterval != null) {
                 final GeneItem geneItem = refInterval.getData();
 
-                final StringBuilder buf = new StringBuilder();
-                buf.append("|ref|").append(Basic.toString(geneItem.getProteinId()));
-                if (geneItem.getKeggId() != 0)
-                    buf.append("|kegg|").append(geneItem.getKeggId());
-                if (geneItem.getCogId() != 0)
-                    buf.append("|cog|").append(geneItem.getCogId());
-                if (geneItem.getSeedId() != 0)
-                    buf.append("|seed|").append(geneItem.getSeedId());
-                if (geneItem.getInterproId() != 0)
-                    buf.append("|ipr|").append(geneItem.getInterproId());
-                if (buf.length() > 0) {
-                    String header = referenceHeader;
-                    final String remainder;
-                    final int len = header.indexOf(' ');
-                    if (len >= 0 && len < header.length()) {
-                        remainder = header.substring(len); // keep space...
-                        header = header.substring(0, len);
-                    } else
-                        remainder = "";
-
-                    return (header + (header.endsWith("|") ? "" : "|") + "pos|"
-                            + (geneItem.isReverse() ? refInterval.getEnd() + ".." + refInterval.getStart()
-                            : refInterval.getStart() + ".." + refInterval.getEnd())
-                            + buf.toString() + remainder);
-                }
+                return geneItem.getAnnotation(refInterval);
             }
         }
         return referenceHeader;
@@ -173,11 +162,11 @@ public class GeneTableAccess {
      * @param args
      */
     public static void main(String[] args) throws IOException, UsageException, CanceledException {
-        args = new String[]{"-i", "/Users/huson/data/malt/genes2/index/annotation.idx"};
+        args = new String[]{"-i", "/Users/huson/data/malt/gff/index/aadd.idx"};
 
         final ArgsOptions options = new ArgsOptions(args, null, "GeneTableDump", "Dump gene table");
-        final String idxFile = options.getOptionMandatory("i", "idxFile", "Input annotation.idx file", "index/annotation.idx");
-        final String dbFile = options.getOption("d", "dbFile", "Input annotation.db file", Basic.replaceFileSuffix(idxFile, ".db"));
+        final String idxFile = options.getOptionMandatory("i", "idxFile", "Input aadd.idx file", "index/aadd.idx");
+        final String dbFile = options.getOption("d", "dbFile", "Input aadd.dbx file", Basic.replaceFileSuffix(idxFile, ".dbx"));
         final String outputFile = options.getOption("o", "output", "Output file (or stdout)", "stdout");
         options.done();
 

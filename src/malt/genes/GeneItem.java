@@ -1,4 +1,4 @@
-/**
+/*
  * GeneItem.java
  * Copyright (C) 2018 Daniel H. Huson
  * <p>
@@ -22,6 +22,7 @@ package malt.genes;
 import jloda.util.Basic;
 import megan.io.InputReader;
 import megan.io.OutputWriter;
+import megan.util.interval.Interval;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -33,53 +34,39 @@ import java.io.RandomAccessFile;
  */
 public class GeneItem {
     private byte[] proteinId;
-    private int keggId;
-    private int cogId;
-    private int seedId;
-    private int interproId;
+    private final GeneItemCreator creator;
     private boolean reverse;
 
-    public GeneItem() {
+    private final int[] ids;
+
+    GeneItem(GeneItemCreator creator) {
+        this.creator = creator;
+        ids = new int[creator.numberOfClassifications()];
     }
 
     public byte[] getProteinId() {
         return proteinId;
     }
 
-    public void setProteinId(byte[] proteinId) {
+    public void setProteinId(byte[] proteinId) throws IOException {
         this.proteinId = proteinId;
+        creator.map(Basic.toString(proteinId), ids);
     }
 
-    public int getKeggId() {
-        return keggId;
+    public int getId(String classificationName) {
+        return getId(creator.rank(classificationName));
     }
 
-    public void setKeggId(int keggId) {
-        this.keggId = keggId;
+    public int getId(Integer rank) {
+        return rank == null ? 0 : ids[rank];
     }
 
-    public int getCogId() {
-        return cogId;
+    public void setId(String classificationName, int id) {
+        ids[creator.rank(classificationName)] = id;
     }
 
-    public void setCogId(int cogId) {
-        this.cogId = cogId;
-    }
-
-    public int getSeedId() {
-        return seedId;
-    }
-
-    public void setSeedId(int seedId) {
-        this.seedId = seedId;
-    }
-
-    public int getInterproId() {
-        return interproId;
-    }
-
-    public void setInterproId(int interproId) {
-        this.interproId = interproId;
+    public void setId(int rank, int id) {
+        ids[rank] = id;
     }
 
     public boolean isReverse() {
@@ -91,13 +78,13 @@ public class GeneItem {
     }
 
     public String toString() {
-        return "proteinId=" + (proteinId == null ? "null" : Basic.toString(proteinId))
-                + ", keggId=" + keggId
-                + ", cogId=" + cogId
-                + ", seedId=" + seedId
-                + ", interProId=" + interproId
-                + ", reverse=" + reverse;
+        final StringBuilder buf = new StringBuilder("proteinId=" + (proteinId == null ? "null" : Basic.toString(proteinId)));
+        for (int i = 0; i < creator.numberOfClassifications(); i++) {
+            buf.append(", ").append(creator.classification(i)).append("=").append(ids[i]);
+        }
+        buf.append(", reverse=").append(reverse);
 
+        return buf.toString();
     }
 
     /**
@@ -113,10 +100,9 @@ public class GeneItem {
             outs.writeInt(proteinId.length);
             outs.write(proteinId);
         }
-        outs.writeInt(keggId);
-        outs.writeInt(cogId);
-        outs.writeInt(seedId);
-        outs.writeInt(interproId);
+        for (int i = 0; i < creator.numberOfClassifications(); i++) {
+            outs.writeInt(ids[i]);
+        }
         outs.write(reverse ? 1 : 0);
     }
 
@@ -135,10 +121,9 @@ public class GeneItem {
             if (ins.read(proteinId, 0, length) != length)
                 throw new IOException("read failed");
         }
-        keggId = ins.readInt();
-        cogId = ins.readInt();
-        seedId = ins.readInt();
-        interproId = ins.readInt();
+        for (int i = 0; i < creator.numberOfClassifications(); i++) {
+            ids[i] = ins.readInt();
+        }
         reverse = (ins.read() == 1);
     }
 
@@ -157,10 +142,26 @@ public class GeneItem {
             if (ins.read(proteinId, 0, length) != length)
                 throw new IOException("read failed");
         }
-        keggId = ins.readInt();
-        cogId = ins.readInt();
-        seedId = ins.readInt();
-        interproId = ins.readInt();
+        for (int i = 0; i < creator.numberOfClassifications(); i++) {
+            ids[i] = ins.readInt();
+        }
         reverse = (ins.read() == 1);
+    }
+
+    /**
+     * get the annotation string
+     *
+     * @param refInterval
+     * @return annotation string
+     */
+    public String getAnnotation(Interval<GeneItem> refInterval) {
+        final StringBuilder buf = new StringBuilder();
+        buf.append("pos|").append(isReverse() ? refInterval.getEnd() + ".." + refInterval.getStart() : refInterval.getStart() + ".." + refInterval.getEnd());
+        buf.append("|ref|").append(Basic.toString(getProteinId()));
+        for (int i = 0; i < creator.numberOfClassifications(); i++) {
+            if (getId(i) > 0)
+                buf.append("|").append(creator.getShortTag(i)).append("|").append(getId(i));
+        }
+        return buf.toString();
     }
 }
