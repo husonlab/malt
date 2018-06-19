@@ -196,7 +196,7 @@ public class MaltRun {
 
         ReadMagnitudeParser.setEnabled(options.getOption("mag", "magnitudes", "Reads have magnitudes (to be used in taxonomic or functional analysis)", false));
 
-        maltOptions.setContaminantsFile(ProgramProperties.getIfEnabled("enable-contaminants", options.getOption("-cf", "conFile", "File of contaminant taxa (one Id or name per line)", "")));
+        maltOptions.setContaminantsFile(options.getOption("-cf", "conFile", "File of contaminant taxa (one Id or name per line)", ""));
 
         options.comment("Heuristics:");
         maltOptions.setMaxSeedsPerOffsetPerFrame(options.getOption("spf", "maxSeedsPerFrame", "Maximum number of seed matches per offset per read frame", maltOptions.getMaxSeedsPerOffsetPerFrame()));

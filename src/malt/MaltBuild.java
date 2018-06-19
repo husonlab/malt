@@ -150,8 +150,7 @@ public class MaltBuild {
         final boolean saveFirstWordOfReferenceHeaderOnly = options.getOption("-fwo", "firstWordOnly", "Save only first word of reference header", false);
         final int randomSeed = options.getOption("rns", "random", "Random number generator seed", 666);
         final float hashTableLoadFactor = options.getOption("hsf", "hashScaleFactor", "Hash table scale factor", 0.9f, 0.1f, 1.0f);
-        //final boolean buildTableInMemory = options.getOption("btm", "buildTableInMemory", "Build the hash table in memory and then save (more memory, much faster)", true);
-        final boolean buildTableInMemory = true; // don't make this an option because it is really slow...
+        final boolean buildTableInMemory = options.getOption("btm", "buildTableInMemory", "Build the hash table in memory and then save (uses more memory, is much faster)", true);
         final boolean doBuildTables = !options.getOption("!xX", "xSkipTable", "Don't recompute index and tables, just compute profile support", false);
 
         final boolean lookInside = options.getOption("-ex", "extraStrict", "When given an input directory, look inside every GFF file to check that it is indeed in GFF3 format", false);
