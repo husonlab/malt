@@ -1,5 +1,5 @@
 /*
- * GeneTableAccess.java
+ * GeneItemAccessor.java
  * Copyright (C) 2018 Daniel H. Huson
  * <p>
  * (Some files contain contributions from other authors, who are then mentioned separately.)
@@ -20,6 +20,7 @@
 package malt.genes;
 
 import jloda.util.*;
+import malt.MaltBuild;
 import malt.tools.AAddBuild;
 import malt.tools.AAddRun;
 import megan.classification.IdMapper;
@@ -30,13 +31,14 @@ import megan.util.interval.IntervalTree;
 import java.io.*;
 
 /**
- * class used to access gene table
+ * class used to access gene items
  * Daniel Huson, 6.2018
  */
-public class GeneTableAccess {
+public class GeneItemAccessor {
     private final int size;
     private final long[] refIndex2FilePos;
     private final IntervalTree<GeneItem>[] refIndex2Intervals;
+    private final String[] index2ref;
     private final RandomAccessFile dbRaf;
 
     private final GeneItemCreator creator;
@@ -51,7 +53,7 @@ public class GeneTableAccess {
      * @param dbFile
      * @throws IOException
      */
-    public GeneTableAccess(File indexFile, File dbFile) throws IOException {
+    public GeneItemAccessor(File indexFile, File dbFile) throws IOException {
         // create the synchronization objects
         for (int i = 0; i < (syncBits + 1); i++) {
             syncObjects[i] = new Object();
@@ -59,11 +61,15 @@ public class GeneTableAccess {
 
         try (InputReader ins = new InputReader(indexFile); ProgressPercentage progress = new ProgressPercentage("Reading file: " + indexFile)) {
             AAddRun.readAndVerifyMagicNumber(ins, AAddBuild.MAGIC_NUMBER_IDX);
+            final String creator = ins.readString();
+            if (!creator.equals(MaltBuild.INDEX_CREATOR))
+                throw new IOException("Gene Item index not created by MALT");
             size = ins.readInt();
             progress.setMaximum(size);
             refIndex2FilePos = new long[size];
+            index2ref = new String[size];
             for (int i = 0; i < size; i++) {
-                final String notUsed = ins.readString();
+                index2ref[i] = ins.readString();
                 final long pos = ins.readLong();
                 refIndex2FilePos[i] = pos;
                 progress.incrementProgress();
@@ -146,10 +152,14 @@ public class GeneTableAccess {
             if (refInterval != null) {
                 final GeneItem geneItem = refInterval.getData();
 
-                return geneItem.getAnnotation(refInterval);
+                return Basic.swallowLeadingGreaterSign(Basic.getFirstWord(referenceHeader)) + "|" + geneItem.getAnnotation(refInterval);
             }
         }
         return referenceHeader;
+    }
+
+    public String getIndex2ref(int i) {
+        return index2ref[i];
     }
 
     public int size() {
@@ -170,16 +180,17 @@ public class GeneTableAccess {
         final String outputFile = options.getOption("o", "output", "Output file (or stdout)", "stdout");
         options.done();
 
-        final GeneTableAccess geneTableAccess = new GeneTableAccess(new File(idxFile), new File(dbFile));
+        final GeneItemAccessor geneTableAccess = new GeneItemAccessor(new File(idxFile), new File(dbFile));
 
         try (Writer w = new BufferedWriter(outputFile.equals("stdout") ? new OutputStreamWriter(System.out) : new FileWriter(outputFile))) {
-            for (int idx = 0; idx < geneTableAccess.size(); idx++) {
-                final IntervalTree<GeneItem> tree = geneTableAccess.getIntervals(idx);
+            for (int i = 0; i < geneTableAccess.size(); i++) {
+                System.err.println("ref[" + i + "]=" + geneTableAccess.getIndex2ref(i) + ":");
+                final IntervalTree<GeneItem> tree = geneTableAccess.getIntervals(i);
                 if (tree != null) {
                     if (true) {
                         System.err.println("Tree[" + idxFile + "]: " + Basic.abbreviateDotDotDot(tree.toString(), 1000));
                     } else {
-                        w.write("RefIndex=" + idx + "\n");
+                        w.write("RefIndex=" + i + "\n");
 
                         for (Interval<GeneItem> interval : tree) {
                             w.write(interval.getStart() + " " + interval.getEnd() + ": " + interval.getData() + "\n");

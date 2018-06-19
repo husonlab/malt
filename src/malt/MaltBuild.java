@@ -41,6 +41,8 @@ import java.util.*;
  * Daniel Huson, 8.2014
  */
 public class MaltBuild {
+    final public static String INDEX_CREATOR = "MALT";
+
     /**
      * run the program
      *
@@ -272,12 +274,12 @@ public class MaltBuild {
 
         if (gffFiles.size() > 0) {
             // setup gene item creator, in particular accession mapping
-            final GeneItemCreator creator = AAddBuild.setupCreator(acc2TaxaFile, class2AccessionFile);
+            final GeneItemCreator creator = AAddBuild.setupCreator(null, class2AccessionFile);
 
             // obtains the gene annotations:
             Map<String, ArrayList<Interval<GeneItem>>> dnaId2list = AAddBuild.computeAnnotations(creator, gffFiles);
 
-            AAddBuild.saveIndex(creator, indexDirectory.getPath(), dnaId2list);
+            AAddBuild.saveIndex(INDEX_CREATOR, creator, indexDirectory.getPath(), dnaId2list, referencesDB.refNames());
         }
     }
 }

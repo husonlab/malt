@@ -41,6 +41,8 @@ public class AAddBuild {
     final public static byte[] MAGIC_NUMBER_IDX = "AAddIdxV0.1.".getBytes();
     final public static byte[] MAGIC_NUMBER_DBX = "AAddDbxV0.1.".getBytes();
 
+    final public static String INDEX_CREATOR = "AADD";
+
     /**
      * add functional annotations to DNA alignments
      */
@@ -96,7 +98,7 @@ public class AAddBuild {
         // obtains the gene annotations:
         Map<String, ArrayList<Interval<GeneItem>>> dnaId2list = computeAnnotations(creator, gffFiles);
 
-        saveIndex(creator, indexDirectory, dnaId2list);
+        saveIndex(INDEX_CREATOR, creator, indexDirectory, dnaId2list, dnaId2list.keySet());
     }
 
     /**
@@ -110,7 +112,7 @@ public class AAddBuild {
         if (gffFiles.size() == 1) {
             final File file = new File(gffFiles.get(0));
             if (file.isDirectory()) {
-                System.err.println("Collecting all GFF3 files in directory: " + file);
+                System.err.println("Looking for GFF3 files in directory: " + file);
                 gffFiles.clear();
                 for (File aFile : Basic.getAllFilesInDirectory(file, new GFF3FileFilter(true, lookInside), true)) {
                     gffFiles.add(aFile.getPath());
@@ -135,7 +137,7 @@ public class AAddBuild {
         final String[] cNames;
         {
             final ArrayList<String> list = new ArrayList<>();
-            if (acc2TaxaFile.length() > 0)
+            if (acc2TaxaFile != null && acc2TaxaFile.length() > 0)
                 list.add(Classification.Taxonomy);
             for (String cName : class2AccessionFile.keySet())
                 if (class2AccessionFile.get(cName).length() > 0 && !list.contains(cName))
@@ -148,7 +150,7 @@ public class AAddBuild {
         for (int i = 0; i < cNames.length; i++) {
             final String cName = cNames[i];
             idMappers[i] = ClassificationManager.get(cName, true).getIdMapper();
-            if (cName.equals(Classification.Taxonomy))
+            if (cName.equals(Classification.Taxonomy) && acc2TaxaFile != null && acc2TaxaFile.length() > 0)
                 idMappers[i].loadMappingFile(acc2TaxaFile, IdMapper.MapType.Accession, false, new ProgressPercentage());
             else
                 idMappers[i].loadMappingFile(class2AccessionFile.get(cName), IdMapper.MapType.Accession, false, new ProgressPercentage());
@@ -196,7 +198,7 @@ public class AAddBuild {
      * @param dnaId2list
      * @throws IOException
      */
-    public static void saveIndex(GeneItemCreator creator, String indexDirectory, Map<String, ArrayList<Interval<GeneItem>>> dnaId2list) throws IOException {
+    public static void saveIndex(String indexCreator, GeneItemCreator creator, String indexDirectory, Map<String, ArrayList<Interval<GeneItem>>> dnaId2list, Iterable<String> dnaIdOrder) throws IOException {
         // writes the index file:
         long totalRefWithAGene = 0;
 
@@ -206,6 +208,7 @@ public class AAddBuild {
              ProgressPercentage progress = new ProgressPercentage("Writing files: " + indexFile + "\n               " + dbFile, dnaId2list.size())) {
 
             idxWriter.write(MAGIC_NUMBER_IDX);
+            idxWriter.writeString(indexCreator);
             idxWriter.writeInt(dnaId2list.size());
 
             dbxWriter.write(MAGIC_NUMBER_DBX);
@@ -215,7 +218,8 @@ public class AAddBuild {
                 dbxWriter.writeString(cName);
             }
 
-            for (String dnaId : dnaId2list.keySet()) {
+
+            for (String dnaId : dnaIdOrder) {
                 idxWriter.writeString(dnaId);
                 final ArrayList<Interval<GeneItem>> list = dnaId2list.get(dnaId);
                 if (list == null) {

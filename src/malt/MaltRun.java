@@ -25,7 +25,7 @@ import malt.align.BlastStatisticsHelper;
 import malt.align.DNAScoringMatrix;
 import malt.align.ProteinScoringMatrix;
 import malt.data.*;
-import malt.genes.GeneTableAccess;
+import malt.genes.GeneItemAccessor;
 import malt.io.*;
 import malt.mapping.MappingManager;
 import malt.util.Utilities;
@@ -299,9 +299,9 @@ public class MaltRun {
             MappingManager.loadMappings(cNames, indexDirectory);
         }
 
-        final GeneTableAccess geneTableAccess;
-        if ((new File(indexDirectory, "annotation.idx")).exists()) {
-            geneTableAccess = new GeneTableAccess(new File(indexDirectory, "annotation.idx"), new File(indexDirectory, "annotation.db"));
+        final GeneItemAccessor geneTableAccess;
+        if ((new File(indexDirectory, "aadd.idx")).exists()) {
+            geneTableAccess = new GeneItemAccessor(new File(indexDirectory, "aadd.idx"), new File(indexDirectory, "aadd.dbx"));
             maltOptions.setParseHeaders(true);
         } else
             geneTableAccess = null;
@@ -356,7 +356,7 @@ public class MaltRun {
                                         final String matchesOutputFile,
                                         final String alignedReadsOutputFile, final String unalignedReadsOutputFile,
                                         final ReferencesDBAccess referencesDB, final ReferencesHashTableAccess[] tables,
-                                        final GeneTableAccess geneTableAccess) throws IOException {
+                                        final GeneItemAccessor geneTableAccess) throws IOException {
 
         final ExecutorService executor = Executors.newFixedThreadPool(maltOptions.getNumberOfThreads());
         final CountDownLatch countDownLatch = new CountDownLatch(maltOptions.getNumberOfThreads());

@@ -19,12 +19,14 @@
  */
 package malt.data;
 
+import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressPercentage;
 import malt.io.FastAFileIteratorBytes;
 import megan.io.OutputWriter;
 
 import java.io.*;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -102,6 +104,37 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
      */
     public byte[] getHeader(int index) {
         return headers[index];
+    }
+
+    /**
+     * gets an iterable over all ref names as strings
+     *
+     * @return iterable
+     */
+    public Iterable<String> refNames() {
+        return new Iterable<String>() {
+            @Override
+            public Iterator<String> iterator() {
+                return new Iterator<String>() {
+                    private int i = 0;
+
+                    @Override
+                    public boolean hasNext() {
+                        return i < numberOfSequences;
+                    }
+
+                    @Override
+                    public String next() {
+                        return Basic.getAccessionWord(headers[i++]);
+                    }
+
+                    @Override
+                    public void remove() {
+
+                    }
+                };
+            }
+        };
     }
 
     /**
@@ -259,9 +292,9 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
             pos++;
         byte[] add;
         if (header[pos - 1] == '|')
-            add = String.format("%s%d|", tag, id).getBytes();
+            add = String.format("%s%d", tag, id).getBytes();
         else
-            add = String.format("|%s%d|", tag, id).getBytes();
+            add = String.format("|%s%d", tag, id).getBytes();
 
         byte[] newHeader = new byte[header.length + add.length];
         System.arraycopy(header, 0, newHeader, 0, pos);

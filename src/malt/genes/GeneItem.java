@@ -160,7 +160,7 @@ public class GeneItem {
         buf.append("|ref|").append(Basic.toString(getProteinId()));
         for (int i = 0; i < creator.numberOfClassifications(); i++) {
             if (getId(i) > 0)
-                buf.append("|").append(creator.getShortTag(i)).append("|").append(getId(i));
+                buf.append("|").append(creator.getShortTag(i)).append(getId(i));
         }
         return buf.toString();
     }

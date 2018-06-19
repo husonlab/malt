@@ -89,6 +89,8 @@ public class AAddRun {
 
         try (InputReader ins = new InputReader(indexFile); ProgressPercentage progress = new ProgressPercentage("Reading file: " + indexFile)) {
             readAndVerifyMagicNumber(ins, AAddBuild.MAGIC_NUMBER_IDX);
+            final String creator = ins.readString();
+            System.err.println("Index created by: " + creator);
             final int entries = ins.readInt();
             progress.setMaximum(entries);
 

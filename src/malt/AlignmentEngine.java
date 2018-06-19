@@ -23,7 +23,7 @@ import jloda.util.Basic;
 import malt.align.AlignerOptions;
 import malt.align.BandedAligner;
 import malt.data.*;
-import malt.genes.GeneTableAccess;
+import malt.genes.GeneItemAccessor;
 import malt.io.*;
 import malt.util.FixedSizePriorityQueue;
 import malt.util.Utilities;
@@ -59,7 +59,7 @@ public class AlignmentEngine {
     private final FileWriterRanked unalignedReadsWriter;
     private final RMA6Writer rmaWriter;
 
-    private final GeneTableAccess geneTableAccess;
+    private final GeneItemAccessor geneTableAccess;
 
     // parameters
     private final double minRawScore;
@@ -100,7 +100,7 @@ public class AlignmentEngine {
     AlignmentEngine(final int threadNumber, final MaltOptions maltOptions, AlignerOptions alignerOptions, final ReferencesDBAccess referencesDB,
                     final ReferencesHashTableAccess[] tables, final FastAReader fastAReader,
                     final FileWriterRanked matchesWriter, final RMA6Writer rmaWriter,
-                    final FileWriterRanked alignedReadsWriter, final FileWriterRanked unalignedReadsWriter, final GeneTableAccess geneTableAccess) throws IOException {
+                    final FileWriterRanked alignedReadsWriter, final FileWriterRanked unalignedReadsWriter, final GeneItemAccessor geneTableAccess) throws IOException {
         this.threadNumber = threadNumber;
         this.maltOptions = maltOptions;
         this.referencesDB = referencesDB;
@@ -356,7 +356,7 @@ public class AlignmentEngine {
                                                     }
                                                     int end = aligner.getEndReference();
                                                     referenceHeader = geneTableAccess.annotateRefString(Basic.toString(referencesDB.getHeader(refIndex)), refIndex, start, end).getBytes();
-                                                    // System.err.println(Basic.toString(referenceHeader));
+                                                    //System.err.println(Basic.toString(referenceHeader));
                                                 }
 
                                                 byte[] text = null;
