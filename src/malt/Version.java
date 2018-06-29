@@ -25,5 +25,5 @@ package malt;
  */
 public class Version {
     public static final String NAME = "MALT";
-    public static final String SHORT_DESCRIPTION = "MALT (version 0.4.1, built 24 May 2018)";
+    public static final String SHORT_DESCRIPTION = "MALT (version 0.4.1, built 29 June 2018)";
 }
