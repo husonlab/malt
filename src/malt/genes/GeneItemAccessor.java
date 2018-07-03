@@ -21,10 +21,10 @@ package malt.genes;
 
 import jloda.util.*;
 import malt.MaltBuild;
-import malt.tools.AAddBuild;
-import malt.tools.AAddRun;
 import megan.classification.IdMapper;
 import megan.io.InputReader;
+import megan.tools.AAddBuild;
+import megan.tools.AAddRun;
 import megan.util.interval.Interval;
 import megan.util.interval.IntervalTree;
 

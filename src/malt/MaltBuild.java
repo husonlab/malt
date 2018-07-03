@@ -24,12 +24,12 @@ import malt.data.*;
 import malt.genes.GeneItem;
 import malt.genes.GeneItemCreator;
 import malt.mapping.Mapping;
-import malt.tools.AAddBuild;
 import malt.util.Utilities;
 import megan.classification.Classification;
 import megan.classification.ClassificationManager;
 import megan.classification.IdMapper;
 import megan.classification.IdParser;
+import megan.tools.AAddBuild;
 import megan.util.interval.Interval;
 
 import java.io.File;
