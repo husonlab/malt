@@ -29,7 +29,7 @@ import megan.classification.Classification;
 import megan.classification.ClassificationManager;
 import megan.classification.IdMapper;
 import megan.classification.IdParser;
-import megan.tools.AAddBuild;
+import megan.tools.AAdderBuild;
 import megan.util.interval.Interval;
 
 import java.io.File;
@@ -176,7 +176,7 @@ public class MaltBuild {
 
             }
         }
-        AAddBuild.setupGFFFiles(gffFiles, lookInside);
+        AAdderBuild.setupGFFFiles(gffFiles, lookInside);
 
         System.err.println("Reference sequence type set to: " + sequenceType.toString());
         final IAlphabet referenceAlphabet;
@@ -273,12 +273,12 @@ public class MaltBuild {
 
         if (gffFiles.size() > 0) {
             // setup gene item creator, in particular accession mapping
-            final GeneItemCreator creator = AAddBuild.setupCreator(null, class2AccessionFile);
+            final GeneItemCreator creator = AAdderBuild.setupCreator(null, class2AccessionFile);
 
             // obtains the gene annotations:
-            Map<String, ArrayList<Interval<GeneItem>>> dnaId2list = AAddBuild.computeAnnotations(creator, gffFiles);
+            Map<String, ArrayList<Interval<GeneItem>>> dnaId2list = AAdderBuild.computeAnnotations(creator, gffFiles);
 
-            AAddBuild.saveIndex(INDEX_CREATOR, creator, indexDirectory.getPath(), dnaId2list, referencesDB.refNames());
+            AAdderBuild.saveIndex(INDEX_CREATOR, creator, indexDirectory.getPath(), dnaId2list, referencesDB.refNames());
         }
     }
 }

@@ -23,8 +23,8 @@ import jloda.util.*;
 import malt.MaltBuild;
 import megan.classification.IdMapper;
 import megan.io.InputReader;
-import megan.tools.AAddBuild;
-import megan.tools.AAddRun;
+import megan.tools.AAdderBuild;
+import megan.tools.AAdderRun;
 import megan.util.interval.Interval;
 import megan.util.interval.IntervalTree;
 
@@ -60,7 +60,7 @@ public class GeneItemAccessor {
         }
 
         try (InputReader ins = new InputReader(indexFile); ProgressPercentage progress = new ProgressPercentage("Reading file: " + indexFile)) {
-            AAddRun.readAndVerifyMagicNumber(ins, AAddBuild.MAGIC_NUMBER_IDX);
+            AAdderRun.readAndVerifyMagicNumber(ins, AAdderBuild.MAGIC_NUMBER_IDX);
             final String creator = ins.readString();
             if (!creator.equals(MaltBuild.INDEX_CREATOR))
                 throw new IOException("Gene Item index not created by MALT");
@@ -78,7 +78,7 @@ public class GeneItemAccessor {
         refIndex2Intervals = (IntervalTree<GeneItem>[]) new IntervalTree[size];
 
         try (InputReader dbxIns = new InputReader(dbFile)) {
-            AAddRun.readAndVerifyMagicNumber(dbxIns, AAddBuild.MAGIC_NUMBER_DBX);
+            AAdderRun.readAndVerifyMagicNumber(dbxIns, AAdderBuild.MAGIC_NUMBER_DBX);
             final String[] cNames = new String[dbxIns.readInt()];
             for (int i = 0; i < cNames.length; i++) {
                 cNames[i] = dbxIns.readString();
