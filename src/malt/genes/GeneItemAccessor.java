@@ -20,13 +20,13 @@
 package malt.genes;
 
 import jloda.util.*;
+import jloda.util.interval.Interval;
+import jloda.util.interval.IntervalTree;
 import malt.MaltBuild;
 import megan.classification.IdMapper;
 import megan.io.InputReader;
 import megan.tools.AAdderBuild;
 import megan.tools.AAdderRun;
-import megan.util.interval.Interval;
-import megan.util.interval.IntervalTree;
 
 import java.io.*;
 

@@ -20,9 +20,9 @@
 package malt.genes;
 
 import jloda.util.Basic;
+import jloda.util.interval.Interval;
 import megan.io.InputReader;
 import megan.io.OutputWriter;
-import megan.util.interval.Interval;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

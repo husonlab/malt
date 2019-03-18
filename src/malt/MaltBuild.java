@@ -20,6 +20,7 @@
 package malt;
 
 import jloda.util.*;
+import jloda.util.interval.Interval;
 import malt.data.*;
 import malt.genes.GeneItem;
 import malt.genes.GeneItemCreator;
@@ -30,7 +31,6 @@ import megan.classification.ClassificationManager;
 import megan.classification.IdMapper;
 import megan.classification.IdParser;
 import megan.tools.AAdderBuild;
-import megan.util.interval.Interval;
 
 import java.io.File;
 import java.io.IOException;
