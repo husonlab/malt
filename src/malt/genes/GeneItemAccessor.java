@@ -19,7 +19,11 @@
  */
 package malt.genes;
 
-import jloda.util.*;
+import jloda.swing.util.ArgsOptions;
+import jloda.util.Basic;
+import jloda.util.CanceledException;
+import jloda.util.ProgressPercentage;
+import jloda.util.UsageException;
 import jloda.util.interval.Interval;
 import jloda.util.interval.IntervalTree;
 import malt.MaltBuild;

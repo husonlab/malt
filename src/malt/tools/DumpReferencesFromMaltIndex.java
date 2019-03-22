@@ -19,6 +19,8 @@
 
 package malt.tools;
 
+import jloda.swing.util.ArgsOptions;
+import jloda.swing.util.ProgramProperties;
 import jloda.util.*;
 import malt.MaltOptions;
 import malt.data.ReferencesDBAccess;

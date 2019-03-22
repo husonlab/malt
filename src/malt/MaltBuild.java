@@ -19,7 +19,11 @@
  */
 package malt;
 
-import jloda.util.*;
+import jloda.swing.util.*;
+import jloda.util.Basic;
+import jloda.util.PeakMemoryUsageMonitor;
+import jloda.util.ProgressPercentage;
+import jloda.util.UsageException;
 import jloda.util.interval.Interval;
 import malt.data.*;
 import malt.genes.GeneItem;
@@ -166,7 +170,7 @@ public class MaltBuild {
             if (file.isDirectory()) {
                 System.err.println("Looking for FastA files in directory: " + file);
                 inputFiles.clear();
-                for (File aFile : Basic.getAllFilesInDirectory(file, new FastaFileFilter(), true)) {
+                for (File aFile : BasicSwing.getAllFilesInDirectory(file, new FastaFileFilter(), true)) {
                     inputFiles.add(aFile.getPath());
                 }
                 if (inputFiles.size() == 0)

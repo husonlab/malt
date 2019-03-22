@@ -19,6 +19,9 @@
  */
 package malt;
 
+import jloda.swing.util.ArgsOptions;
+import jloda.swing.util.ProgramProperties;
+import jloda.swing.util.ResourceManager;
 import jloda.util.*;
 import malt.align.AlignerOptions;
 import malt.align.BlastStatisticsHelper;
