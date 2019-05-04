@@ -19,11 +19,11 @@
  */
 package malt;
 
-import jloda.swing.util.*;
-import jloda.util.Basic;
-import jloda.util.PeakMemoryUsageMonitor;
-import jloda.util.ProgressPercentage;
-import jloda.util.UsageException;
+import jloda.swing.util.ArgsOptions;
+import jloda.swing.util.BasicSwing;
+import jloda.swing.util.FastaFileFilter;
+import jloda.swing.util.ResourceManager;
+import jloda.util.*;
 import jloda.util.interval.Interval;
 import malt.data.*;
 import malt.genes.GeneItem;
