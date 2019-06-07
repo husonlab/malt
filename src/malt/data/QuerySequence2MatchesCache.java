@@ -1,25 +1,25 @@
-/**
- * QuerySequence2MatchesCache.java
- * Copyright (C) 2019 Daniel H. Huson
- * <p>
- * (Some files contain contributions from other authors, who are then mentioned separately.)
- * <p>
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * <p>
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * <p>
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/*
+ *  QuerySequence2MatchesCache.java Copyright (C) 2019. Daniel H. Huson GPL
+ *
+ *   (Some files contain contributions from other authors, who are then mentioned separately.)
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
 package malt.data;
 
-import malt.util.MurmurHash3;
+import jloda.thirdparty.MurmurHash;
 
 /**
  * hash table used for caching matches associated with a given read
@@ -108,7 +108,7 @@ public class QuerySequence2MatchesCache {
      * @return hash value
      */
     private int getHash(byte[] key, int length) {
-        int value = MurmurHash3.murmurhash3x8632(key, 0, length, randomNumberSeed) & hashMask; // & also removes negative sign
+        int value = MurmurHash.hash32(key, 0, length, randomNumberSeed) & hashMask; // & also removes negative sign
         if (value >= hash2data.length)
             value %= hash2data.length;
         return value;

@@ -1,21 +1,21 @@
 /*
- * MaltRun.java
- * Copyright (C) 2019 Daniel H. Huson
+ *  MaltRun.java Copyright (C) 2019. Daniel H. Huson GPL
  *
- * (Some files contain contributions from other authors, who are then mentioned separately.)
+ *   (Some files contain contributions from other authors, who are then mentioned separately.)
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
 package malt;
 
@@ -27,16 +27,14 @@ import malt.align.BlastStatisticsHelper;
 import malt.align.DNAScoringMatrix;
 import malt.align.ProteinScoringMatrix;
 import malt.data.*;
-import malt.genes.GeneItemAccessor;
 import malt.io.*;
 import malt.mapping.MappingManager;
 import malt.util.Utilities;
 import megan.classification.ClassificationManager;
 import megan.core.Document;
-import megan.parsers.blast.BlastMode;
+import megan.genes.GeneItemAccessor;
 import megan.util.ReadMagnitudeParser;
 
-import javax.xml.bind.JAXBException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +93,7 @@ public class MaltRun {
     /**
      * run the program
      */
-    public void run(final String[] args) throws UsageException, IOException, CanceledException, JAXBException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
+    public void run(final String[] args) throws UsageException, IOException, CanceledException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
         version = Basic.getVersion(this.getClass());
         final MaltOptions maltOptions = new MaltOptions();
         final AlignerOptions alignerOptions = new AlignerOptions();
