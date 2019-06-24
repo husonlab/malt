@@ -19,7 +19,7 @@
  */
 package malt.data;
 
-import jloda.thirdparty.MurmurHash;
+import jloda.thirdparty.MurmurHash3;
 import jloda.util.Basic;
 import jloda.util.CanceledException;
 import jloda.util.ProgressPercentage;
@@ -139,7 +139,7 @@ public class ReferencesHashTableAccess implements Closeable {
      * @return hash value
      */
     public int getHash(byte[] key) {
-        int value = MurmurHash.hash32(key, 0, key.length, randomNumberSeed) & hashMask;
+        int value = MurmurHash3.murmurhash3x8632(key, 0, key.length, randomNumberSeed) & hashMask;
         if (value >= Basic.MAX_ARRAY_SIZE) // only use modulo if we are on or above table size
             value %= Basic.MAX_ARRAY_SIZE;
         return value;

@@ -19,7 +19,7 @@
  */
 package malt.data;
 
-import jloda.thirdparty.MurmurHash;
+import jloda.thirdparty.MurmurHash3;
 import jloda.util.Basic;
 import jloda.util.ProgressPercentage;
 import jloda.util.Single;
@@ -435,7 +435,7 @@ public class ReferencesHashTableBuilder {
      * @return hash value
      */
     public int getHash(byte[] key) {
-        int value = MurmurHash.hash32(key, 0, key.length, randomNumberSeed) & hashMask; // & also removes negative sign
+        int value = MurmurHash3.murmurhash3x8632(key, 0, key.length, randomNumberSeed) & hashMask; // & also removes negative sign
 
         if (value >= Basic.MAX_ARRAY_SIZE)
             value %= Basic.MAX_ARRAY_SIZE;

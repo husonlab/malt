@@ -19,7 +19,7 @@
  */
 package malt.data;
 
-import jloda.thirdparty.MurmurHash;
+import jloda.thirdparty.MurmurHash3;
 
 /**
  * hash table used for caching matches associated with a given read
@@ -108,7 +108,7 @@ public class QuerySequence2MatchesCache {
      * @return hash value
      */
     private int getHash(byte[] key, int length) {
-        int value = MurmurHash.hash32(key, 0, length, randomNumberSeed) & hashMask; // & also removes negative sign
+        int value = MurmurHash3.murmurhash3x8632(key, 0, length, randomNumberSeed) & hashMask; // & also removes negative sign
         if (value >= hash2data.length)
             value %= hash2data.length;
         return value;
