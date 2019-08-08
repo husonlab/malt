@@ -68,7 +68,7 @@ public class MaltRun {
             PeakMemoryUsageMonitor.start();
             MaltRun program = new MaltRun();
             ResourceManager.setWarningMissingIcon(false);
-            ProgramProperties.setProgramIcon(ResourceManager.getIcon("malt-run48.png"));
+            ProgramProperties.setProgramIcons(ResourceManager.getIcons("malt-run16.png", "malt-run32.png", "malt-run48.png"));
             ProgramProperties.setProgramName("MaltRun");
             ProgramProperties.setProgramVersion(Version.SHORT_DESCRIPTION);
 
