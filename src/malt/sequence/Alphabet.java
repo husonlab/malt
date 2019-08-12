@@ -46,7 +46,7 @@ public class Alphabet implements INormalizer {
      */
     public Alphabet(String definitionString, byte undefinedLetter) {
         boolean isUndefinedContained = (definitionString.indexOf(undefinedLetter) != -1);
-        this.definitionString = definitionString.replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("  ", " ");
+        this.definitionString = definitionString.replaceAll("\\[", "").replaceAll("]", "").replaceAll("\\s+", " ");
         String[] letterGroups = this.definitionString.split(" ");
         alphabetSize = (byte) (letterGroups.length + (isUndefinedContained ? 0 : 1));
 

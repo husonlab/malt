@@ -198,8 +198,8 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     public void saveFastAFile(String fileName) throws IOException {
         try (BufferedWriter w = new BufferedWriter(new FileWriter(fileName), 8192)) {
             for (int i = 0; i < numberOfSequences; i++) {
-                w.write(headers[i] + "\n");
-                w.write(sequences[i] + "\n");
+                w.write(Basic.toString(headers[i]) + "\n");
+                w.write(Basic.toString(sequences[i]) + "\n");
             }
         }
     }

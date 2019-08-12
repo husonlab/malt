@@ -135,7 +135,7 @@ public class ProteinSequenceEncoder {
         }
 
         for (int p = 0; p < steps; p++) {
-            final int c[] = new int[1 << d];
+            final int[] c = new int[1 << d];
             // the next three for loops implement counting-sort
             for (int i = 0; i < length; i += 2) {
                 c[(int) ((a[i] >> d * p) & ((1 << d) - 1))]++;
