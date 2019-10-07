@@ -28,6 +28,7 @@ import jloda.util.interval.Interval;
 import malt.data.*;
 import malt.mapping.Mapping;
 import malt.util.Utilities;
+import megan.accessiondb.AccessAccessionMappingDatabase;
 import megan.classification.Classification;
 import megan.classification.ClassificationManager;
 import megan.classification.IdMapper;
@@ -118,20 +119,19 @@ public class MaltBuild {
         else
             proteinReduction = "";
 
-        options.comment("Classification:");
+        options.comment("Classification support:");
         final boolean parseTaxonNames = options.getOption("-tn", "parseTaxonNames", "Parse taxon names", true);
-        final String gi2TaxaFile = options.getOption("-g2t", "gi2taxa", "GI-to-Taxonomy mapping file", "");
+
+        final String mapDBFile = options.getOption("-mdb", "mapDB", "MEGAN mapping db (file megan-map.db)", "");
         final String acc2TaxaFile = options.getOption("-a2t", "acc2taxa", "Accession-to-Taxonomy mapping file", "");
         final String synonyms2TaxaFile = options.getOption("-s2t", "syn2taxa", "Synonyms-to-Taxonomy mapping file", "");
 
-        final HashMap<String, String> class2GIFile = new HashMap<>();
         final HashMap<String, String> class2AccessionFile = new HashMap<>();
         final HashMap<String, String> class2SynonymsFile = new HashMap<>();
 
         final Set<String> classificationsToUse = new TreeSet<>();
 
         for (String cName : ClassificationManager.getAllSupportedClassificationsExcludingNCBITaxonomy()) {
-            class2GIFile.put(cName, options.getOption("-g2" + cName.toLowerCase(), "gi2" + cName.toLowerCase(), "GI-to-" + cName + " mapping file", ""));
             class2AccessionFile.put(cName, options.getOption("-a2" + cName.toLowerCase(), "acc2" + cName.toLowerCase(), "Accession-to-" + cName + " mapping file", ""));
             class2SynonymsFile.put(cName, options.getOption("-s2" + cName.toLowerCase(), "syn2" + cName.toLowerCase(), "Synonyms-to-" + cName + " mapping file", ""));
             final String tags = options.getOption("-t4" + cName.toLowerCase(), "tags4" + cName.toLowerCase(), "Tags for " + cName + " id parsing (must set to activate id parsing)", "").trim();
@@ -141,7 +141,7 @@ public class MaltBuild {
             // final boolean useLCA = options.getOption("-l_" + cName.toLowerCase(), "lca" + cName.toLowerCase(), "Use LCA for assigning to '" + cName + "', alternative: best hit", ProgramProperties.get(cName + "UseLCA", cName.equals(Classification.Taxonomy)));
             // ProgramProperties.put(cName + "UseLCA", useLCA);
 
-            if (class2GIFile.get(cName).length() > 0 || class2AccessionFile.get(cName).length() > 0 || class2AccessionFile.get(cName).length() > 0)
+            if (class2AccessionFile.get(cName).length() > 0 || class2AccessionFile.get(cName).length() > 0)
                 classificationsToUse.add(cName);
         }
 
@@ -177,9 +177,16 @@ public class MaltBuild {
                     throw new IOException("No files found in directory: " + file);
                 else
                     System.err.println(String.format("Found: %,d", inputFiles.size()));
-
             }
         }
+
+        final Collection<String> mapDBClassifications = AccessAccessionMappingDatabase.getContainedClassificationsIfDBExists(mapDBFile);
+        if (mapDBClassifications.size() > 0 && (Basic.hasPositiveLengthValue(class2AccessionFile) || Basic.hasPositiveLengthValue(class2SynonymsFile)))
+            throw new UsageException("Illegal to use both --mapDB and ---acc2... or --syn2... options");
+
+        if (mapDBClassifications.size() > 0)
+            ClassificationManager.setMeganMapDBFile(mapDBFile);
+
         AAdderBuild.setupGFFFiles(gffFiles, lookInside);
 
         System.err.println("Reference sequence type set to: " + sequenceType.toString());
@@ -243,7 +250,7 @@ public class MaltBuild {
             }
         }
 
-        if (gi2TaxaFile.length() > 0 || acc2TaxaFile.length() > 0 || synonyms2TaxaFile.length() > 0)
+        if (acc2TaxaFile.length() > 0 || synonyms2TaxaFile.length() > 0)
             classificationsToUse.add(Classification.Taxonomy);
 
         for (String cName : classificationsToUse) {
@@ -255,12 +262,13 @@ public class MaltBuild {
             Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".tre"), new File(indexDirectory, cNameLowerCase + ".tre"));
             Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".map"), new File(indexDirectory, cNameLowerCase + ".map"));
 
+            if (mapDBClassifications.contains(cName))
+                Utilities.loadMapping(mapDBFile, IdMapper.MapType.MeganMapDB, cName);
+
             if (class2SynonymsFile.get(cName) != null)
                 Utilities.loadMapping(class2SynonymsFile.get(cName), IdMapper.MapType.Synonyms, cName);
             if (class2AccessionFile.get(cName) != null)
                 Utilities.loadMapping(class2AccessionFile.get(cName), IdMapper.MapType.Accession, cName);
-            if (class2GIFile.get(cName) != null)
-                Utilities.loadMapping(class2GIFile.get(cName), IdMapper.MapType.GI, cName);
 
             final IdParser idParser = ClassificationManager.get(cName, true).getIdMapper().createIdParser();
             if (cName.equals(Classification.Taxonomy))
