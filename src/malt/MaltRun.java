@@ -456,7 +456,7 @@ public class MaltRun {
 
             // copy matches
             {
-                final FileInputIterator it = new FileInputIterator(matchesOutputFileUsed);
+                final FileLineIterator it = new FileLineIterator(matchesOutputFileUsed);
                 final ProgressPercentage progress = new ProgressPercentage("Copying from temporary file:", it.getMaximumProgress());
 
                 while (it.hasNext()) {

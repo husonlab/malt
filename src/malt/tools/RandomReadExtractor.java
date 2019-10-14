@@ -82,7 +82,7 @@ public class RandomReadExtractor {
 
         final ArrayList<Integer> starts = new ArrayList<>();
         if (startsFile.length() > 0) {
-            try (FileInputIterator it = new FileInputIterator(startsFile, true)) {
+            try (FileLineIterator it = new FileLineIterator(startsFile, true)) {
                 while (it.hasNext()) {
                     String aLine = it.next();
                     if (Basic.isInteger(aLine))

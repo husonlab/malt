@@ -21,7 +21,7 @@ package malt.data;
 
 import jloda.util.Basic;
 import jloda.util.CanceledException;
-import jloda.util.FileInputIterator;
+import jloda.util.FileLineIterator;
 import malt.MaltOptions;
 import megan.io.*;
 import megan.io.experimental.ByteFileGetterPagedMemory;
@@ -76,7 +76,7 @@ public class ReferencesDBAccess implements Closeable {
                 break;
         }
 
-        try (FileInputIterator it = new FileInputIterator(refInfFile)) {
+        try (FileLineIterator it = new FileLineIterator(refInfFile)) {
             while (it.hasNext()) {
                 String aLine = it.next();
                 if (aLine.startsWith("sequences")) {
