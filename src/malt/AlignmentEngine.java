@@ -1,20 +1,20 @@
 /*
- *  AlignmentEngine.java Copyright (C) 2019. Daniel H. Huson GPL
+ * AlignmentEngine.java Copyright (C) 2020. Daniel H. Huson
  *
- *   (Some files contain contributions from other authors, who are then mentioned separately.)
+ *  (Some files contain contributions from other authors, who are then mentioned separately.)
  *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 package malt;
@@ -89,7 +89,7 @@ public class AlignmentEngine {
 
     private final ReadMatch[] readMatchesForRefIndex;
 
-    private SeedMatchArray[] seedArrays;   // used in innerloop to keep track of seedmatches per reference sequence
+    private SeedMatchArray[] seedArrays;   // used in inner loop to keep track of seed matches per reference sequence
     private int seedArraysLength = 0;
 
     static private QuerySequence2MatchesCache querySequence2MatchesCache = null;
@@ -475,13 +475,10 @@ public class AlignmentEngine {
             // matchesQueue.erase();    // not necessary because queue is consumed when building array
         } else {   // no match
             if (matchesWriter != null) {
-                switch (matchOutputFormat) {
-                    case Text: // report no-hits statement
-                        matchesWriter.writeByRank(threadNumber, query.getId(), BlastTextHelper.makeQueryLine(query), BlastTextHelper.NO_HITS);
-                        break;
-                    default:
-                        matchesWriter.skipByRank(threadNumber, query.getId());
-                        break;
+                if (matchOutputFormat == MaltOptions.MatchOutputFormat.Text) { // report no-hits statement
+                    matchesWriter.writeByRank(threadNumber, query.getId(), BlastTextHelper.makeQueryLine(query), BlastTextHelper.NO_HITS);
+                } else {
+                    matchesWriter.skipByRank(threadNumber, query.getId());
                 }
             }
             if (rmaWriter != null && maltOptions.isSaveUnalignedToRMA()) {
@@ -579,7 +576,7 @@ public class AlignmentEngine {
     /**
      * an array of seed matches
      */
-    class SeedMatchArray {
+    static class SeedMatchArray {
         int size;
         SeedMatch[] matches;
 
