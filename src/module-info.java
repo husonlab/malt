@@ -4,4 +4,6 @@ module malt {
 
     exports malt.tools;
     exports malt;
+
+    opens malt.resources.icons;
 }
