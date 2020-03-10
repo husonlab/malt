@@ -94,7 +94,7 @@ public class MaltBuild {
         final ArgsOptions options = new ArgsOptions(args, this, "Builds an index for MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
         options.setVersion(ProgramProperties.getProgramVersion());
-        options.setLicense("Copyright (C) 2019 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
+        options.setLicense("Copyright (C) 2020 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Input:");
         final List<String> inputFiles = options.getOptionMandatory("i", "input", "Input reference files in FastA format (or specify a single directory)", new LinkedList<String>());
@@ -138,8 +138,6 @@ public class MaltBuild {
             if (tags.length() > 0)
                 ProgramProperties.put(cName + "Tags", tags);
             ProgramProperties.put(cName + "ParseIds", tags.length() > 0);
-            // final boolean useLCA = options.getOption("-l_" + cName.toLowerCase(), "lca" + cName.toLowerCase(), "Use LCA for assigning to '" + cName + "', alternative: best hit", ProgramProperties.get(cName + "UseLCA", cName.equals(Classification.Taxonomy)));
-            // ProgramProperties.put(cName + "UseLCA", useLCA);
 
             if (class2AccessionFile.get(cName).length() > 0 || class2AccessionFile.get(cName).length() > 0)
                 classificationsToUse.add(cName);
