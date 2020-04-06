@@ -192,7 +192,7 @@ public class MaltRun {
 
         maltOptions.setUseWeightedLCA(options.getOption("-wlca", "weightedLCA", "Use the weighted LCA for taxonomic assignment", false));
         if (options.isDoHelp() || maltOptions.isUseWeightedLCA())
-            maltOptions.setLcaCoveragePercent(options.getOption("-lcp", "lcaCoveragePercent", "Set the percent for the LCA to cover", Document.DEFAULT_LCA_COVERAGE_PERCENT));
+            maltOptions.setLcaCoveragePercent(options.getOption("-lcp", "lcaCoveragePercent", "Set the percent for the LCA to cover", Document.DEFAULT_LCA_COVERAGE_PERCENT_SHORT_READS));
 
         ReadMagnitudeParser.setEnabled(options.getOption("mag", "magnitudes", "Reads have magnitudes (to be used in taxonomic or functional analysis)", false));
 
