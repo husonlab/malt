@@ -53,7 +53,7 @@ public class DumpReferencesFromMaltIndex {
     /**
      * run the program
      */
-    public void run(String[] args) throws CanceledException, IOException, UsageException {
+    public void run(String[] args) throws IOException, UsageException {
         final ArgsOptions options = new ArgsOptions(args, this, "Dump references from MALT index");
         options.setVersion(ProgramProperties.getProgramVersion());
         options.setLicense("Copyright (C) 2020 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
@@ -77,6 +77,6 @@ public class DumpReferencesFromMaltIndex {
                 count++;
             }
         }
-        System.err.println(String.format("Lines: %,d", count));
+        System.err.printf("Lines: %,d%n", count);
     }
 }

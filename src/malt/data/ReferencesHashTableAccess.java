@@ -37,7 +37,7 @@ import java.io.*;
  */
 
 public class ReferencesHashTableAccess implements Closeable {
-    public static int BUFFER_SIZE = 8192;  // benchmarking suggested that choosing a large size doesn't make a difference
+    public static final int BUFFER_SIZE = 8192;  // benchmarking suggested that choosing a large size doesn't make a difference
     private final ILongGetter tableIndexGetter; // each entry points to a row of integers that is contained in the data table
 
     private final int tableSize;
@@ -50,14 +50,14 @@ public class ReferencesHashTableAccess implements Closeable {
     private final IAlphabet seedAlphabet;  // alphabet used by seeds
     private final SeedShape seedShape; //  seed shape that is saved and loaded from index
 
-    private IIntGetter tableDataGetter; // used for memory mapping
+    private final IIntGetter tableDataGetter; // used for memory mapping
 
     /**
      * construct the table from the given directory
      *
      * @param indexDirectory
      */
-    public ReferencesHashTableAccess(MaltOptions.MemoryMode memoryMode, String indexDirectory, int tableNumber) throws IOException, CanceledException {
+    public ReferencesHashTableAccess(MaltOptions.MemoryMode memoryMode, String indexDirectory, int tableNumber) throws IOException {
         final File indexFile = new File(indexDirectory, "index" + tableNumber + ".idx");
         final File tableIndexFile = new File(indexDirectory, "table" + tableNumber + ".idx");
         final File tableDataFile = new File(indexDirectory, "table" + tableNumber + ".db");
@@ -285,7 +285,7 @@ public class ReferencesHashTableAccess implements Closeable {
      *
      * @param indexDirectory
      */
-    public static SequenceType getIndexSequenceType(String indexDirectory) throws IOException, CanceledException {
+    public static SequenceType getIndexSequenceType(String indexDirectory) throws IOException {
         File indexFile = new File(indexDirectory, "index0.idx");
         try (DataInputStream ins = new DataInputStream(new BufferedInputStream(new FileInputStream(indexFile), 8192))) {
             Basic.readAndVerifyMagicNumber(ins, ReferencesHashTableBuilder.MAGIC_NUMBER);

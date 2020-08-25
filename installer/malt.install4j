@@ -1,44 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="8.0.4" transformSequenceNumber="8">
-  <directoryPresets config="./License.txt" />
-  <application name="MALT" applicationId="3229-5251-7410-5330" mediaDir="../../../builds" shortName="MALT" publisher="Daniel Huson's Lab, University of Tuebingen" publisherWeb="www-ab.informatik.uni-tuebingen.de" version="0" allPathsRelative="true" backupOnSave="true" macVolumeId="970a61501b2fa775" javaMinVersion="11" allowBetaVM="true">
+  <directoryPresets config="../../jloda" />
+  <application name="MALT" applicationId="3229-5251-7410-5330" mediaDir="../../../builds" shortName="MALT" publisher="Daniel Huson's Lab, University of Tuebingen" publisherWeb="www-ab.informatik.uni-tuebingen.de" version="0" allPathsRelative="true" backupOnSave="true" macVolumeId="970a61501b2fa775" javaMinVersion="13" allowBetaVM="true">
     <variables>
       <variable name="variable" />
     </variables>
-    <codeSigning macEnabled="true" macPkcs12File="../../../../etc/application.p12" />
-    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk12/jdk-12.0.2+10" />
+    <codeSigning macEnabled="true" macPkcs12File="../../../../etc/application.p12">
+      <macSearchedJars>
+        <entry>jna-*</entry>
+        <entry>swt-*</entry>
+        <entry>sqlite-*</entry>
+      </macSearchedJars>
+    </codeSigning>
+    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk14/jdk-14.0.2+12">
+      <modules />
+    </jreBundles>
   </application>
   <files globalExcludeSuffixes=".svn,.CVS,*.psd,*.java">
     <mountPoints>
       <mountPoint id="1691242151" location="jars" />
-      <mountPoint id="1691243744" location="openjfx" />
-      <mountPoint id="1691243745" location="openjfx/macos" />
-      <mountPoint id="1691243746" location="openjfx/unix" />
-      <mountPoint id="1691243747" location="openjfx/windows-x64" />
       <mountPoint id="1691242160" />
     </mountPoints>
     <entries>
-      <fileEntry mountPoint="1691242151" file="../antbuild/MALT.jar" />
       <dirEntry mountPoint="1691242151" file="../jars" subDirectory="jars" />
       <fileEntry mountPoint="1691242151" file="../antbuild/megan.jar" />
       <fileEntry mountPoint="1691242151" file="../antbuild/jloda.jar" />
       <fileEntry mountPoint="1691242151" file="../antbuild/malt.jar" />
       <dirEntry mountPoint="1691242151" file="../../megan-ce/jars" subDirectory="jars" />
-      <dirEntry mountPoint="1691243745" file="../../javafx/macos/javafx">
-        <exclude>
-          <entry location="lib/src.zip" />
-        </exclude>
-      </dirEntry>
-      <dirEntry mountPoint="1691243746" file="../../javafx/unix/javafx">
-        <exclude>
-          <entry location="lib/src.zip" />
-        </exclude>
-      </dirEntry>
-      <dirEntry mountPoint="1691243747" file="../../javafx/windows/javafx">
-        <exclude>
-          <entry location="lib/src.zip" />
-        </exclude>
-      </dirEntry>
+      <dirEntry mountPoint="1691242151" file="../../jloda/jars" subDirectory="jars" />
       <fileEntry mountPoint="1691242160" file="./License.txt" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" />
       <fileEntry mountPoint="1691242160" file="../tex/manual/manual.pdf" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" />
     </entries>
@@ -78,11 +67,11 @@
           <versionLine x="17" y="10" text="MALT ${compiler:sys.version}" fontSize="12" />
         </text>
       </splashScreen>
-      <java mainClass="malt/malt.MaltBuild" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" arguments="--argsGui" preferredVM="server">
-        <classPath>
-          <directory location="openjfx/${compiler:sys.platform}/lib" failOnError="false" />
+      <java mainClass="malt/malt.MaltBuild" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US  --add-modules=malt" arguments="--argsGui" preferredVM="server">
+        <modulePath>
           <directory location="jars" failOnError="false" />
-        </classPath>
+          <directory location="jars/megan6server" failOnError="false" />
+        </modulePath>
       </java>
       <macStaticAssociationActions mode="selected" />
       <vmOptionsFile overwriteMode="1" />
@@ -94,11 +83,11 @@
     </launcher>
     <launcher name="malt-run-gui" id="1691243093">
       <executable name="malt-run-gui" iconSet="true" stderrFile="malt-run.log" redirectStdout="true" stdoutFile="malt-run.log" executableMode="gui" changeWorkingDirectory="false" dpiAware="false" />
-      <java mainClass="malt/malt.MaltRun" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" arguments="--argsGui">
-        <classPath>
+      <java mainClass="malt/malt.MaltRun" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US  --add-modules=malt" arguments="--argsGui">
+        <modulePath>
           <directory location="jars" failOnError="false" />
-          <directory location="openjfx/${compiler:sys.platform}/lib" failOnError="false" />
-        </classPath>
+          <directory location="jars/megan6server" failOnError="false" />
+        </modulePath>
       </java>
       <macStaticAssociationActions mode="selected" />
       <iconImageFiles>
@@ -115,11 +104,11 @@
           <versionLine x="17" y="10" text="MALT ${compiler:sys.version}" fontSize="12" />
         </text>
       </splashScreen>
-      <java mainClass="malt/malt.MaltBuild" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" preferredVM="server">
-        <classPath>
-          <directory location="openjfx/${compiler:sys.platform}/lib" failOnError="false" />
+      <java mainClass="malt/malt.MaltBuild" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US  --add-modules=malt" preferredVM="server">
+        <modulePath>
           <directory location="jars" failOnError="false" />
-        </classPath>
+          <directory location="jars/megan6server" failOnError="false" />
+        </modulePath>
       </java>
       <macStaticAssociationActions mode="selected" />
       <vmOptionsFile overwriteMode="1" />
@@ -131,11 +120,11 @@
     </launcher>
     <launcher name="malt-run" id="1691243207">
       <executable name="malt-run" iconSet="true" redirectStderr="false" executableMode="console" changeWorkingDirectory="false" dpiAware="false" />
-      <java mainClass="malt/malt.MaltRun" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US">
-        <classPath>
-          <directory location="openjfx/${compiler:sys.platform}/lib" failOnError="false" />
+      <java mainClass="malt/malt.MaltRun" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US  --add-modules=malt">
+        <modulePath>
           <directory location="jars" failOnError="false" />
-        </classPath>
+          <directory location="jars/megan6server" failOnError="false" />
+        </modulePath>
       </java>
       <macStaticAssociationActions mode="selected" />
       <iconImageFiles>
@@ -1134,28 +1123,29 @@ context.goForward(1, true, true);
         <launcher id="1691242235" />
         <launcher id="1691243093" />
       </excludedLaunchers>
-      <jreBundle>
+      <jreBundle jreBundleSource="generated">
         <modules>
           <defaultModules set="jre" />
+          <jmodDirectory location="../../javafx-jmods/unix" />
         </modules>
       </jreBundle>
     </unixInstaller>
     <macosFolder name="Mac OS X Folder" id="1691242149" installDir="MALT" overridePrincipalLanguage="true">
       <jreBundle jreBundleSource="generated">
         <modules>
-          <defaultModules set="jre" />
+          <jmodDirectory location="../../javafx-jmods/macos" />
         </modules>
       </jreBundle>
     </macosFolder>
     <windows name="Windows" id="1691242407" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" installDir="Malt" overridePrincipalLanguage="true">
       <jreBundle jreBundleSource="generated" installOnlyIfNecessary="true">
         <modules>
-          <defaultModules set="jre" />
+          <jmodDirectory location="../../javafx-jmods/windows" />
         </modules>
       </jreBundle>
     </windows>
   </mediaSets>
-  <buildIds buildAll="false">
+  <buildIds>
     <mediaSet refId="1691242149" />
   </buildIds>
   <buildOptions disableSigning="true" disableNotarization="true" />

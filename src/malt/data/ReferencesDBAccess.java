@@ -36,8 +36,8 @@ import java.io.IOException;
  * Daniel Huson, 3.2015
  */
 public class ReferencesDBAccess implements Closeable {
-    private byte[][] headers;
-    private byte[][] sequences;
+    private final byte[][] headers;
+    private final byte[][] sequences;
 
     private int numberOfSequences;
     private long numberOfLetters;
@@ -54,7 +54,7 @@ public class ReferencesDBAccess implements Closeable {
      * @param refIndexFile
      * @throws java.io.IOException
      */
-    public ReferencesDBAccess(MaltOptions.MemoryMode memoryMode, File refIndexFile, File refDBFile, File refInfFile) throws IOException, CanceledException {
+    public ReferencesDBAccess(MaltOptions.MemoryMode memoryMode, File refIndexFile, File refDBFile, File refInfFile) throws IOException {
         syncObjects = new Object[SYNC_BITMASK + 1];
         for (int i = 0; i < syncObjects.length; i++) {
             syncObjects[i] = new Object();
@@ -86,8 +86,8 @@ public class ReferencesDBAccess implements Closeable {
                 }
             }
         }
-        System.err.println(String.format("Number of sequences:%,14d", numberOfSequences));
-        System.err.println(String.format("Number of letters:%,16d", numberOfLetters));
+        System.err.printf("Number of sequences:%,14d%n", numberOfSequences);
+        System.err.printf("Number of letters:%,16d%n", numberOfLetters);
 
         if (numberOfSequences != refIndex.limit())
             throw new IOException("Expected " + numberOfSequences + "sequences , index contains: " + refIndex.limit());

@@ -33,7 +33,7 @@ public class ProteinAlphabet implements IAlphabet {
             'X', 'Y', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'A', 'X', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'X', 'K', 'L', 'M',
             'N', 'X', 'P', 'Q', 'R', 'S', 'T', 'X', 'V', 'W', 'X', 'Y', 'X', 'X', 'X', 'X', 'X', 'X'};
 
-    private static ProteinAlphabet instance = new ProteinAlphabet();
+    private static final ProteinAlphabet instance = new ProteinAlphabet();
 
     /**
      * return an instance

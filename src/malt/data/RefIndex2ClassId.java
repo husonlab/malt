@@ -33,8 +33,8 @@ import java.io.*;
 public class RefIndex2ClassId {
     private static final byte[] MAGIC_NUMBER = "MAClassV1.1.".getBytes();
 
-    private int maxRefId;
-    private int[] refIndex2ClassId;
+    private final int maxRefId;
+    private final int[] refIndex2ClassId;
 
     public RefIndex2ClassId(int numberOfReferences) {
         refIndex2ClassId = new int[numberOfReferences];
@@ -67,7 +67,7 @@ public class RefIndex2ClassId {
      * @param file
      * @throws java.io.IOException
      */
-    public void save(File file) throws IOException, CanceledException {
+    public void save(File file) throws IOException {
         save(file, MAGIC_NUMBER);
     }
 
@@ -77,7 +77,7 @@ public class RefIndex2ClassId {
      * @param file
      * @throws java.io.IOException
      */
-    public void save(File file, byte[] magicNumber) throws IOException, CanceledException {
+    public void save(File file, byte[] magicNumber) throws IOException {
         try (BufferedOutputStream outs = new BufferedOutputStream(new FileOutputStream(file)); ProgressPercentage progressListener = new ProgressPercentage("Writing file: " + file, maxRefId)) {
             outs.write(magicNumber);
 
@@ -98,7 +98,7 @@ public class RefIndex2ClassId {
      *
      * @param file
      */
-    public RefIndex2ClassId(File file) throws IOException, CanceledException {
+    public RefIndex2ClassId(File file) throws IOException {
         this(file, MAGIC_NUMBER);
     }
 
@@ -107,7 +107,7 @@ public class RefIndex2ClassId {
      *
      * @param file
      */
-    public RefIndex2ClassId(File file, byte[] magicNumber) throws IOException, CanceledException {
+    public RefIndex2ClassId(File file, byte[] magicNumber) throws IOException {
         ProgressPercentage progressListener = null;
         try (BufferedInputStream ins = new BufferedInputStream(new FileInputStream(file))) {
             // check magic number:

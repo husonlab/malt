@@ -87,9 +87,8 @@ public class Tester {
 
         if (true) {
             int top = Integer.MAX_VALUE >>> 8;
-            int aMask = top;
             System.err.println("top: " + top);
-            System.err.println("aMask: " + Integer.toBinaryString(aMask));
+            System.err.println("aMask: " + Integer.toBinaryString(top));
 
             {
                 long start = System.currentTimeMillis();
@@ -107,7 +106,7 @@ public class Tester {
 
                 long sum = 0;
                 for (int i = 0; i < Integer.MAX_VALUE; i++) {
-                    sum += (i & aMask);
+                    sum += (i & top);
                 }
                 System.err.println("Time: " + ((System.currentTimeMillis() - start) / 1000.0));
                 System.err.println("Sum: " + sum);

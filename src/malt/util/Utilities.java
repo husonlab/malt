@@ -263,11 +263,7 @@ public class Utilities {
         if (!indexDirectory.isDirectory())
             throw new IOException("Not a directory: " + indexDirectory);
 
-        File[] files = indexDirectory.listFiles(new FilenameFilter() {
-            public boolean accept(File file, String s) {
-                return s.endsWith(".idx") || s.contains(".idx.");
-            }
-        });
+        File[] files = indexDirectory.listFiles((file, s) -> s.endsWith(".idx") || s.contains(".idx."));
         if (files != null) {
             System.err.println("Deleting index files: " + files.length);
             for (File file : files)

@@ -52,15 +52,12 @@ public class Alphabet implements INormalizer {
 
         {
             int bits = 1;
-            while (true) {
-                if (Math.pow(2, bits) > alphabetSize) {
-                    break;
-                }
+            while (!(Math.pow(2, bits) > alphabetSize)) {
                 bits++;
             }
             bitsPerLetter = bits;
         }
-        letterMask = (1l << bitsPerLetter) - 1;
+        letterMask = (1L << bitsPerLetter) - 1;
         lettersPerWord = 64 / bitsPerLetter;
         unusedBits = 64 - lettersPerWord * bitsPerLetter;
 

@@ -47,11 +47,11 @@ public class DataForInnerLoop {
     private int maxQueryLength;
     private int queryLength;
     public int numberOfFrames;
-    private int[] frame;
-    public byte[][] frameSequence;
+    private final int[] frame;
+    public final byte[][] frameSequence;
     public byte[] qualityValues;
-    public int[] frameSequenceLength;
-    public Row[][][] frameXTableXSeed2Reference;
+    public final int[] frameSequenceLength;
+    public final Row[][][] frameXTableXSeed2Reference;
 
     /**
      * constructor

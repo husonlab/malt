@@ -35,7 +35,7 @@ public class FastAFileIteratorCode {
     private long position = 0;
     private final long maxProgress;
     private boolean expectingHeader = true;
-    private BufferedInputStream inputStream;
+    private final BufferedInputStream inputStream;
     private boolean isFastQ = false;
 
     private boolean ok = true; // haven't seen next() fail yet

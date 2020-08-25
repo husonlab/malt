@@ -43,7 +43,7 @@ public class DNA5 implements IAlphabet {
             'N', 'N', 'N', 'N', 'N', 'N', 'A', 'A', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N'
     };
 
-    private static DNA5 instance = new DNA5();
+    private static final DNA5 instance = new DNA5();
 
     /**
      * return an instance

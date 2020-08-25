@@ -37,7 +37,7 @@ public class BandedAligner {
     private final static double LN_2 = 0.69314718055994530941723212145818;
     private final static int MINUS_INFINITY = -100000000;
 
-    public static int ALIGNMENT_SEGMENT_LENGTH = 60; // length of alignment segment in text format output
+    public static final int ALIGNMENT_SEGMENT_LENGTH = 60; // length of alignment segment in text format output
     private final static byte[] MID_TRACK_LEADING_SPACES = "                 ".getBytes(); // spaces used in text format output
 
     private long referenceDatabaseLength = 10000000;
@@ -96,7 +96,7 @@ public class BandedAligner {
     private byte[] midTrack = new byte[1000];
     private byte[] referenceTrack = new byte[1000];
 
-    private ReusableByteBuffer alignmentBuffer = new ReusableByteBuffer(10000);
+    private final ReusableByteBuffer alignmentBuffer = new ReusableByteBuffer(10000);
 
     private int queryPos;
     private int refPos;
@@ -246,7 +246,7 @@ public class BandedAligner {
                     if (refIndex == -1) { // in column before reference starts, init
                         traceBackM[col][row] = traceBackIRef[col][row] = traceBackIQuery[col][row] = DONE;
                         matrixM[col][row] = matrixIRef[col][row] = matrixIQuery[col][row] = 0;
-                    } else if (refIndex >= 0) //do the actual alignment:
+                    } else if (refIndex >= 0 && refIndex<reference.length) //do the actual alignment:
                     {
                         int bestMScore = 0;
                         // match or mismatch
@@ -1185,9 +1185,7 @@ public class BandedAligner {
         }
         buf.append("\n");
         buf.append("---+");
-        for (int i = firstCol; i < cols; i++) {
-            buf.append("----");
-        }
+        buf.append("----".repeat(Math.max(0, cols - firstCol)));
         buf.append("\n");
 
 

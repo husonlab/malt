@@ -1,118 +1,95 @@
 <!--
-	~  build.xml Copyright (C) 2020 Daniel H. Huson
+	~  build.xml Copyright (C) 2019 Daniel H. Huson
 	~
-	~  (Some files contain contributions from other authors, who are then mentioned separately.)
-	~
-	~  This program is free software: you can redistribute it and/or modify
-	~  it under the terms of the GNU General Public License as published by
-	~  the Free Software Foundation, either version 3 of the License, or
-	~  (at your option) any later version.
-	~
-	~  This program is distributed in the hope that it will be useful,
-	~  but WITHOUT ANY WARRANTY; without even the implied warranty of
-	~  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	~  GNU General Public License for more details.
-	~
-	~  You should have received a copy of the GNU General Public License
-	~  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<project name="CatlyNet" default="jar" basedir=".">
+	<project name="MALT" default="jar" basedir=".">
 
-    <property name="ant.build.javac.source" value="14"/>
-    <property name="ant.build.javac.target" value="14"/>
+		<property name="ant.build.javac.source" value="13"/>
+		<property name="ant.build.javac.target" value="13"/>
 
+		<property name="jfxDir" value="../../javafx/lib"/>
+		<property name="meganAntDir" value="../../megan-ce/antbuild"/>
+		<property name="buildSrcDir" value="../antbuild/src"/>
+		<property name="buildModulesDir" value="../antbuild/modules"/>
 
-    <property name="jfxDir" value="../../javafx/lib"/>
-    <property name="jlodaAntDir" value="../../jloda/antbuild"/>
-    <property name="meganAntDir" value="../../megan-ce/antbuild"/>
-    <property name="buildSrcDir" value="../antbuild/src"/>
-    <property name="buildModulesDir" value="../antbuild/modules"/>
+		<path id="build.modulepath">
+			<fileset dir="../../jloda/jars"  includes="*.jar"/>
+			<fileset dir="../../megan-ce/jars"  includes="*.jar" excludes="data.jar"/>
+			<fileset dir="../../megan-ce/jars/megan6server"  includes="*.jar"/>
+			<fileset dir="../../malt/jars"  includes="*.jar" excludes="data.jar"/>
+			<fileset dir="${jfxDir}"  includes="*.jar"/>
+			<fileset dir="../antbuild"  includes="jloda.jar"/>
+			<fileset dir="../antbuild"  includes="megan.jar"/>
+		</path>
 
-    <path id="build.classpath">
-        <fileset dir="../../malt/jars" includes="*.jar"/>
-        <fileset dir="${jlodaAntDir}" includes="jloda.jar"/>
-        <fileset dir="${meganAntDir}" includes="megan.jar"/>
-    </path>
+		<path id="run.modulepath">
+			<fileset dir="../../jloda/jars"  includes="*.jar"/>
+			<fileset dir="../../megan-ce/jars"  includes="*.jar"/>
+			<fileset dir="../../megan-ce/jars/megan6server"  includes="*.jar" excludes="data.jar"/>
+			<fileset dir="../../malt/jars"  includes="*.jar"/>
+			<fileset dir="${jfxDir}"  includes="*.jar"/>
+			<fileset dir="../antbuild"  includes="jloda.jar"/>
+			<fileset dir="../antbuild"  includes="megan.jar"/>
+			<fileset dir="../antbuild"  includes="malt.jar"/>
+		</path>
 
-    <path id="build.modulepath">
-        <fileset dir="../../jloda/jars" includes="*.jar"/>
-        <fileset dir="../../megan-ce/jars" includes="*.jar"/>
-        <fileset dir="../../malt/jars" includes="*.jar"/>
-        <fileset dir="${jfxDir}" includes="*.jar"/>
-        <fileset dir="../antbuild" includes="jloda.jar"/>
-        <fileset dir="../antbuild" includes="megan.jar"/>
-    </path>
+		<target name="init">
+			<mkdir dir="${buildSrcDir}/malt"/>
+			<mkdir dir="${buildModulesDir}/malt"/>
+		</target>
 
-    <path id="run.modulepath">
-        <fileset dir="../../jloda/jars" includes="*.jar"/>
-        <fileset dir="../../megan-ce/jars" includes="*.jar"/>
-	<fileset dir="../../megan-ce/jars/megan6server" includes="*.jar"/>
-        <fileset dir="../../malt/jars" includes="*.jar"/>
-        <fileset dir="${jfxDir}" includes="*.jar"/>
-        <fileset dir="../antbuild" includes="jloda.jar"/>
-        <fileset dir="../antbuild" includes="megan.jar"/>
-        <fileset dir="../antbuild" includes="malt.jar"/>
-    </path>
+		<target name="megan" depends="init">
+			<ant antfile="${meganAntDir}/build.xml" target="jar"/>
+		</target>
 
-    <target name="init">
-        <mkdir dir="${buildSrcDir}/malt"/>
-        <mkdir dir="${buildModulesDir}/malt"/>
-    </target>
+		<target name="copy_sources" depends="megan">
+			<copy todir="${buildSrcDir}/malt">
+				<fileset dir="../../malt/src"/>
+			</copy>
+		</target>
 
-    <target name="jloda" depends="init">
-        <ant antfile="${jlodaAntDir}/build.xml" target="jar"/>
-    </target>
-    <target name="megan" depends="jloda">
-        <ant antfile="${meganAntDir}/build.xml" target="jar"/>
-    </target>
+		<target name="copy_resources" depends="copy_sources">
+			<copy todir="${buildModulesDir}/malt">
+				<fileset dir="../../malt/src"
+					includes="**/*.fxml **/*.png **/*.dtd **/*.gif **/*.css **/*.txt **/*.map **/*.info **/*.tre **/*.lvl **/*.xml"/>
+		</copy>
+		</target>
 
-    <target name="copy_sources" depends="megan">
-        <copy todir="${buildSrcDir}/malt">
-            <fileset dir="../../malt/src"/>
-        </copy>
-    </target>
+		<target name="compile" depends="copy_resources">
+			<javac  includeantruntime="false"
+				srcdir="../antbuild/src/malt"
+				destdir="${buildModulesDir}/malt"
+				debug="on"
+				modulepathref="build.modulepath"
+				>
+			</javac>
+		</target>
 
-    <target name="copy_resources" depends="copy_sources">
-        <copy todir="${buildModulesDir}/malt">
-            <fileset dir="../../malt/src" includes="**/*.fxml **/*.png **/*.gif **/*.css"/>
-        </copy>
-    </target>
+		  <target name="jar" depends="compile">
+        		<jar jarfile="malt.jar" basedir="${buildModulesDir}/malt"/>
+   		 </target>
 
-    <target name="compile" depends="copy_resources">
-        <javac includeantruntime="false"
-               srcdir="../antbuild/src/malt"
-               destdir="${buildModulesDir}/malt"
-               debug="on"
-               modulepathref="build.modulepath"
-        >
-        </javac>
-    </target>
+		<target name="run" depends="jar">
+			<java classname="malt.MaltBuild" fork="true" modulepathref="run.modulepath">
+				<arg value="--argsGui"/>
+				<jvmarg value="-Xshare:off"/>
+				<jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
+				<jvmarg value="-server"/>
+				<jvmarg value="-Xmx4G"/>
+				<jvmarg value="-Duser.language=en"/>
+				<jvmarg value="-Duser.region=US"/>
+				<jvmarg value="--add-modules=malt"/>
+			</java>
+		</target>
 
-    <target name="jar" depends="compile">
-        <jar jarfile="malt.jar" basedir="${buildModulesDir}/malt"/>
-    </target>
+		<target name="clean">
+			<delete dir="${buildModulesDir}" includeEmptyDirs="true"/>
+			<delete dir="${buildSrcDir}" includeEmptyDirs="true"/>
+			<delete file="malt.jar"/>
+			<delete file="megan.jar"/>
+			<delete file="jloda.jar"/>
+		</target>
 
-    <target name="run" depends="jar">
-        <java classname="malt.MaltBuild" fork="true"
-              modulepathref="run.modulepath">
-            <jvmarg value="-Xshare:off"/>
-            <jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
-            <jvmarg value="-server"/>
-            <jvmarg value="-Xmx1G"/>
-            <jvmarg value="-Duser.language=en"/>
-            <jvmarg value="-Duser.region=US"/>
-	    <jvmarg value="--add-modules=malt"/>
-	    <arg value="-h"/>
-        </java>
-    </target>
+	</project>
 
-    <target name="clean">
-        <delete dir="${buildModulesDir}" includeEmptyDirs="true"/>
-        <delete dir="${buildSrcDir}" includeEmptyDirs="true"/>
-        <delete file="malt.jar"/>
-        <delete file="jloda.jar"/>
-        <delete file="megan.jar"/>
-    </target>
-
-</project>
 

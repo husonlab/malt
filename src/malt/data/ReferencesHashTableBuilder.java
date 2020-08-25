@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
  */
 
 public class ReferencesHashTableBuilder {
-    public static byte[] MAGIC_NUMBER = "MATableV0.12.".getBytes();
+    public static final byte[] MAGIC_NUMBER = "MATableV0.12.".getBytes();
 
     private final SequenceType referenceSequenceType;
     private final IAlphabet alphabet;
@@ -87,7 +87,7 @@ public class ReferencesHashTableBuilder {
         // number of possible different seed values:
         final long numberOfPossibleHashValues = (long) Math.ceil(Math.pow(alphabet.size(), seedShape.getWeight()));
 
-        System.err.println(String.format("Seeds found: %,14d", totalNumberOfSeeds));
+        System.err.printf("Seeds found: %,14d%n", totalNumberOfSeeds);
         // System.err.println("Number of possible hash values: " + numberOfPossibleHashValues);
 
         long entriesPerTable = (long) (hashTableLoadFactor * Math.min(totalNumberOfSeeds, numberOfPossibleHashValues)); // assume only 90% are used
@@ -104,8 +104,8 @@ public class ReferencesHashTableBuilder {
             hashMask = tableSize - 1;
         }
 
-        System.err.println(String.format("tableSize=   %,14d", tableSize));
-        System.err.println(String.format("hashMask.length=%d", Integer.toBinaryString(hashMask).length()));
+        System.err.printf("tableSize=   %,14d%n", tableSize);
+        System.err.printf("hashMask.length=%d%n", Integer.toBinaryString(hashMask).length());
 
         maxHitsPerHash = maxHitPerSeed; // we use the same value because the actual number of seeds used is usually smaller than the table size
         // final double averageWordsPerHashValue = Math.max(1,  (totalNumberOfSeeds / (double) tableSize));
@@ -175,29 +175,27 @@ public class ReferencesHashTableBuilder {
         for (int i = 0; i < numberOfThreads; i++) {
             final int threadNumber = i;
 
-            executor.execute(new Runnable() {
-                public void run() {
-                    try {
-                        final byte[] seedBytes = seedShape.createBuffer();
-                        for (int refIndex = threadNumber; refIndex < referencesDB.getNumberOfSequences(); refIndex += numberOfThreads) {
-                            byte[] sequence = referencesDB.getSequence(refIndex);
-                            int top = sequence.length - seedShape.getLength() + 1;
-                            for (int pos = 0; pos < top; pos += stepSize) {
-                                seedShape.getSeed(sequence, pos, seedBytes);
-                                if (!Utilities.hasAtMostTwoLetters(seedBytes)) {
-                                    int hashValue = getHash(seedBytes);
-                                    synchronized (syncObjects[hashValue & SYNC_BITMASK]) {
-                                        if (tableIndex[hashValue] <= maxHitsPerHash)
-                                            tableIndex[hashValue]++;
-                                    }
-                                } else
-                                    countLowComplexitySeeds[threadNumber]++;
-                            }
-                            countsForProgress[threadNumber]++;
+            executor.execute(() -> {
+                try {
+                    final byte[] seedBytes = seedShape.createBuffer();
+                    for (int refIndex = threadNumber; refIndex < referencesDB.getNumberOfSequences(); refIndex += numberOfThreads) {
+                        byte[] sequence = referencesDB.getSequence(refIndex);
+                        int top = sequence.length - seedShape.getLength() + 1;
+                        for (int pos = 0; pos < top; pos += stepSize) {
+                            seedShape.getSeed(sequence, pos, seedBytes);
+                            if (!Utilities.hasAtMostTwoLetters(seedBytes)) {
+                                int hashValue = getHash(seedBytes);
+                                synchronized (syncObjects[hashValue & SYNC_BITMASK]) {
+                                    if (tableIndex[hashValue] <= maxHitsPerHash)
+                                        tableIndex[hashValue]++;
+                                }
+                            } else
+                                countLowComplexitySeeds[threadNumber]++;
                         }
-                    } finally {
-                        countDownLatch.countDown();
+                        countsForProgress[threadNumber]++;
                     }
+                } finally {
+                    countDownLatch.countDown();
                 }
             });
         }
@@ -213,7 +211,7 @@ public class ReferencesHashTableBuilder {
             progressPercentage.setProgress(Basic.getSum(countsForProgress));
         }
         progressPercentage.close();
-        System.err.println(String.format("Number of low-complexity seeds skipped: %,d", Basic.getSum(countLowComplexitySeeds)));
+        System.err.printf("Number of low-complexity seeds skipped: %,d%n", Basic.getSum(countLowComplexitySeeds));
         executor.shutdown();
     }
 
@@ -240,37 +238,35 @@ public class ReferencesHashTableBuilder {
         for (int i = 0; i < numberOfThreads; i++) {
             final int threadNumber = i;
 
-            executor.execute(new Runnable() {
-                public void run() {
-                    try {
-                        for (long index = threadNumber; index < tableSize; index += numberOfThreads) {
-                            final long count = tableIndex[(int) index];  // here count is number of seeds that will be saved for given index
+            executor.execute(() -> {
+                try {
+                    for (long index = threadNumber; index < tableSize; index += numberOfThreads) {
+                        final long count = tableIndex[(int) index];  // here count is number of seeds that will be saved for given index
 
-                            if (count > maxHitsPerHash) {
-                                tableIndex[(int) index] = 0L;  // need to overwrite the count
-                                totalDropped[threadNumber] += count;
-                            } else if (count > 1) {
-                                totalSeeds[threadNumber] += count;
-                                totalKeys[threadNumber]++;
-                                synchronized (nextFreeIndex) {
-                                    final long location = nextFreeIndex.get();
-                                    tableIndex[(int) index] = location;
-                                    nextFreeIndex.set(location + 2 * count + 1);
-                                }
-                            } else if (count == 1) {   // will write refInd and offset directly into table, use value of -1 to indicate this
-                                totalSeeds[threadNumber]++;
-                                totalKeys[threadNumber]++;
-                                tableIndex[(int) index] = -1L;
-                            } else if (count < 0)
-                                throw new IOException("negative count: " + count);
-                            countsForProgress[threadNumber]++;
-                        }
-                    } catch (Exception ex) {
-                        Basic.caught(ex);
-                        System.exit(1);
-                    } finally {
-                        countDownLatch.countDown();
+                        if (count > maxHitsPerHash) {
+                            tableIndex[(int) index] = 0L;  // need to overwrite the count
+                            totalDropped[threadNumber] += count;
+                        } else if (count > 1) {
+                            totalSeeds[threadNumber] += count;
+                            totalKeys[threadNumber]++;
+                            synchronized (nextFreeIndex) {
+                                final long location = nextFreeIndex.get();
+                                tableIndex[(int) index] = location;
+                                nextFreeIndex.set(location + 2 * count + 1);
+                            }
+                        } else if (count == 1) {   // will write refInd and offset directly into table, use value of -1 to indicate this
+                            totalSeeds[threadNumber]++;
+                            totalKeys[threadNumber]++;
+                            tableIndex[(int) index] = -1L;
+                        } else if (count < 0)
+                            throw new IOException("negative count: " + count);
+                        countsForProgress[threadNumber]++;
                     }
+                } catch (Exception ex) {
+                    Basic.caught(ex);
+                    System.exit(1);
+                } finally {
+                    countDownLatch.countDown();
                 }
             });
         }
@@ -286,9 +282,9 @@ public class ReferencesHashTableBuilder {
             progressPercentage.setProgress(Basic.getSum(countsForProgress));
         }
         progressPercentage.reportTaskCompleted();
-        System.err.println(String.format("Total keys used:    %,14d", Basic.getSum(totalKeys)));
-        System.err.println(String.format("Total seeds matched:%,14d", Basic.getSum(totalSeeds)));
-        System.err.println(String.format("Total seeds dropped:%,14d", Basic.getSum(totalDropped)));
+        System.err.printf("Total keys used:    %,14d%n", Basic.getSum(totalKeys));
+        System.err.printf("Total seeds matched:%,14d%n", Basic.getSum(totalSeeds));
+        System.err.printf("Total seeds dropped:%,14d%n", Basic.getSum(totalDropped));
         // shut down threads:
         executor.shutdownNow();
         return nextFreeIndex.get();
@@ -315,38 +311,36 @@ public class ReferencesHashTableBuilder {
         for (int i = 0; i < numberOfThreads; i++) {
             final int threadNumber = i;
 
-            executor.execute(new Runnable() {
-                public void run() {
-                    try {
-                        final byte[] seedBytes = seedShape.createBuffer();
-                        for (int refIndex = threadNumber; refIndex < referencesDB.getNumberOfSequences(); refIndex += numberOfThreads) {
-                            final byte[] sequence = referencesDB.getSequence(refIndex);
-                            final int top = sequence.length - seedShape.getLength() + 1;
-                            for (int pos = 0; pos < top; pos += stepSize) {
-                                seedShape.getSeed(sequence, pos, seedBytes);
-                                if (!Utilities.hasAtMostTwoLetters(seedBytes)) {
-                                    final int hashValue = getHash(seedBytes);
+            executor.execute(() -> {
+                try {
+                    final byte[] seedBytes = seedShape.createBuffer();
+                    for (int refIndex = threadNumber; refIndex < referencesDB.getNumberOfSequences(); refIndex += numberOfThreads) {
+                        final byte[] sequence = referencesDB.getSequence(refIndex);
+                        final int top = sequence.length - seedShape.getLength() + 1;
+                        for (int pos = 0; pos < top; pos += stepSize) {
+                            seedShape.getSeed(sequence, pos, seedBytes);
+                            if (!Utilities.hasAtMostTwoLetters(seedBytes)) {
+                                final int hashValue = getHash(seedBytes);
 
-                                    synchronized (syncObjects[hashValue & SYNC_BITMASK]) {
-                                        final long location = tableIndex[hashValue];
-                                        if (location == -1) {    // has been marked as singleton, so store value directly
-                                            final long value = -(((long) refIndex << 32) | pos);
-                                            tableIndex[hashValue] = value;
-                                        } else if (location > 0) {
-                                            final int length = tableDataPutter.get(location);
-                                            tableDataPutter.put(location, length + 2);
-                                            tableDataPutter.put(location + length + 1, refIndex);
-                                            tableDataPutter.put(location + length + 2, pos);
-                                        }
+                                synchronized (syncObjects[hashValue & SYNC_BITMASK]) {
+                                    final long location = tableIndex[hashValue];
+                                    if (location == -1) {    // has been marked as singleton, so store value directly
+                                        final long value = -(((long) refIndex << 32) | pos);
+                                        tableIndex[hashValue] = value;
+                                    } else if (location > 0) {
+                                        final int length = tableDataPutter.get(location);
+                                        tableDataPutter.put(location, length + 2);
+                                        tableDataPutter.put(location + length + 1, refIndex);
+                                        tableDataPutter.put(location + length + 2, pos);
                                     }
-                                    counts[threadNumber]++;
                                 }
+                                counts[threadNumber]++;
                             }
-                            countsForProgress[threadNumber]++;
                         }
-                    } finally {
-                        countDownLatch.countDown();
+                        countsForProgress[threadNumber]++;
                     }
+                } finally {
+                    countDownLatch.countDown();
                 }
             });
         }
@@ -384,28 +378,26 @@ public class ReferencesHashTableBuilder {
         // launch the worker threads
         for (int i = 0; i < numberOfThreads; i++) {
             final int threadNumber = i;
-            executor.execute(new Runnable() {
-                public void run() {
-                    try {
-                        final Random random = new Random();
-                        for (long index = threadNumber; index < tableSize; index += numberOfThreads) { // need to use long otherwise can get overflow
-                            if (index < tableIndex.length) {
-                                long location = tableIndex[(int) index];
-                                if (location > 0) {
-                                    int size = tableDataPutter.get(location);
-                                    if (size > 2) {
-                                        random.setSeed(index * index);  // use location in hash table as seed.
-                                        Utilities.randomizePairs(tableDataPutter, location + 1, size, random);
-                                    }
+            executor.execute(() -> {
+                try {
+                    final Random random = new Random();
+                    for (long index = threadNumber; index < tableSize; index += numberOfThreads) { // need to use long otherwise can get overflow
+                        if (index < tableIndex.length) {
+                            long location = tableIndex[(int) index];
+                            if (location > 0) {
+                                int size = tableDataPutter.get(location);
+                                if (size > 2) {
+                                    random.setSeed(index * index);  // use location in hash table as seed.
+                                    Utilities.randomizePairs(tableDataPutter, location + 1, size, random);
                                 }
                             }
-                            countsForProgress[threadNumber]++;
                         }
-                    } catch (Exception ex) {
-                        Basic.caught(ex);
-                    } finally {
-                        countDownLatch.countDown();
+                        countsForProgress[threadNumber]++;
                     }
+                } catch (Exception ex) {
+                    Basic.caught(ex);
+                } finally {
+                    countDownLatch.countDown();
                 }
             });
         }

@@ -102,7 +102,6 @@ public class SequenceStore {
                 }
                 progress.incrementProgress();
             }
-            progress.close();
         }
     }
 
@@ -192,7 +191,7 @@ public class SequenceStore {
      * grow the data arrays
      */
     private void grow() {
-        final int newLength = (int) Math.min(MAX_ARRAY_SIZE, 2l * Math.max(16, headers.length));
+        final int newLength = (int) Math.min(MAX_ARRAY_SIZE, 2L * Math.max(16, headers.length));
         System.err.print("[Grow: " + headers.length + " -> " + newLength + "]");
 
         {
@@ -207,7 +206,7 @@ public class SequenceStore {
         }
     }
 
-    public static void main(String[] args) throws IOException, CanceledException {
+    public static void main(String[] args) throws IOException {
         String fileName = "/Users/huson/data/megan/ecoli/x.fna";
 
         SequenceStore sequenceStore = new SequenceStore(new SequenceEncoder(DNA5Alphabet.getInstance()), 2000);

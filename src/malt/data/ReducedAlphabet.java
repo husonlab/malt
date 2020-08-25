@@ -43,7 +43,7 @@ public class ReducedAlphabet implements IAlphabet {
             'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X',
             'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'};
 
-    public static Map<String, String> reductions = new TreeMap<>();
+    public static final Map<String, String> reductions = new TreeMap<>();
 
     static {
         // From: Bioinformatics. 2009 June 1; 25(11): 1356–1362. Published online 2009 April 7. doi: 10.1093/bioinformatics/btp164:

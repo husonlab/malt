@@ -137,23 +137,21 @@ class ReadMatch {
      * get comparator
      */
     static public Comparator<ReadMatch> createComparator() {
-        return new Comparator<ReadMatch>() {
-            public int compare(ReadMatch a, ReadMatch b) {
-                if (a.bitScore < b.bitScore)
-                    return -1;
-                else if (a.bitScore > b.bitScore)
-                    return 1;
-                else if (a.referenceId < b.referenceId)
-                    return 1;
-                else if (a.referenceId > b.referenceId)
-                    return -1;
-                else if (a.entryNumber < b.entryNumber)
-                    return -1;
-                else if (a.entryNumber > b.entryNumber)
-                    return 1;
-                else
-                    return 0;
-            }
+        return (a, b) -> {
+            if (a.bitScore < b.bitScore)
+                return -1;
+            else if (a.bitScore > b.bitScore)
+                return 1;
+            else if (a.referenceId < b.referenceId)
+                return 1;
+            else if (a.referenceId > b.referenceId)
+                return -1;
+            else if (a.entryNumber < b.entryNumber)
+                return -1;
+            else if (a.entryNumber > b.entryNumber)
+                return 1;
+            else
+                return 0;
         };
     }
 

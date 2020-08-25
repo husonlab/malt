@@ -108,7 +108,7 @@ public class ProteinSequenceEncoder {
         seeds = ProteinSequenceEncoder.radixSort2(seeds, seeds.length, 64 - reducedAlphabet.unusedBits, reducedAlphabet.bitsPerLetter, new ProgressPercentage("Sorting..."));
 
         for (int i = 0; i < seeds.length; i += 2) {
-            System.err.println(String.format("i=%3d pos=%3d seed=%s", i, seeds[i + 1], Basic.toString(reducedAlphabet.decodeSeed(seeds[i], seedShape.getWeight()))));
+            System.err.printf("i=%3d pos=%3d seed=%s%n", i, seeds[i + 1], Basic.toString(reducedAlphabet.decodeSeed(seeds[i], seedShape.getWeight())));
         }
     }
 

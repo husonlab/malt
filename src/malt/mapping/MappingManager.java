@@ -115,7 +115,7 @@ public class MappingManager {
                     }
                 }
             }
-            return cNames.toArray(new String[cNames.size()]);
+            return cNames.toArray(new String[0]);
         } else
             return new String[0];
 

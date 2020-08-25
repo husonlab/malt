@@ -76,75 +76,71 @@ public class FileWriterRanked {
         nextRank = smallestRank;
 
         // this thread collects output items in order from thread-specific waiting queues and places them on the output queue
-        final Thread thread1 = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    while (true) {
-                        boolean allEmpty = true;
-                        for (ArrayBlockingQueue<OutputItem> queue : threadSpecificWaitQueues) {
-                            OutputItem item = queue.peek();
-                            while (item != null && item.rank == nextRank) {
-                                if (allEmpty) {
-                                    allEmpty = false;
-                                    if (queue.size() > queueHighWaterMark)
-                                        queueHighWaterMark = queue.size();
-                                }
-                                try {
-                                    outputQueue.put(item);
-                                } catch (InterruptedException e) {
-                                    Basic.caught(e);
-                                }
-                                nextRank++;
-                                item = queue.poll(); // don't use take(), don't want to block here...
+        final Thread thread1 = new Thread(() -> {
+            try {
+                while (true) {
+                    boolean allEmpty = true;
+                    for (ArrayBlockingQueue<OutputItem> queue : threadSpecificWaitQueues) {
+                        OutputItem item = queue.peek();
+                        while (item != null && item.rank == nextRank) {
+                            if (allEmpty) {
+                                allEmpty = false;
+                                if (queue.size() > queueHighWaterMark)
+                                    queueHighWaterMark = queue.size();
                             }
-                        }
-                        if (allEmpty) {
-                            if (isClosing) {
-                                outputQueue.put(SENTINEL);
-                                return;
-                            } else
-                                try {
-                                    Thread.sleep(1);
-                                } catch (InterruptedException e) {
-                                    Basic.caught(e);
-                                }
+                            try {
+                                outputQueue.put(item);
+                            } catch (InterruptedException e) {
+                                Basic.caught(e);
+                            }
+                            nextRank++;
+                            item = queue.poll(); // don't use take(), don't want to block here...
                         }
                     }
-                } catch (InterruptedException ex) {
-                    Basic.caught(ex);
+                    if (allEmpty) {
+                        if (isClosing) {
+                            outputQueue.put(SENTINEL);
+                            return;
+                        } else
+                            try {
+                                Thread.sleep(1);
+                            } catch (InterruptedException e) {
+                                Basic.caught(e);
+                            }
+                    }
                 }
+            } catch (InterruptedException ex) {
+                Basic.caught(ex);
             }
         });
         thread1.start();
 
         // this thread writes output to file
-        final Thread thread2 = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    while (true) {
-                        OutputItem item = outputQueue.take();
-                        if (item == SENTINEL) {
-                            hasFinishedOutput.countDown();
-                            return;
-                        }
-                        byte[][] strings = item.strings;
-                        if (strings != null) {
-                            for (byte[] string : strings) {
-                                byte b = 0;
-                                for (byte aString : string) {
-                                    b = aString;
-                                    if (b == 0)
-                                        break; // zero-terminated byte string
-                                    writer.write((char) b);
-                                }
-                                if (b != '\t') // if this ends on a tab, don't add new line, it is the query-name for BlastTab or SAM
-                                    writer.write('\n');
+        final Thread thread2 = new Thread(() -> {
+            try {
+                while (true) {
+                    OutputItem item = outputQueue.take();
+                    if (item == SENTINEL) {
+                        hasFinishedOutput.countDown();
+                        return;
+                    }
+                    byte[][] strings = item.strings;
+                    if (strings != null) {
+                        for (byte[] string : strings) {
+                            byte b = 0;
+                            for (byte aString : string) {
+                                b = aString;
+                                if (b == 0)
+                                    break; // zero-terminated byte string
+                                writer.write((char) b);
                             }
+                            if (b != '\t') // if this ends on a tab, don't add new line, it is the query-name for BlastTab or SAM
+                                writer.write('\n');
                         }
                     }
-                } catch (Exception ex) {
-                    Basic.caught(ex);
                 }
+            } catch (Exception ex) {
+                Basic.caught(ex);
             }
         });
         thread2.start();
@@ -238,7 +234,7 @@ public class FileWriterRanked {
      * @param string
      * @throws java.io.IOException
      */
-    public void writeLast(String string) throws IOException {
+    public void writeLast(String string) {
         fileFooter.append(string);
     }
 }
@@ -247,8 +243,8 @@ public class FileWriterRanked {
  * output item consists of rank and bytes to write
  */
 class OutputItem {
-    long rank;
-    byte[][] strings;
+    final long rank;
+    final byte[][] strings;
 
     OutputItem(long rank, byte[][] strings) {
         this.rank = rank;

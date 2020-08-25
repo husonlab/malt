@@ -112,27 +112,22 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
      * @return iterable
      */
     public Iterable<String> refNames() {
-        return new Iterable<String>() {
+        return () -> new Iterator<>() {
+            private int i = 0;
+
             @Override
-            public Iterator<String> iterator() {
-                return new Iterator<String>() {
-                    private int i = 0;
+            public boolean hasNext() {
+                return i < numberOfSequences;
+            }
 
-                    @Override
-                    public boolean hasNext() {
-                        return i < numberOfSequences;
-                    }
+            @Override
+            public String next() {
+                return Basic.getAccessionWord(headers[i++]);
+            }
 
-                    @Override
-                    public String next() {
-                        return Basic.getAccessionWord(headers[i++]);
-                    }
+            @Override
+            public void remove() {
 
-                    @Override
-                    public void remove() {
-
-                    }
-                };
             }
         };
     }

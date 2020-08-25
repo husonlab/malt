@@ -35,11 +35,13 @@ import megan.classification.IdMapper;
 import megan.classification.IdParser;
 import megan.genes.GeneItem;
 import megan.genes.GeneItemCreator;
+import megan.main.Megan6;
 import megan.tools.AAdderBuild;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * build MALT index
@@ -56,6 +58,8 @@ public class MaltBuild {
      * @throws java.io.IOException
      */
     public static void main(String[] args) {
+        ResourceManager.addResourceRoot(Megan6.class, "megan.resources");
+
         try {
             PeakMemoryUsageMonitor.start();
             final MaltBuild maltBuild = new MaltBuild();
@@ -97,10 +101,10 @@ public class MaltBuild {
         options.setLicense("Copyright (C) 2020 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Input:");
-        final List<String> inputFiles = options.getOptionMandatory("i", "input", "Input reference files in FastA format (or specify a single directory)", new LinkedList<String>());
+        final List<String> inputFiles = options.getOptionMandatory("i", "input", "Input reference files in FastA format (or specify a single directory)", new LinkedList<>());
         final SequenceType sequenceType = SequenceType.valueOfIgnoreCase(options.getOptionMandatory("s", "sequenceType", "Sequence type", SequenceType.values(), SequenceType.Protein.toString()));
 
-        final List<String> gffFiles = options.getOption("-igff", "inputGFF", "Files that provide CDS annotations of DNA input files in GFF format (or specify a single directory)", new LinkedList<String>());
+        final List<String> gffFiles = options.getOption("-igff", "inputGFF", "Files that provide CDS annotations of DNA input files in GFF format (or specify a single directory)", new LinkedList<>());
 
         options.comment("Output:");
         final String indexDirectoryName = options.getOptionMandatory("-d", "index", "Name of index directory", "");
@@ -120,16 +124,17 @@ public class MaltBuild {
             proteinReduction = "";
 
         options.comment("Classification support:");
+        final String mapDBFile = options.getOption("-mdb", "mapDB", "MEGAN mapping db (file megan-map.db or megan-nucl.db)", "");
+        final Set<String> dbSelectedClassifications = new HashSet<>(Arrays.asList(options.getOption("-on", "only", "Use only named classifications (if not set: use all)", new String[0])));
+
+        options.comment("Deprecated classification support:");
         final boolean parseTaxonNames = options.getOption("-tn", "parseTaxonNames", "Parse taxon names", true);
 
-        final String mapDBFile = options.getOption("-mdb", "mapDB", "MEGAN mapping db (file megan-map.db)", "");
         final String acc2TaxaFile = options.getOption("-a2t", "acc2taxa", "Accession-to-Taxonomy mapping file", "");
         final String synonyms2TaxaFile = options.getOption("-s2t", "syn2taxa", "Synonyms-to-Taxonomy mapping file", "");
 
         final HashMap<String, String> class2AccessionFile = new HashMap<>();
         final HashMap<String, String> class2SynonymsFile = new HashMap<>();
-
-        final Set<String> classificationsToUse = new TreeSet<>();
 
         for (String cName : ClassificationManager.getAllSupportedClassificationsExcludingNCBITaxonomy()) {
             class2AccessionFile.put(cName, options.getOption("-a2" + cName.toLowerCase(), "acc2" + cName.toLowerCase(), "Accession-to-" + cName + " mapping file", ""));
@@ -138,9 +143,6 @@ public class MaltBuild {
             if (tags.length() > 0)
                 ProgramProperties.put(cName + "Tags", tags);
             ProgramProperties.put(cName + "ParseIds", tags.length() > 0);
-
-            if (class2AccessionFile.get(cName).length() > 0 || class2AccessionFile.get(cName).length() > 0)
-                classificationsToUse.add(cName);
         }
 
         final boolean functionalClassification = !options.getOption("-nf", "noFun", "Turn off functional classifications for provided mapping files (set this when using GFF files for DNA references)", false);
@@ -174,16 +176,39 @@ public class MaltBuild {
                 if (inputFiles.size() == 0)
                     throw new IOException("No files found in directory: " + file);
                 else
-                    System.err.println(String.format("Found: %,d", inputFiles.size()));
+                    System.err.printf("Found: %,d%n", inputFiles.size());
             }
         }
 
-        final Collection<String> mapDBClassifications = AccessAccessionMappingDatabase.getContainedClassificationsIfDBExists(mapDBFile);
+        if(Basic.notBlank(mapDBFile))
+            Basic.checkFileReadableNonEmpty(mapDBFile);
+
+        final Collection<String> mapDBClassifications = AccessAccessionMappingDatabase.getContainedClassificationsIfDBExists(mapDBFile)
+                .stream().filter(s->dbSelectedClassifications.size()==0 || dbSelectedClassifications.contains(s)).collect(Collectors.toList());
+
+
         if (mapDBClassifications.size() > 0 && (Basic.hasPositiveLengthValue(class2AccessionFile) || Basic.hasPositiveLengthValue(class2SynonymsFile)))
             throw new UsageException("Illegal to use both --mapDB and ---acc2... or --syn2... options");
 
         if (mapDBClassifications.size() > 0)
             ClassificationManager.setMeganMapDBFile(mapDBFile);
+
+        final ArrayList<String> cNames = new ArrayList<>();
+
+        if(mapDBClassifications.size()>0) {
+            cNames.addAll(mapDBClassifications);
+        }
+         else {
+            for (String cName : ClassificationManager.getAllSupportedClassificationsExcludingNCBITaxonomy()) {
+                if ((dbSelectedClassifications.size() == 0 || dbSelectedClassifications.contains(cName))
+                        && (Basic.notBlank(class2AccessionFile.get(cName)) || Basic.notBlank(class2SynonymsFile.get(cName))))
+                    cNames.add(cName);
+            }
+            if (!cNames.contains(Classification.Taxonomy) && (acc2TaxaFile.length() > 0 || synonyms2TaxaFile.length() > 0))
+                cNames.add(Classification.Taxonomy);
+        }
+        if (cNames.size() > 0)
+            System.err.println("Classifications to use: " + Basic.toString(cNames, ", "));
 
         AAdderBuild.setupGFFFiles(gffFiles, lookInside);
 
@@ -230,10 +255,10 @@ public class MaltBuild {
 
         // load the reference file:
         final ReferencesDBBuilder referencesDB = new ReferencesDBBuilder();
-        System.err.println(String.format("Number input files: %,12d", inputFiles.size()));
+        System.err.printf("Number input files: %,12d%n", inputFiles.size());
         referencesDB.loadFastAFiles(inputFiles, referenceAlphabet);
-        System.err.println(String.format("Number of sequences:%,12d", referencesDB.getNumberOfSequences()));
-        System.err.println(String.format("Number of letters:%,14d", referencesDB.getNumberOfLetters()));
+        System.err.printf("Number of sequences:%,12d%n", referencesDB.getNumberOfSequences());
+        System.err.printf("Number of letters:%,14d%n", referencesDB.getNumberOfLetters());
 
         // generate hash table for each seed shape
         if (doBuildTables) {
@@ -248,35 +273,43 @@ public class MaltBuild {
             }
         }
 
-        if (acc2TaxaFile.length() > 0 || synonyms2TaxaFile.length() > 0)
-            classificationsToUse.add(Classification.Taxonomy);
-
-        for (String cName : classificationsToUse) {
+        for (String cName : cNames) {
             final String cNameLowerCase = cName.toLowerCase();
             final String sourceName = (cName.equals(Classification.Taxonomy) ? "ncbi" : cNameLowerCase);
-
             ClassificationManager.ensureTreeIsLoaded(cName);
-            //  need these present for MaltRun to know what to classify
             Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".tre"), new File(indexDirectory, cNameLowerCase + ".tre"));
             Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".map"), new File(indexDirectory, cNameLowerCase + ".map"));
+        }
 
-            if (mapDBClassifications.contains(cName))
-                Utilities.loadMapping(mapDBFile, IdMapper.MapType.MeganMapDB, cName);
+        if(mapDBFile.length()==0) {
+            for (String cName : cNames) {
+                final String cNameLowerCase = cName.toLowerCase();
 
-            if (class2SynonymsFile.get(cName) != null)
-                Utilities.loadMapping(class2SynonymsFile.get(cName), IdMapper.MapType.Synonyms, cName);
-            if (class2AccessionFile.get(cName) != null)
-                Utilities.loadMapping(class2AccessionFile.get(cName), IdMapper.MapType.Accession, cName);
+                if (mapDBClassifications.contains(cName))
+                    Utilities.loadMapping(mapDBFile, IdMapper.MapType.MeganMapDB, cName);
 
-            final IdParser idParser = ClassificationManager.get(cName, true).getIdMapper().createIdParser();
-            if (cName.equals(Classification.Taxonomy))
-                idParser.setUseTextParsing(parseTaxonNames);
+                if (class2SynonymsFile.get(cName) != null)
+                    Utilities.loadMapping(class2SynonymsFile.get(cName), IdMapper.MapType.Synonyms, cName);
+                if (class2AccessionFile.get(cName) != null)
+                    Utilities.loadMapping(class2AccessionFile.get(cName), IdMapper.MapType.Accession, cName);
 
-            if (functionalClassification || cName.equals(Classification.Taxonomy)) {
-                final Mapping mapping = Mapping.create(cName, referencesDB, idParser, new ProgressPercentage("Building " + cName + "-mapping..."));
-                mapping.save(new File(indexDirectory, cNameLowerCase + ".idx"));
+                final IdParser idParser = ClassificationManager.get(cName, true).getIdMapper().createIdParser();
+                if (cName.equals(Classification.Taxonomy))
+                    idParser.setUseTextParsing(parseTaxonNames);
+
+                if (functionalClassification || cName.equals(Classification.Taxonomy)) {
+                    final Mapping mapping = Mapping.create(cName, referencesDB, idParser, new ProgressPercentage("Building " + cName + "-mapping..."));
+                    mapping.save(new File(indexDirectory, cNameLowerCase + ".idx"));
+                }
             }
         }
+        else {
+                final Map<String,Mapping> mappings= Mapping.create(cNames,referencesDB, new AccessAccessionMappingDatabase(mapDBFile), new ProgressPercentage("Building mappings..."));
+                for(String cName:mappings.keySet()) {
+                    final Mapping mapping=mappings.get(cName);
+                    mapping.save(new File(indexDirectory, cName.toLowerCase() + ".idx"));
+                }
+            }
 
         if (doBuildTables) // don't write until after running classification mappers, as they add tags to reference sequences
             referencesDB.save(new File(indexDirectory, "ref.idx"), new File(indexDirectory, "ref.db"), new File(indexDirectory, "ref.inf"), saveFirstWordOfReferenceHeaderOnly);

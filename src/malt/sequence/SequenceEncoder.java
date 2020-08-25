@@ -208,7 +208,7 @@ public class SequenceEncoder implements ISeedExtractor {
      * @return iterator
      */
     public Iterator<Byte> getLetterIterator(final long[] sequenceCode, final int pos) {
-        return new Iterator<Byte>() {
+        return new Iterator<>() {
             private int word = pos / lettersPerWord;
             private int shift = 64 - ((pos - lettersPerWord * word) + 1) * bitsPerLetter;
             byte bits = (byte) ((sequenceCode[word] & (letterMask << shift)) >>> shift);
@@ -246,7 +246,7 @@ public class SequenceEncoder implements ISeedExtractor {
      * @return iterator
      */
     public Iterator<Byte> getLetterReverseIterator(final long[] sequenceCode, final int pos) {
-        return new Iterator<Byte>() {
+        return new Iterator<>() {
             private int word = pos / lettersPerWord;
             private int shift = 64 - ((pos - lettersPerWord * word) + 1) * bitsPerLetter;
 

@@ -39,7 +39,7 @@ public class BlastStatisticsHelper {
     /**
      * lookup table, source: Blast book, appendix C
      */
-    private static String[] table = new String[]
+    private static final String[] table = new String[]
             {
                     "Matrix open extension lambda K H",
                     "BLOSUM80	32767	32767	0.343	0.177	0.657",

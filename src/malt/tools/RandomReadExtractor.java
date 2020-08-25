@@ -50,7 +50,7 @@ public class RandomReadExtractor {
     /**
      * run the program
      */
-    public void run(String[] args) throws CanceledException, IOException, UsageException {
+    public void run(String[] args) throws IOException, UsageException {
         final ArgsOptions options = new ArgsOptions(args, this, "Randomly cuts out reads from a single DNA sequence");
         options.setVersion(ProgramProperties.getProgramVersion());
         options.setLicense("Copyright (C) 2020 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
@@ -76,7 +76,7 @@ public class RandomReadExtractor {
         final FastA fastA = new FastA();
         try (Reader r = new InputStreamReader(Basic.getInputStreamPossiblyZIPorGZIP(inputFile))) {
             fastA.read(r);
-            System.err.println(String.format("Sequence '%s' length: %,d", Basic.getFirstWord(fastA.getHeader(0)), fastA.getSequence(0).length()));
+            System.err.printf("Sequence '%s' length: %,d%n", Basic.getFirstWord(fastA.getHeader(0)), fastA.getSequence(0).length());
         }
         final String genome = fastA.getSequence(0);
 
@@ -121,6 +121,6 @@ public class RandomReadExtractor {
                 count++;
             }
         }
-        System.err.println(String.format("Lines: %,d", count));
+        System.err.printf("Lines: %,d%n", count);
     }
 }

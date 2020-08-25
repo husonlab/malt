@@ -28,7 +28,7 @@ import jloda.thirdparty.MurmurHash3;
 public class QuerySequence2MatchesCache {
     private final int hashMask;
     private final Item[] hash2data;
-    private int randomNumberSeed = 666;
+    private final int randomNumberSeed = 666;
 
     private final int numberOfSyncObjects = (1 << 10);
     private final int syncObjectsMask = numberOfSyncObjects - 1;
@@ -143,8 +143,8 @@ public class QuerySequence2MatchesCache {
      */
     class Item {
         private Item next;
-        private byte[] sequence;
-        private ReadMatch[] matches;
+        private final byte[] sequence;
+        private final ReadMatch[] matches;
 
         /**
          * constructor

@@ -212,7 +212,7 @@ public class RMA6Writer {
                         progress.setProgress(it.getProgress());
                     }
                     progress.close();
-                    System.err.println(String.format("Number of pairs:%,14d", count));
+                    System.err.printf("Number of pairs:%,14d%n", count);
                 }
             }
 
