@@ -304,7 +304,10 @@ public class MaltBuild {
             }
         }
         else {
-                final Map<String,Mapping> mappings= Mapping.create(cNames,referencesDB, new AccessAccessionMappingDatabase(mapDBFile), new ProgressPercentage("Building mappings..."));
+                final Map<String,Mapping> mappings;
+                try(var progress=new ProgressPercentage("Building mappings...")) {
+                    mappings=Mapping.create(cNames,referencesDB, new AccessAccessionMappingDatabase(mapDBFile), progress);
+                }
                 for(String cName:mappings.keySet()) {
                     final Mapping mapping=mappings.get(cName);
                     mapping.save(new File(indexDirectory, cName.toLowerCase() + ".idx"));

@@ -141,7 +141,7 @@ public class Mapping extends RefIndex2ClassId {
                         if (cIndex2Name[c] != null) {
                             final int index = ids[c];
                             if (index != 0) {
-                               // System.err.println(cIndex2Name[c]+" -> "+index);
+                                //System.err.println(cIndex2Name[c]+" -> "+index);
                                 mappings.get(cIndex2Name[c]).put(offset + r, index);
                                 referencesDB.extendHeader(c, tags[c], index);
                             }
