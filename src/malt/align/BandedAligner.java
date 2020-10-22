@@ -246,7 +246,7 @@ public class BandedAligner {
                     if (refIndex == -1) { // in column before reference starts, init
                         traceBackM[col][row] = traceBackIRef[col][row] = traceBackIQuery[col][row] = DONE;
                         matrixM[col][row] = matrixIRef[col][row] = matrixIQuery[col][row] = 0;
-                    } else if (refIndex >= 0 && refIndex<reference.length) //do the actual alignment:
+                    } else if (refIndex >= 0 && refIndex < reference.length) //do the actual alignment:
                     {
                         int bestMScore = 0;
                         // match or mismatch
@@ -1283,6 +1283,7 @@ public class BandedAligner {
 
     /**
      * gets simple text, for debugging purproses
+     *
      * @return text
      */
     public byte[] getAlignmentSimpleText() {

@@ -201,6 +201,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
 
     /**
      * Save the reference data as an index file and a datafile
+     *
      * @param refIndexFile
      * @param refDBFile
      * @throws IOException

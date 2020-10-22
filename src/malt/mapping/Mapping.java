@@ -107,7 +107,7 @@ public class Mapping extends RefIndex2ClassId {
         {
             int c = 0;
             for (String cName : cNames) {
-                final int index = mappingDatabase.getClassificationIndex(cName)-2;
+                final int index = mappingDatabase.getClassificationIndex(cName) - 2;
 
                 if (namesToUse.contains(cName)) {
                     mappings.put(cName, new Mapping(cName, referencesDB.getNumberOfSequences()));
@@ -128,54 +128,53 @@ public class Mapping extends RefIndex2ClassId {
 
             final int numberInChunk = Math.min(chunkSize, referencesDB.getNumberOfSequences() - offset * chunkSize);
             for (int r = 0; r < numberInChunk; r++) {
-                accessions[r] =getFirstWordAccession(referencesDB.getHeader(offset + r));
+                accessions[r] = getFirstWordAccession(referencesDB.getHeader(offset + r));
             }
             final Map<String, int[]> accession2ids = mappingDatabase.getValues(accessions, numberInChunk);
             for (int r = 0; r < numberInChunk; r++) {
-                if(accessions[r].length()>0) {
-                final int[] ids=accession2ids.get(accessions[r]);
-                if(ids!=null) {
-                    //System.err.println((offset+r)+" -> "+Basic.toString(referencesDB.getHeader(offset + r))+" -> "+accessions[r]);
+                if (accessions[r].length() > 0) {
+                    final int[] ids = accession2ids.get(accessions[r]);
+                    if (ids != null) {
+                        //System.err.println((offset+r)+" -> "+Basic.toString(referencesDB.getHeader(offset + r))+" -> "+accessions[r]);
 
-                    for (int c = 0; c < cIndex2Name.length; c++) {
-                        if (cIndex2Name[c] != null) {
-                            final int index = ids[c];
-                            if (index != 0) {
-                                //System.err.println(cIndex2Name[c]+" -> "+index);
-                                mappings.get(cIndex2Name[c]).put(offset + r, index);
-                                referencesDB.extendHeader(c, tags[c], index);
+                        for (int c = 0; c < cIndex2Name.length; c++) {
+                            if (cIndex2Name[c] != null) {
+                                final int index = ids[c];
+                                if (index != 0) {
+                                    //System.err.println(cIndex2Name[c]+" -> "+index);
+                                    mappings.get(cIndex2Name[c]).put(offset + r, index);
+                                    referencesDB.extendHeader(c, tags[c], index);
+                                }
                             }
                         }
                     }
                 }
-                }
             }
-            progress.setProgress(offset+numberInChunk);
+            progress.setProgress(offset + numberInChunk);
         }
         return mappings;
     }
 
     public static String getFirstWordAccession(byte[] bytes) {
-        final String aLine=Basic.toString(bytes);
-            int a = 0;
-            while (a < aLine.length()) {
-                if (aLine.charAt(a) == '>' || aLine.charAt(a) == '@' || Character.isWhitespace(aLine.charAt(a)))
-                    a++;
-                else
-                    break;
-            }
-            int b = a + 1;
-            while (b < aLine.length()) {
-                if (Character.isLetterOrDigit(aLine.charAt(b)) || aLine.charAt(b) == '_')
-                    b++;
-                else
-                    break;
-            }
-            if (b - a > 4) {
-                return aLine.substring(a, b);
-            }
+        final String aLine = Basic.toString(bytes);
+        int a = 0;
+        while (a < aLine.length()) {
+            if (aLine.charAt(a) == '>' || aLine.charAt(a) == '@' || Character.isWhitespace(aLine.charAt(a)))
+                a++;
             else
-                return "";
+                break;
+        }
+        int b = a + 1;
+        while (b < aLine.length()) {
+            if (Character.isLetterOrDigit(aLine.charAt(b)) || aLine.charAt(b) == '_')
+                b++;
+            else
+                break;
+        }
+        if (b - a > 4) {
+            return aLine.substring(a, b);
+        } else
+            return "";
     }
 
     /**

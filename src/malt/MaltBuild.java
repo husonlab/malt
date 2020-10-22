@@ -180,11 +180,11 @@ public class MaltBuild {
             }
         }
 
-        if(Basic.notBlank(mapDBFile))
+        if (Basic.notBlank(mapDBFile))
             Basic.checkFileReadableNonEmpty(mapDBFile);
 
         final Collection<String> mapDBClassifications = AccessAccessionMappingDatabase.getContainedClassificationsIfDBExists(mapDBFile)
-                .stream().filter(s->dbSelectedClassifications.size()==0 || dbSelectedClassifications.contains(s)).collect(Collectors.toList());
+                .stream().filter(s -> dbSelectedClassifications.size() == 0 || dbSelectedClassifications.contains(s)).collect(Collectors.toList());
 
 
         if (mapDBClassifications.size() > 0 && (Basic.hasPositiveLengthValue(class2AccessionFile) || Basic.hasPositiveLengthValue(class2SynonymsFile)))
@@ -195,10 +195,9 @@ public class MaltBuild {
 
         final ArrayList<String> cNames = new ArrayList<>();
 
-        if(mapDBClassifications.size()>0) {
+        if (mapDBClassifications.size() > 0) {
             cNames.addAll(mapDBClassifications);
-        }
-         else {
+        } else {
             for (String cName : ClassificationManager.getAllSupportedClassificationsExcludingNCBITaxonomy()) {
                 if ((dbSelectedClassifications.size() == 0 || dbSelectedClassifications.contains(cName))
                         && (Basic.notBlank(class2AccessionFile.get(cName)) || Basic.notBlank(class2SynonymsFile.get(cName))))
@@ -281,7 +280,7 @@ public class MaltBuild {
             Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".map"), new File(indexDirectory, cNameLowerCase + ".map"));
         }
 
-        if(mapDBFile.length()==0) {
+        if (mapDBFile.length() == 0) {
             for (String cName : cNames) {
                 final String cNameLowerCase = cName.toLowerCase();
 
@@ -302,17 +301,16 @@ public class MaltBuild {
                     mapping.save(new File(indexDirectory, cNameLowerCase + ".idx"));
                 }
             }
-        }
-        else {
-                final Map<String,Mapping> mappings;
-                try(var progress=new ProgressPercentage("Building mappings...")) {
-                    mappings=Mapping.create(cNames,referencesDB, new AccessAccessionMappingDatabase(mapDBFile), progress);
-                }
-                for(String cName:mappings.keySet()) {
-                    final Mapping mapping=mappings.get(cName);
-                    mapping.save(new File(indexDirectory, cName.toLowerCase() + ".idx"));
-                }
+        } else {
+            final Map<String, Mapping> mappings;
+            try (var progress = new ProgressPercentage("Building mappings...")) {
+                mappings = Mapping.create(cNames, referencesDB, new AccessAccessionMappingDatabase(mapDBFile), progress);
             }
+            for (String cName : mappings.keySet()) {
+                final Mapping mapping = mappings.get(cName);
+                mapping.save(new File(indexDirectory, cName.toLowerCase() + ".idx"));
+            }
+        }
 
         if (doBuildTables) // don't write until after running classification mappers, as they add tags to reference sequences
             referencesDB.save(new File(indexDirectory, "ref.idx"), new File(indexDirectory, "ref.db"), new File(indexDirectory, "ref.inf"), saveFirstWordOfReferenceHeaderOnly);

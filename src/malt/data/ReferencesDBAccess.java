@@ -20,7 +20,6 @@
 package malt.data;
 
 import jloda.util.Basic;
-import jloda.util.CanceledException;
 import jloda.util.FileLineIterator;
 import malt.MaltOptions;
 import megan.io.*;

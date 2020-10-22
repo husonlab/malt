@@ -66,6 +66,7 @@ public class DNA5 implements IAlphabet {
 
     /**
      * normalize a sequence
+     *
      * @param sequence
      */
     public void normalize(byte[] sequence) {

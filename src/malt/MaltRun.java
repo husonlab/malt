@@ -360,9 +360,6 @@ public class MaltRun {
                                         final ReferencesDBAccess referencesDB, final ReferencesHashTableAccess[] tables,
                                         final GeneItemAccessor geneTableAccess) throws IOException {
 
-        final ExecutorService executor = Executors.newFixedThreadPool(maltOptions.getNumberOfThreads());
-        final CountDownLatch countDownLatch = new CountDownLatch(maltOptions.getNumberOfThreads());
-
         final FastAReader fastAReader = new FastAReader(infile, maltOptions.getQueryAlphabet(), new ProgressPercentage("+++++ Aligning file: " + infile));
 
         final String matchesOutputFileUsed;
@@ -393,33 +390,40 @@ public class MaltRun {
 
         final AlignmentEngine[] alignmentEngines = new AlignmentEngine[maltOptions.getNumberOfThreads()];
 
-        // launch the worker threads
-        for (int thread = 0; thread < maltOptions.getNumberOfThreads(); thread++) {
-            final int threadNumber = thread;
-            executor.execute(() -> {
-                try {
-                    alignmentEngines[threadNumber] = new AlignmentEngine(threadNumber, maltOptions, alignerOptions, referencesDB, tables, fastAReader,
-                            matchesWriter, rmaWriter, alignedReadsWriter, unalignedReadsWriter, geneTableAccess);
-                    alignmentEngines[threadNumber].runOuterLoop();
-                    alignmentEngines[threadNumber].finish();
-                } catch (Exception ex) {
-                    Basic.caught(ex);
-                    System.exit(1);  // just die...
-                } finally {
-                    countDownLatch.countDown();
-                }
-            });
-        }
+        final ExecutorService executor = Executors.newFixedThreadPool(maltOptions.getNumberOfThreads());
+        final CountDownLatch countDownLatch = new CountDownLatch(maltOptions.getNumberOfThreads());
 
         try {
-            countDownLatch.await();  // await completion of alignment threads
-        } catch (InterruptedException e) {
-            Basic.caught(e);
+            // launch the worker threads
+            for (int thread = 0; thread < maltOptions.getNumberOfThreads(); thread++) {
+                final int threadNumber = thread;
+                executor.execute(() -> {
+                    try {
+                        alignmentEngines[threadNumber] = new AlignmentEngine(threadNumber, maltOptions, alignerOptions, referencesDB, tables, fastAReader,
+                                matchesWriter, rmaWriter, alignedReadsWriter, unalignedReadsWriter, geneTableAccess);
+                        alignmentEngines[threadNumber].runOuterLoop();
+                        alignmentEngines[threadNumber].finish();
+                    } catch (Exception ex) {
+                        Basic.caught(ex);
+                        System.exit(1);  // just die...
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                });
+            }
+
+            try {
+                countDownLatch.await();  // await completion of alignment threads
+            } catch (InterruptedException e) {
+                Basic.caught(e);
+            } finally {
+                fastAReader.close();
+            }
         } finally {
             // shut down threads:
             executor.shutdownNow();
-            fastAReader.close();
         }
+
         if (matchesWriter != null) {
             if (maltOptions.getMatchOutputFormat() == MaltOptions.MatchOutputFormat.Text)
                 matchesWriter.writeLast(BlastTextHelper.FILE_FOOTER_BLAST);

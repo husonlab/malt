@@ -21,7 +21,6 @@ package malt.data;
 
 import jloda.thirdparty.MurmurHash3;
 import jloda.util.Basic;
-import jloda.util.CanceledException;
 import jloda.util.ProgressPercentage;
 import malt.MaltOptions;
 import malt.util.Utilities;
