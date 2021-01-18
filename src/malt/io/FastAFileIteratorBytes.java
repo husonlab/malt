@@ -59,7 +59,7 @@ public class FastAFileIteratorBytes implements Iterator<byte[]>, ICloseableItera
         try {
             int value = inputStream.read();
             isFastQ = (value == '@');
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 
@@ -191,7 +191,7 @@ public class FastAFileIteratorBytes implements Iterator<byte[]>, ICloseableItera
      * grows the line buffer
      */
     private void growBuffer() {
-        byte[] nextBuffer = new byte[(int) Math.min(Integer.MAX_VALUE - 10L, 2 * buffer.length)];
+        byte[] nextBuffer = new byte[(int) Math.min(Basic.MAX_ARRAY_SIZE, 2L * buffer.length)];
         System.arraycopy(buffer, 0, nextBuffer, 0, buffer.length);
         buffer = nextBuffer;
     }
