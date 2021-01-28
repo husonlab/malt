@@ -63,7 +63,7 @@ public class FileWriterRanked {
 
         // the output writer:
         OutputStream outs;
-        if (fileName == null || fileName.equalsIgnoreCase("STDOUT")) {
+        if (fileName == null || fileName.equalsIgnoreCase("stdout")) {
             isFile = false;
             outs = System.out;
         } else {
