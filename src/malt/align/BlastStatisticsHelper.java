@@ -116,8 +116,8 @@ public class BlastStatisticsHelper {
     public BlastStatisticsHelper(long referenceLength, String blosumName, int gapOpenPenalty, int gapExtensionPenalty) throws IOException {
         this.referenceLength = referenceLength;
         Pair<Double, Double> pair = lookupLambdaAndK(blosumName, gapOpenPenalty, gapExtensionPenalty);
-        this.lambda = pair.get1();
-        this.k = pair.get2();
+        this.lambda = pair.getFirst();
+        this.k = pair.getSecond();
         this.lnK = (float) Math.log(k);
         System.err.println("Blast-stats: matrix=" + blosumName + " gapOpen=" + gapOpenPenalty + " gapExtend=" + gapExtensionPenalty + " lambda=" + getLambda() + " k=" + getK());
     }
