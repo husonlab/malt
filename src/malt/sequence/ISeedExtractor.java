@@ -1,5 +1,5 @@
 /*
- * ISeedExtractor.java Copyright (C) 2020. Daniel H. Huson
+ * ISeedExtractor.java Copyright (C) 2021. Daniel H. Huson
  *
  *  (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -20,14 +20,14 @@
 package malt.sequence;
 
 /**
- * seed extract
+ * seed extractSubGraph
  * Daniel Huson, 2014
  */
 public interface ISeedExtractor {
     byte[] decodeSeed(long seedCode, int seedWeight);
 
     /**
-     * extract a seed from a sequence code
+     * extractSubGraph a seed from a sequence code
      *
      * @param seedShape
      * @param seedWeight
@@ -37,7 +37,7 @@ public interface ISeedExtractor {
     long getSeedCode(boolean[] seedShape, int seedWeight, long[] sequenceCode, int pos);
 
     /**
-     * extract a seed from a sequence code
+     * extractSubGraph a seed from a sequence code
      *
      * @param seedShape
      * @param seedWeight

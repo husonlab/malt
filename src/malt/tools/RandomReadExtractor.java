@@ -1,5 +1,5 @@
 /*
- * RandomReadExtractor.java Copyright (C) 2020. Daniel H. Huson
+ * RandomReadExtractor.java Copyright (C) 2021. Daniel H. Huson
  *
  *  (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -53,7 +53,7 @@ public class RandomReadExtractor {
     public void run(String[] args) throws IOException, UsageException {
         final ArgsOptions options = new ArgsOptions(args, this, "Randomly cuts out reads from a single DNA sequence");
         options.setVersion(ProgramProperties.getProgramVersion());
-        options.setLicense("Copyright (C) 2020 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
+        options.setLicense("Copyright (C) 2021 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
         options.setAuthors("Daniel H. Huson");
 
         options.comment("Input Output");
@@ -61,8 +61,8 @@ public class RandomReadExtractor {
         final String outputFile = options.getOptionMandatory("-o", "output", "Output file (.gz ok)", "");
         options.comment("Options");
         final String startsFile = options.getOption("-sf", "startsFile", "Select the reads from the list of start positions given in this file (overrides -n)", "");
-        final int numberOfReads = options.getOption("-n", "num", "Number of reads to extract", 10000);
-        final int readLength = options.getOption("-l", "length", "Length of reads to extract", 100);
+        final int numberOfReads = options.getOption("-n", "num", "Number of reads to extractSubGraph", 10000);
+        final int readLength = options.getOption("-l", "length", "Length of reads to extractSubGraph", 100);
         final boolean forwardStrand = options.getOption("-fs", "forwardStrand", "From forward strand", true);
         final boolean backwardStrand = options.getOption("-bs", "backwardtrand", "From backward strand", true);
         final int randomSeed = options.getOption("-rs", "randomSeed", "Random number seed", 666);

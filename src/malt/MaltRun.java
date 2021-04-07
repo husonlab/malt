@@ -1,5 +1,5 @@
 /*
- * MaltRun.java Copyright (C) 2020. Daniel H. Huson
+ * MaltRun.java Copyright (C) 2021. Daniel H. Huson
  *
  *  (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -104,7 +104,7 @@ public class MaltRun {
         final ArgsOptions options = new ArgsOptions(args, this, "Aligns sequences using MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
         options.setVersion(ProgramProperties.getProgramVersion());
-        options.setLicense("Copyright (C) 2020 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
+        options.setLicense("Copyright (C) 2021 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Mode:");
         maltOptions.setMode(BlastMode.valueOfIgnoreCase(options.getOptionMandatory("m", "mode", "Program mode", BlastMode.values(), BlastMode.BlastX.toString())));

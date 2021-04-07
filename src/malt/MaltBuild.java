@@ -1,5 +1,5 @@
 /*
- * MaltBuild.java Copyright (C) 2020. Daniel H. Huson
+ * MaltBuild.java Copyright (C) 2021. Daniel H. Huson
  *
  *  (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -98,7 +98,7 @@ public class MaltBuild {
         final ArgsOptions options = new ArgsOptions(args, this, "Builds an index for MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
         options.setVersion(ProgramProperties.getProgramVersion());
-        options.setLicense("Copyright (C) 2020 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
+        options.setLicense("Copyright (C) 2021 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Input:");
         final List<String> inputFiles = options.getOptionMandatory("i", "input", "Input reference files in FastA format (or specify a single directory)", new LinkedList<>());
