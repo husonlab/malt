@@ -20,14 +20,14 @@
 package malt.sequence;
 
 /**
- * seed extractSubGraph
+ * seed extract
  * Daniel Huson, 2014
  */
 public interface ISeedExtractor {
     byte[] decodeSeed(long seedCode, int seedWeight);
 
     /**
-     * extractSubGraph a seed from a sequence code
+     * extract a seed from a sequence code
      *
      * @param seedShape
      * @param seedWeight
@@ -37,7 +37,7 @@ public interface ISeedExtractor {
     long getSeedCode(boolean[] seedShape, int seedWeight, long[] sequenceCode, int pos);
 
     /**
-     * extractSubGraph a seed from a sequence code
+     * extract a seed from a sequence code
      *
      * @param seedShape
      * @param seedWeight

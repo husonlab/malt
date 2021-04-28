@@ -61,8 +61,8 @@ public class RandomReadExtractor {
         final String outputFile = options.getOptionMandatory("-o", "output", "Output file (.gz ok)", "");
         options.comment("Options");
         final String startsFile = options.getOption("-sf", "startsFile", "Select the reads from the list of start positions given in this file (overrides -n)", "");
-        final int numberOfReads = options.getOption("-n", "num", "Number of reads to extractSubGraph", 10000);
-        final int readLength = options.getOption("-l", "length", "Length of reads to extractSubGraph", 100);
+        final int numberOfReads = options.getOption("-n", "num", "Number of reads to extract", 10000);
+        final int readLength = options.getOption("-l", "length", "Length of reads to extract", 100);
         final boolean forwardStrand = options.getOption("-fs", "forwardStrand", "From forward strand", true);
         final boolean backwardStrand = options.getOption("-bs", "backwardtrand", "From backward strand", true);
         final int randomSeed = options.getOption("-rs", "randomSeed", "Random number seed", 666);
