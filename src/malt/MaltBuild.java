@@ -35,7 +35,6 @@ import megan.classification.IdMapper;
 import megan.classification.IdParser;
 import megan.genes.GeneItem;
 import megan.genes.GeneItemCreator;
-import megan.main.Megan6;
 import megan.tools.AAdderBuild;
 
 import java.io.File;
@@ -58,7 +57,7 @@ public class MaltBuild {
      * @throws java.io.IOException
      */
     public static void main(String[] args) {
-        ResourceManager.addResourceRoot(Megan6.class, "megan.resources");
+        ResourceManager.insertResourceRoot(megan.resources.Resources.class);
 
         try {
             PeakMemoryUsageMonitor.start();
