@@ -143,6 +143,10 @@ public class MaltBuild {
                 ProgramProperties.put(cName + "Tags", tags);
             ProgramProperties.put(cName + "ParseIds", tags.length() > 0);
         }
+        if (!acc2TaxaFile.isBlank())
+            class2AccessionFile.put(Classification.Taxonomy, acc2TaxaFile);
+        if (!synonyms2TaxaFile.isBlank())
+            class2SynonymsFile.put(Classification.Taxonomy, synonyms2TaxaFile);
 
         final boolean functionalClassification = !options.getOption("-nf", "noFun", "Turn off functional classifications for provided mapping files (set this when using GFF files for DNA references)", false);
 
@@ -182,9 +186,17 @@ public class MaltBuild {
         if (Basic.notBlank(mapDBFile))
             Basic.checkFileReadableNonEmpty(mapDBFile);
 
+        for (var file : class2AccessionFile.values()) {
+            if (!file.isBlank())
+                Basic.checkFileReadableNonEmpty(file);
+        }
+        for (var file : class2SynonymsFile.values()) {
+            if (!file.isBlank())
+                Basic.checkFileReadableNonEmpty(file);
+        }
+
         final Collection<String> mapDBClassifications = AccessAccessionMappingDatabase.getContainedClassificationsIfDBExists(mapDBFile)
                 .stream().filter(s -> dbSelectedClassifications.size() == 0 || dbSelectedClassifications.contains(s)).collect(Collectors.toList());
-
 
         if (mapDBClassifications.size() > 0 && (Basic.hasPositiveLengthValue(class2AccessionFile) || Basic.hasPositiveLengthValue(class2SynonymsFile)))
             throw new UsageException("Illegal to use both --mapDB and ---acc2... or --syn2... options");
@@ -282,9 +294,6 @@ public class MaltBuild {
         if (mapDBFile.length() == 0) {
             for (String cName : cNames) {
                 final String cNameLowerCase = cName.toLowerCase();
-
-                if (mapDBClassifications.contains(cName))
-                    Utilities.loadMapping(mapDBFile, IdMapper.MapType.MeganMapDB, cName);
 
                 if (class2SynonymsFile.get(cName) != null)
                     Utilities.loadMapping(class2SynonymsFile.get(cName), IdMapper.MapType.Synonyms, cName);
