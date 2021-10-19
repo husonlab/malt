@@ -19,9 +19,9 @@
  */
 package malt.align;
 
-import jloda.util.Basic;
-import jloda.util.BlastMode;
+import jloda.seq.BlastMode;
 import jloda.util.ReusableByteBuffer;
+import jloda.util.StringUtils;
 import malt.DataForInnerLoop;
 import malt.data.DNA5;
 import malt.io.SAMHelper;
@@ -432,10 +432,10 @@ public class BandedAligner {
                 System.err.println("refPos:    " + refPos);
                 System.err.println("seedLen.: " + seedLength);
 
-                System.err.println("Query:");
-                System.err.println(Basic.toString(query));
-                System.err.println("Reference:");
-                System.err.println(Basic.toString(reference));
+				System.err.println("Query:");
+				System.err.println(StringUtils.toString(query));
+				System.err.println("Reference:");
+				System.err.println(StringUtils.toString(reference));
             }
 
             {
@@ -698,10 +698,10 @@ public class BandedAligner {
                 System.err.println("refPos:    " + refPos);
                 System.err.println("seedLen.: " + seedLength);
 
-                System.err.println("Query:");
-                System.err.println(Basic.toString(query));
-                System.err.println("Reference:");
-                System.err.println(Basic.toString(reference));
+				System.err.println("Query:");
+				System.err.println(StringUtils.toString(query));
+				System.err.println("Reference:");
+				System.err.println(StringUtils.toString(reference));
             }
 
             {
@@ -1235,7 +1235,7 @@ public class BandedAligner {
                     (100.0 * (getIdentities()) / getAlignmentLength()), getGaps(), getAlignmentLength(), (100.0 * (getGaps()) / getAlignmentLength())));
         else // protein alignment
         {
-            int numberOfPositives = getAlignmentLength() - Basic.countOccurrences(alignment[1], ' ');
+			int numberOfPositives = getAlignmentLength() - StringUtils.countOccurrences(alignment[1], ' ');
             alignmentBuffer.writeAsAscii(String.format(" Identities = %d/%d (%.0f%%), Positives = %d/%d (%.0f%%), Gaps = %d/%d (%.0f%%)\n",
                     getIdentities(), getAlignmentLength(), (100.0 * (getIdentities()) / getAlignmentLength()),
                     numberOfPositives, getAlignmentLength(), (100.0 * (numberOfPositives) / getAlignmentLength()),

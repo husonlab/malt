@@ -19,8 +19,8 @@
  */
 package malt.io;
 
-import jloda.util.Basic;
-import jloda.util.ProgressPercentage;
+import jloda.util.FileUtils;
+import jloda.util.progress.ProgressPercentage;
 import malt.data.DNA5;
 import malt.data.IAlphabet;
 
@@ -67,7 +67,7 @@ public class FastAReader {
     public FastAReader(final String fileName, final IAlphabet alphabet, final ProgressPercentage progress) throws IOException {
         this.alphabet = alphabet;
 
-        maxProgress = Basic.guessUncompressedSizeOfFile(fileName);
+		maxProgress = FileUtils.guessUncompressedSizeOfFile(fileName);
 
         this.progress = progress;
         if (progress != null) {
@@ -77,14 +77,14 @@ public class FastAReader {
 
         // determine file type:
         {
-            InputStream tmp = new BufferedInputStream(Basic.getInputStreamPossiblyZIPorGZIP(fileName));
-            int value = tmp.read();
+			InputStream tmp = new BufferedInputStream(FileUtils.getInputStreamPossiblyZIPorGZIP(fileName));
+			int value = tmp.read();
             if (value != '@' && value != '>')
                 throw new IOException("Input file '" + fileName + "' does not appear to be in FastA or FastQ format, as it does not start with a '>' or '@'");
             isFastQ = (value == '@');
             tmp.close();
         }
-        inputStream = new BufferedInputStream(Basic.getInputStreamPossiblyZIPorGZIP(fileName), BUFFER_SIZE);
+		inputStream = new BufferedInputStream(FileUtils.getInputStreamPossiblyZIPorGZIP(fileName), BUFFER_SIZE);
     }
 
     /**

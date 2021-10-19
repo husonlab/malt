@@ -19,9 +19,9 @@
  */
 package malt.data;
 
-import jloda.util.Basic;
 import jloda.util.CanceledException;
-import jloda.util.ProgressPercentage;
+import jloda.util.progress.ProgressPercentage;
+import jloda.util.StringUtils;
 import malt.io.FastAFileIteratorBytes;
 import megan.io.OutputWriter;
 
@@ -122,7 +122,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
 
             @Override
             public String next() {
-                return Basic.getAccessionWord(headers[i++]);
+				return StringUtils.getAccessionWord(headers[i++]);
             }
 
             @Override
@@ -193,9 +193,9 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     public void saveFastAFile(String fileName) throws IOException {
         try (BufferedWriter w = new BufferedWriter(new FileWriter(fileName), 8192)) {
             for (int i = 0; i < numberOfSequences; i++) {
-                w.write(Basic.toString(headers[i]) + "\n");
-                w.write(Basic.toString(sequences[i]) + "\n");
-            }
+				w.write(StringUtils.toString(headers[i]) + "\n");
+				w.write(StringUtils.toString(sequences[i]) + "\n");
+			}
         }
     }
 

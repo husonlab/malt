@@ -19,7 +19,7 @@
  */
 package malt.data;
 
-import jloda.util.Basic;
+import jloda.util.StringUtils;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -74,11 +74,11 @@ public class ReducedAlphabet implements IAlphabet {
         if (reduction.equalsIgnoreCase("default"))
             reduction = "DIAMOND_11";
 
-        if (Basic.isOneWord(reduction)) {
-            if (!reductions.containsKey(reduction))
-                throw new IOException("Unknown protein reduction: " + reduction);
-            reduction = reductions.get(reduction);
-        }
+		if (StringUtils.isOneWord(reduction)) {
+			if (!reductions.containsKey(reduction))
+				throw new IOException("Unknown protein reduction: " + reduction);
+			reduction = reductions.get(reduction);
+		}
 
         StringBuilder buffer = new StringBuilder();
         char group = 'A';
@@ -202,7 +202,7 @@ public class ReducedAlphabet implements IAlphabet {
                 if (Character.isLetter(def.charAt(i)) || def.charAt(i) == '*')
                     letters.add(def.charAt(i));
             }
-            System.err.println(name + ": " + letters.size() + ": " + Basic.toString(letters, ","));
+			System.err.println(name + ": " + letters.size() + ": " + StringUtils.toString(letters, ","));
             if (firstSet == null)
                 firstSet = letters;
             else {

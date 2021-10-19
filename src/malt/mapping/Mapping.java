@@ -19,10 +19,9 @@
  */
 package malt.mapping;
 
-import jloda.util.Basic;
-import jloda.util.CanceledException;
-import jloda.util.ProgressListener;
-import jloda.util.ProgressPercentage;
+import jloda.util.*;
+import jloda.util.progress.ProgressListener;
+import jloda.util.progress.ProgressPercentage;
 import malt.data.ISequenceAccessor;
 import malt.data.RefIndex2ClassId;
 import megan.accessiondb.AccessAccessionMappingDatabase;
@@ -68,8 +67,8 @@ public class Mapping extends RefIndex2ClassId {
         progress.setProgress(0);
 
         for (int i = 0; i < referencesDB.getNumberOfSequences(); i++) {
-            String header = Basic.toString(referencesDB.getHeader(i));
-            int classId = classificationMapper.getIdFromHeaderLine(header);
+			String header = StringUtils.toString(referencesDB.getHeader(i));
+			int classId = classificationMapper.getIdFromHeaderLine(header);
             if (classId != 0) {
                 mapping.put(i, classId);
                 referencesDB.extendHeader(i, tag, classId);
@@ -156,8 +155,8 @@ public class Mapping extends RefIndex2ClassId {
     }
 
     public static String getFirstWordAccession(byte[] bytes) {
-        final String aLine = Basic.toString(bytes);
-        int a = 0;
+		final String aLine = StringUtils.toString(bytes);
+		int a = 0;
         while (a < aLine.length()) {
             if (aLine.charAt(a) == '>' || aLine.charAt(a) == '@' || Character.isWhitespace(aLine.charAt(a)))
                 a++;

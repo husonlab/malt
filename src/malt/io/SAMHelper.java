@@ -19,7 +19,7 @@
  */
 package malt.io;
 
-import jloda.util.BlastMode;
+import jloda.seq.BlastMode;
 import malt.data.DNA5;
 
 /**

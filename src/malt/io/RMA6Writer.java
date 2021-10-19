@@ -19,9 +19,8 @@
  */
 package malt.io;
 
-import jloda.util.Basic;
-import jloda.util.CanceledException;
-import jloda.util.ProgressPercentage;
+import jloda.util.*;
+import jloda.util.progress.ProgressPercentage;
 import malt.MaltOptions;
 import malt.Version;
 import malt.data.ReadMatch;
@@ -80,7 +79,7 @@ public class RMA6Writer {
         maxMatchesPerQuery = maltOptions.getMaxAlignmentsPerQuery();
 
         cNames = MappingManager.getCNames();
-        int taxonMapperIndex = Basic.getIndex(Classification.Taxonomy, Arrays.asList(cNames));
+		int taxonMapperIndex = StringUtils.getIndex(Classification.Taxonomy, Arrays.asList(cNames));
 
         matches = new MatchLineRMA6[maxMatchesPerQuery];
         for (int i = 0; i < matches.length; i++) {
@@ -106,8 +105,8 @@ public class RMA6Writer {
      */
     public synchronized void processMatches(String queryHeader, String querySequence, ReadMatch[] matchesArray, int numberOfMatches) throws IOException {
         // setup query text:
-        byte[] queryName = Basic.swallowLeadingGreaterSign(Basic.getFirstWord(queryHeader)).getBytes();
-        byte[] queryHeaderText = queryHeader.getBytes();
+		byte[] queryName = StringUtils.swallowLeadingGreaterSign(StringUtils.getFirstWord(queryHeader)).getBytes();
+		byte[] queryHeaderText = queryHeader.getBytes();
         byte[] querySequenceText = querySequence.getBytes();
         if (queryHeaderText.length + querySequenceText.length + 100 > queryText.length) {
             queryText = new byte[100 + queryHeaderText.length + querySequenceText.length];
@@ -234,18 +233,18 @@ public class RMA6Writer {
 
             doc.setReadAssignmentMode(Document.ReadAssignmentMode.readCount); // todo: make this an option
 
-            if (Basic.fileExistsAndIsNonEmpty(contaminantsFile)) {
-                ContaminantManager contaminantManager = new ContaminantManager();
-                contaminantManager.read(contaminantsFile);
-                doc.getDataTable().setContaminants(contaminantManager.getTaxonIdsString());
-            }
+			if (FileUtils.fileExistsAndIsNonEmpty(contaminantsFile)) {
+				ContaminantManager contaminantManager = new ContaminantManager();
+				contaminantManager.read(contaminantsFile);
+				doc.getDataTable().setContaminants(contaminantManager.getTaxonIdsString());
+			}
 
             doc.getMeganFile().setFileFromExistingFile(rma6File, false);
             doc.loadMeganFile();
             doc.processReadHits();
 
             // update and then save auxiliary data:
-            final String sampleName = Basic.replaceFileSuffix(Basic.getFileNameWithoutPath(rma6File), "");
+			final String sampleName = FileUtils.replaceFileSuffix(FileUtils.getFileNameWithoutPath(rma6File), "");
             SyncArchiveAndDataTable.syncRecomputedArchive2Summary(doc.getReadAssignmentMode(), sampleName, "LCA", doc.getBlastMode(), doc.getParameterString(), new RMA6Connector(rma6File), doc.getDataTable(), 0);
             doc.saveAuxiliaryData();
         } catch (CanceledException ex) {

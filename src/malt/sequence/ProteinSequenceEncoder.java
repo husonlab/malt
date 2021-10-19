@@ -20,7 +20,8 @@
 package malt.sequence;
 
 import jloda.util.Basic;
-import jloda.util.ProgressPercentage;
+import jloda.util.progress.ProgressPercentage;
+import jloda.util.StringUtils;
 import malt.data.SeedShape;
 
 import java.io.IOException;
@@ -44,11 +45,11 @@ public class ProteinSequenceEncoder {
 
         byte[] sequence1 = "MKTKSSNNIKKIYYISSILVGIYLCWQIIIQIIFLMDNSIAILEAIGMVVFISVYSLAVAINGWILVGRMKKSSKKAQYE".getBytes();
 
-        System.err.println("set: " + Basic.toString(sequence1));
+		System.err.println("set: " + StringUtils.toString(sequence1));
         long[] encoded = encoder.encode(sequence1, sequence1.length, null);
 
         byte[] sequence2 = encoder.decode(encoded);
-        System.err.println("get: " + Basic.toString(sequence2));
+		System.err.println("get: " + StringUtils.toString(sequence2));
 
         System.err.println("SAME: " + Basic.equal(sequence1, sequence2));
 
@@ -83,20 +84,20 @@ public class ProteinSequenceEncoder {
         System.err.println("SeedShape: " + seedShape);
 
         for (int i = 0; i < 5; i++) {
-            System.err.print("Span at " + i + ": ");
-            long[] span = encoder.getSeedSpanCode(seedShape.getLength(), encoded, i, null);
-            System.err.print(Basic.toString(encoder.decode(span)));
-            System.err.println();
+			System.err.print("Span at " + i + ": ");
+			long[] span = encoder.getSeedSpanCode(seedShape.getLength(), encoded, i, null);
+			System.err.print(StringUtils.toString(encoder.decode(span)));
+			System.err.println();
 
-            long seedCode = encoder.getSeedCode(seedShape.getMask(), seedShape.getWeight(), encoded, i);
-            System.err.println("Full seed at " + i + ":    " + Basic.toString(encoder.decodeSeed(seedCode, seedShape.getWeight()))
-                    + "      " + Basic.toBinaryString(seedCode));
+			long seedCode = encoder.getSeedCode(seedShape.getMask(), seedShape.getWeight(), encoded, i);
+			System.err.println("Full seed at " + i + ":    " + StringUtils.toString(encoder.decodeSeed(seedCode, seedShape.getWeight()))
+							   + "      " + StringUtils.toBinaryString(seedCode));
 
-            long reducedSeedCode = reducedAlphabet.getSeedCode(seedShape.getMask(), seedShape.getWeight(), encoded, i);
-            System.err.println("Reduced seed at " + i + ": " +
-                    Basic.toString(reducedAlphabet.decodeSeed(reducedSeedCode, seedShape.getWeight()))
-                    + "      " + Basic.toBinaryString(reducedSeedCode));
-        }
+			long reducedSeedCode = reducedAlphabet.getSeedCode(seedShape.getMask(), seedShape.getWeight(), encoded, i);
+			System.err.println("Reduced seed at " + i + ": " +
+							   StringUtils.toString(reducedAlphabet.decodeSeed(reducedSeedCode, seedShape.getWeight()))
+							   + "      " + StringUtils.toBinaryString(reducedSeedCode));
+		}
 
         int limit = sequence1.length - seedShape.getLength();
         long[] seeds = new long[2 * limit];
@@ -108,7 +109,7 @@ public class ProteinSequenceEncoder {
         seeds = ProteinSequenceEncoder.radixSort2(seeds, seeds.length, 64 - reducedAlphabet.unusedBits, reducedAlphabet.bitsPerLetter, new ProgressPercentage("Sorting..."));
 
         for (int i = 0; i < seeds.length; i += 2) {
-            System.err.printf("i=%3d pos=%3d seed=%s%n", i, seeds[i + 1], Basic.toString(reducedAlphabet.decodeSeed(seeds[i], seedShape.getWeight())));
+			System.err.printf("i=%3d pos=%3d seed=%s%n", i, seeds[i + 1], StringUtils.toString(reducedAlphabet.decodeSeed(seeds[i], seedShape.getWeight())));
         }
     }
 

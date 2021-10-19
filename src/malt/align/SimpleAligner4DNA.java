@@ -20,10 +20,8 @@
 
 package malt.align;
 
-import jloda.util.Basic;
-import jloda.util.BlastMode;
-import jloda.util.BoyerMoore;
-import jloda.util.Single;
+import jloda.util.*;
+import jloda.seq.BlastMode;
 
 import java.util.Iterator;
 
@@ -117,7 +115,7 @@ public class SimpleAligner4DNA {
      * @return as string
      */
     public String getAlignmentString() {
-        return Basic.toString(bandedAligner.getAlignmentSimpleText());
+		return StringUtils.toString(bandedAligner.getAlignmentSimpleText());
     }
 
     /**

@@ -25,6 +25,7 @@ import jloda.swing.util.FastaFileFilter;
 import jloda.swing.util.ResourceManager;
 import jloda.util.*;
 import jloda.util.interval.Interval;
+import jloda.util.progress.ProgressPercentage;
 import malt.data.*;
 import malt.mapping.Mapping;
 import malt.util.Utilities;
@@ -117,8 +118,8 @@ public class MaltBuild {
         int maxHitsPerSeed = options.getOption("-mh", "maxHitsPerSeed", "Maximum number of hits per seed", 1000);
         final String proteinReduction;
         if (sequenceType == SequenceType.Protein || options.isDoHelp())
-            proteinReduction = options.getOption("-pr", "proteinReduct", "Name or definition of protein alphabet reduction ("
-                    + Basic.toString(malt.data.ReducedAlphabet.reductions.keySet(), ",") + ")", "DIAMOND_11");
+			proteinReduction = options.getOption("-pr", "proteinReduct", "Name or definition of protein alphabet reduction ("
+																		 + StringUtils.toString(malt.data.ReducedAlphabet.reductions.keySet(), ",") + ")", "DIAMOND_11");
         else
             proteinReduction = "";
 
@@ -173,33 +174,33 @@ public class MaltBuild {
             if (file.isDirectory()) {
                 System.err.println("Looking for FastA files in directory: " + file);
                 inputFiles.clear();
-                for (File aFile : BasicSwing.getAllFilesInDirectory(file, new FastaFileFilter(), true)) {
-                    inputFiles.add(aFile.getPath());
-                }
-                if (inputFiles.size() == 0)
-                    throw new IOException("No files found in directory: " + file);
-                else
-                    System.err.printf("Found: %,d%n", inputFiles.size());
-            }
-        }
+				for (File aFile : BasicSwing.getAllFilesInDirectory(file, new FastaFileFilter(), true)) {
+					inputFiles.add(aFile.getPath());
+				}
+				if (inputFiles.size() == 0)
+					throw new IOException("No files found in directory: " + file);
+				else
+					System.err.printf("Found: %,d%n", inputFiles.size());
+			}
+		}
 
-        if (Basic.notBlank(mapDBFile))
-            Basic.checkFileReadableNonEmpty(mapDBFile);
+		if (StringUtils.notBlank(mapDBFile))
+			FileUtils.checkFileReadableNonEmpty(mapDBFile);
 
-        for (var file : class2AccessionFile.values()) {
-            if (!file.isBlank())
-                Basic.checkFileReadableNonEmpty(file);
-        }
-        for (var file : class2SynonymsFile.values()) {
-            if (!file.isBlank())
-                Basic.checkFileReadableNonEmpty(file);
-        }
+		for (var file : class2AccessionFile.values()) {
+			if (!file.isBlank())
+				FileUtils.checkFileReadableNonEmpty(file);
+		}
+		for (var file : class2SynonymsFile.values()) {
+			if (!file.isBlank())
+				FileUtils.checkFileReadableNonEmpty(file);
+		}
 
         final Collection<String> mapDBClassifications = AccessAccessionMappingDatabase.getContainedClassificationsIfDBExists(mapDBFile)
                 .stream().filter(s -> dbSelectedClassifications.size() == 0 || dbSelectedClassifications.contains(s)).collect(Collectors.toList());
 
-        if (mapDBClassifications.size() > 0 && (Basic.hasPositiveLengthValue(class2AccessionFile) || Basic.hasPositiveLengthValue(class2SynonymsFile)))
-            throw new UsageException("Illegal to use both --mapDB and ---acc2... or --syn2... options");
+		if (mapDBClassifications.size() > 0 && (StringUtils.hasPositiveLengthValue(class2AccessionFile) || StringUtils.hasPositiveLengthValue(class2SynonymsFile)))
+			throw new UsageException("Illegal to use both --mapDB and ---acc2... or --syn2... options");
 
         if (mapDBClassifications.size() > 0)
             ClassificationManager.setMeganMapDBFile(mapDBFile);
@@ -210,15 +211,15 @@ public class MaltBuild {
             cNames.addAll(mapDBClassifications);
         } else {
             for (String cName : ClassificationManager.getAllSupportedClassificationsExcludingNCBITaxonomy()) {
-                if ((dbSelectedClassifications.size() == 0 || dbSelectedClassifications.contains(cName))
-                        && (Basic.notBlank(class2AccessionFile.get(cName)) || Basic.notBlank(class2SynonymsFile.get(cName))))
-                    cNames.add(cName);
+				if ((dbSelectedClassifications.size() == 0 || dbSelectedClassifications.contains(cName))
+					&& (StringUtils.notBlank(class2AccessionFile.get(cName)) || StringUtils.notBlank(class2SynonymsFile.get(cName))))
+					cNames.add(cName);
             }
             if (!cNames.contains(Classification.Taxonomy) && (acc2TaxaFile.length() > 0 || synonyms2TaxaFile.length() > 0))
                 cNames.add(Classification.Taxonomy);
         }
         if (cNames.size() > 0)
-            System.err.println("Classifications to use: " + Basic.toString(cNames, ", "));
+			System.err.println("Classifications to use: " + StringUtils.toString(cNames, ", "));
 
         AAdderBuild.setupGFFFiles(gffFiles, lookInside);
 
@@ -244,7 +245,7 @@ public class MaltBuild {
             default:
                 throw new UsageException("Undefined sequence type: " + sequenceType);
         }
-        System.err.println("Seed shape(s): " + Basic.toString(shapes, ", "));
+		System.err.println("Seed shape(s): " + StringUtils.toString(shapes, ", "));
 
         final File indexDirectory = new File(indexDirectoryName);
         if (doBuildTables) {
@@ -284,12 +285,12 @@ public class MaltBuild {
         }
 
         for (String cName : cNames) {
-            final String cNameLowerCase = cName.toLowerCase();
-            final String sourceName = (cName.equals(Classification.Taxonomy) ? "ncbi" : cNameLowerCase);
-            ClassificationManager.ensureTreeIsLoaded(cName);
-            Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".tre"), new File(indexDirectory, cNameLowerCase + ".tre"));
-            Basic.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".map"), new File(indexDirectory, cNameLowerCase + ".map"));
-        }
+			final String cNameLowerCase = cName.toLowerCase();
+			final String sourceName = (cName.equals(Classification.Taxonomy) ? "ncbi" : cNameLowerCase);
+			ClassificationManager.ensureTreeIsLoaded(cName);
+			FileUtils.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".tre"), new File(indexDirectory, cNameLowerCase + ".tre"));
+			FileUtils.writeStreamToFile(ResourceManager.getFileAsStream(sourceName + ".map"), new File(indexDirectory, cNameLowerCase + ".map"));
+		}
 
         if (mapDBFile.length() == 0) {
             for (String cName : cNames) {

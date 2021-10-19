@@ -19,8 +19,8 @@
  */
 package malt.align;
 
-import jloda.util.Basic;
 import jloda.util.Pair;
+import jloda.util.StringUtils;
 
 import java.io.IOException;
 
@@ -209,8 +209,8 @@ public class BlastStatisticsHelper {
                 }
             }
         }
-        System.err.println("Known combinations of BLOSUM matrices and gap penalties:");
-        System.err.println(Basic.toString(table, "\n"));
+		System.err.println("Known combinations of BLOSUM matrices and gap penalties:");
+		System.err.println(StringUtils.toString(table, "\n"));
         throw new IOException("Can't determine BLAST statistics for given combination of BLOSUM matrix and gap penalties");
     }
 }

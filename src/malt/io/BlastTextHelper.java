@@ -20,7 +20,7 @@
 package malt.io;
 
 
-import jloda.util.BlastMode;
+import jloda.seq.BlastMode;
 
 /**
  * some methods to help generate BLAST text output

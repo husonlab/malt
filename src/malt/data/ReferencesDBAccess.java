@@ -19,8 +19,8 @@
  */
 package malt.data;
 
-import jloda.util.Basic;
 import jloda.util.FileLineIterator;
+import jloda.util.StringUtils;
 import malt.MaltOptions;
 import megan.io.*;
 import megan.io.experimental.ByteFileGetterPagedMemory;
@@ -79,9 +79,9 @@ public class ReferencesDBAccess implements Closeable {
             while (it.hasNext()) {
                 String aLine = it.next();
                 if (aLine.startsWith("sequences")) {
-                    numberOfSequences = Integer.parseInt(Basic.getTokenFromTabSeparatedLine(aLine, 1));
+					numberOfSequences = Integer.parseInt(StringUtils.getTokenFromTabSeparatedLine(aLine, 1));
                 } else if (aLine.startsWith("letters")) {
-                    numberOfLetters = Long.parseLong(Basic.getTokenFromTabSeparatedLine(aLine, 1));
+					numberOfLetters = Long.parseLong(StringUtils.getTokenFromTabSeparatedLine(aLine, 1));
                 }
             }
         }

@@ -19,7 +19,7 @@
  */
 package malt.sequence;
 
-import jloda.util.Basic;
+import jloda.util.FileUtils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -48,16 +48,16 @@ public class FastAFileIteratorCode {
      * @throws java.io.FileNotFoundException
      */
     public FastAFileIteratorCode(final String fileName, final SequenceEncoder sequenceEncoder) throws IOException {
-        this.sequenceEncoder = sequenceEncoder;
-        inputStream = new BufferedInputStream(Basic.getInputStreamPossiblyZIPorGZIP(fileName), 8192);
-        maxProgress = Basic.guessUncompressedSizeOfFile(fileName);
+		this.sequenceEncoder = sequenceEncoder;
+		inputStream = new BufferedInputStream(FileUtils.getInputStreamPossiblyZIPorGZIP(fileName), 8192);
+		maxProgress = FileUtils.guessUncompressedSizeOfFile(fileName);
 
-        try {
-            int value = inputStream.read();
-            isFastQ = (value == '@');
-        } catch (IOException e) {
-        }
-    }
+		try {
+			int value = inputStream.read();
+			isFastQ = (value == '@');
+		} catch (IOException e) {
+		}
+	}
 
     /**
      * has next header or sequence

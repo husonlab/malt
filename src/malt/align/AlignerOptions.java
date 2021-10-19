@@ -19,7 +19,7 @@
  */
 package malt.align;
 
-import jloda.util.BlastMode;
+import jloda.seq.BlastMode;
 import jloda.util.Pair;
 
 /**

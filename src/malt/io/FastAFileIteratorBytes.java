@@ -20,6 +20,7 @@
 package malt.io;
 
 import jloda.util.Basic;
+import jloda.util.FileUtils;
 import jloda.util.ICloseableIterator;
 import malt.data.INormalizer;
 
@@ -52,16 +53,16 @@ public class FastAFileIteratorBytes implements Iterator<byte[]>, ICloseableItera
      * @throws FileNotFoundException
      */
     public FastAFileIteratorBytes(final String fileName, final INormalizer normalizer) throws IOException {
-        this.normalizer = normalizer;
-        inputStream = new BufferedInputStream(Basic.getInputStreamPossiblyZIPorGZIP(fileName), 8192);
-        maxProgress = Basic.guessUncompressedSizeOfFile(fileName);
+		this.normalizer = normalizer;
+		inputStream = new BufferedInputStream(FileUtils.getInputStreamPossiblyZIPorGZIP(fileName), 8192);
+		maxProgress = FileUtils.guessUncompressedSizeOfFile(fileName);
 
-        try {
-            int value = inputStream.read();
-            isFastQ = (value == '@');
-        } catch (IOException ignored) {
-        }
-    }
+		try {
+			int value = inputStream.read();
+			isFastQ = (value == '@');
+		} catch (IOException ignored) {
+		}
+	}
 
     /**
      * has next header or sequence

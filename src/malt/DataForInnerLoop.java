@@ -24,7 +24,7 @@ package malt;
  * Daniel Huson, 8.2014
  */
 
-import jloda.util.BlastMode;
+import jloda.seq.BlastMode;
 import malt.data.DNA5;
 import malt.data.Row;
 import malt.data.Translator;

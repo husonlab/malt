@@ -20,7 +20,8 @@
 package malt;
 
 import jloda.util.Basic;
-import jloda.util.BlastMode;
+import jloda.seq.BlastMode;
+import jloda.util.StringUtils;
 import malt.align.AlignerOptions;
 import malt.align.BandedAligner;
 import malt.data.*;
@@ -355,7 +356,7 @@ public class AlignmentEngine {
                                                         start = aligner.getStartReference();
                                                     }
                                                     int end = aligner.getEndReference();
-                                                    referenceHeader = geneTableAccess.annotateRefString(Basic.toString(referencesDB.getHeader(refIndex)), refIndex, start, end).getBytes();
+													referenceHeader = geneTableAccess.annotateRefString(StringUtils.toString(referencesDB.getHeader(refIndex)), refIndex, start, end).getBytes();
                                                     //System.err.println(Basic.toString(referenceHeader));
                                                 }
 

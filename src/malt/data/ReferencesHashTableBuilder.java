@@ -21,7 +21,7 @@ package malt.data;
 
 import jloda.thirdparty.MurmurHash3;
 import jloda.util.Basic;
-import jloda.util.ProgressPercentage;
+import jloda.util.progress.ProgressPercentage;
 import jloda.util.Single;
 import malt.util.Utilities;
 import megan.io.IntFilePutter;

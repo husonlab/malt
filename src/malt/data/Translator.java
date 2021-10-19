@@ -19,7 +19,7 @@
  */
 package malt.data;
 
-import jloda.util.SequenceUtils;
+import jloda.seq.SequenceUtils;
 
 /**
  * translate DNA sequences into protein sequences

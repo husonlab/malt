@@ -20,6 +20,8 @@
 package malt.io;
 
 import jloda.util.Basic;
+import jloda.util.FileUtils;
+import jloda.util.StringUtils;
 
 import java.io.*;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -67,8 +69,8 @@ public class FileWriterRanked {
             isFile = false;
             outs = System.out;
         } else {
-            isFile = true;
-            outs = Basic.getOutputStreamPossiblyZIPorGZIP(fileName);
+			isFile = true;
+			outs = FileUtils.getOutputStreamPossiblyZIPorGZIP(fileName);
         }
         writer = new BufferedWriter(new OutputStreamWriter(outs), 10 * 1024 * 1024); // ten megabyte buffer, not sure whether this makes a difference
 
@@ -255,7 +257,7 @@ class OutputItem {
         StringBuilder buf = new StringBuilder();
         buf.append("rank=").append(this.rank);
         if (strings != null) {
-            for (byte[] string : strings) buf.append(Basic.toString(string));
+			for (byte[] string : strings) buf.append(StringUtils.toString(string));
         }
         return buf.toString();
     }

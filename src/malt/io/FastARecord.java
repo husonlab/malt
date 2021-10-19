@@ -19,7 +19,7 @@
  */
 package malt.io;
 
-import jloda.util.Basic;
+import jloda.util.StringUtils;
 
 /**
  * A simple fastA record. Note that header and sequence are 0-terminated
@@ -80,7 +80,7 @@ public class FastARecord {
     }
 
     public String getHeaderString() {
-        return Basic.toString(header, headerLength);
+		return StringUtils.toString(header, headerLength);
     }
 
     /**
@@ -113,7 +113,7 @@ public class FastARecord {
     }
 
     public String getSequenceString() {
-        return Basic.toString(sequence, sequenceLength);
+		return StringUtils.toString(sequence, sequenceLength);
     }
 
     public byte[] getQualityValues() {
@@ -121,7 +121,7 @@ public class FastARecord {
     }
 
     public String getQualityValuesString() {
-        return Basic.toString(qualityValues, sequenceLength);
+		return StringUtils.toString(qualityValues, sequenceLength);
     }
 
     /**
@@ -130,7 +130,7 @@ public class FastARecord {
      * @return
      */
     public String toString() {
-        return (new StringBuilder()).append(Basic.toString(header, headerLength)).append("\n").append(Basic.toString(sequence, sequenceLength)).append("\n").toString();
+		return (new StringBuilder()).append(StringUtils.toString(header, headerLength)).append("\n").append(StringUtils.toString(sequence, sequenceLength)).append("\n").toString();
     }
 
     public boolean isWantQualityValues() {

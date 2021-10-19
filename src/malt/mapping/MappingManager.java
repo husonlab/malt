@@ -19,8 +19,8 @@
  */
 package malt.mapping;
 
-import jloda.util.Basic;
 import jloda.util.CanceledException;
+import jloda.util.FileUtils;
 import megan.classification.Classification;
 import megan.classification.ClassificationManager;
 
@@ -108,7 +108,7 @@ public class MappingManager {
             for (File file : files) {
                 String name = file.getName();
                 if (name.endsWith(".tre")) {
-                    name = Basic.replaceFileSuffix(name, "");
+					name = FileUtils.replaceFileSuffix(name, "");
                     for (String cName : ClassificationManager.getAllSupportedClassifications()) {
                         if (cName.equalsIgnoreCase(name))
                             cNames.add(cName);

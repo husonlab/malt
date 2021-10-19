@@ -20,10 +20,9 @@
 package malt.sequence;
 
 
-import jloda.util.Basic;
-import jloda.util.CanceledException;
-import jloda.util.ProgressListener;
-import jloda.util.ProgressPercentage;
+import jloda.util.*;
+import jloda.util.progress.ProgressListener;
+import jloda.util.progress.ProgressPercentage;
 import megan.io.OutputWriter;
 
 import java.io.DataInputStream;
@@ -217,9 +216,9 @@ public class SequenceStore {
 
         System.err.println("Got:");
         for (int i = 0; i < Math.min(5, sequenceStore.getNumberOfSequences()); i++) {
-            System.err.println(Basic.toString(sequenceStore.getHeader(i)));
-            System.err.println(Basic.toString(sequenceStore.getSequence(i)));
-        }
+			System.err.println(StringUtils.toString(sequenceStore.getHeader(i)));
+			System.err.println(StringUtils.toString(sequenceStore.getSequence(i)));
+		}
 
         String binFile = "/Users/huson/tmp/x.idx";
         sequenceStore.write(binFile);
@@ -228,8 +227,8 @@ public class SequenceStore {
         System.err.println("Read: " + sequenceStore.numberOfSequences);
         System.err.println("Got:");
         for (int i = 0; i < Math.min(5, sequenceStore.getNumberOfSequences()); i++) {
-            System.err.println(Basic.toString(sequenceStore.getHeader(i)));
-            System.err.println(Basic.toString(sequenceStore.getSequence(i)));
-        }
+			System.err.println(StringUtils.toString(sequenceStore.getHeader(i)));
+			System.err.println(StringUtils.toString(sequenceStore.getSequence(i)));
+		}
     }
 }

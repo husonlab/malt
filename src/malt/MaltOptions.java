@@ -19,7 +19,7 @@
  */
 package malt;
 
-import jloda.util.BlastMode;
+import jloda.seq.BlastMode;
 import malt.data.IAlphabet;
 
 /**

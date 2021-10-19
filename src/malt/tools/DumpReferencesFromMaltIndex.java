@@ -22,6 +22,7 @@ package malt.tools;
 
 import jloda.swing.util.ArgsOptions;
 import jloda.util.*;
+import jloda.util.progress.ProgressPercentage;
 import malt.MaltOptions;
 import malt.data.ReferencesDBAccess;
 
@@ -71,11 +72,11 @@ public class DumpReferencesFromMaltIndex {
         int count = 0;
         try (BufferedWriter w = new BufferedWriter(new FileWriter(outputFile)); ProgressPercentage progress = new ProgressPercentage("Writing file: " + outputFile, referencesDB.getNumberOfSequences())) {
             for (int i = 0; i < referencesDB.getNumberOfSequences(); i++) {
-                w.write(Basic.toString(referencesDB.getHeader(i)) + "\n");
-                if (!headersOnly) w.write(Basic.toString(referencesDB.getSequence(i)) + "\n");
-                progress.incrementProgress();
-                count++;
-            }
+				w.write(StringUtils.toString(referencesDB.getHeader(i)) + "\n");
+				if (!headersOnly) w.write(StringUtils.toString(referencesDB.getSequence(i)) + "\n");
+				progress.incrementProgress();
+				count++;
+			}
         }
         System.err.printf("Lines: %,d%n", count);
     }

@@ -19,7 +19,7 @@
  */
 package malt.data;
 
-import jloda.util.Basic;
+import jloda.util.StringUtils;
 
 import java.util.Comparator;
 
@@ -130,7 +130,7 @@ class ReadMatch {
     }
 
     public String toString() {
-        return "RefId=" + referenceId + " bitScore=" + bitScore + " start=" + startRef + " end=" + endRef + " text=" + (text == null ? "null" : Basic.toString(text));
+		return "RefId=" + referenceId + " bitScore=" + bitScore + " start=" + startRef + " end=" + endRef + " text=" + (text == null ? "null" : StringUtils.toString(text));
     }
 
     /**

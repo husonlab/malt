@@ -19,8 +19,8 @@
  */
 package malt.util;
 
-import jloda.util.Basic;
-import jloda.util.BlastMode;
+import jloda.seq.BlastMode;
+import jloda.util.FileUtils;
 import jloda.util.UsageException;
 import malt.data.ReadMatch;
 import malt.data.Row;
@@ -399,7 +399,7 @@ public class Utilities {
             file = new File(directory, name + ".gz");
             if (file.exists())
                 return file;
-            file = new File(directory, Basic.replaceFileSuffix(name, ".gz"));
+			file = new File(directory, FileUtils.replaceFileSuffix(name, ".gz"));
             if (file.exists())
                 return file;
         }

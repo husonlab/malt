@@ -22,6 +22,8 @@ package malt;
 import jloda.swing.util.ArgsOptions;
 import jloda.swing.util.ResourceManager;
 import jloda.util.*;
+import jloda.seq.BlastMode;
+import jloda.util.progress.ProgressPercentage;
 import malt.align.AlignerOptions;
 import malt.align.BlastStatisticsHelper;
 import malt.align.DNAScoringMatrix;
@@ -215,7 +217,7 @@ public class MaltRun {
         options.done();
         Basic.setDebugMode(options.isVerbose());
 
-        maltOptions.setCommandLine(Basic.toString(args, " "));
+		maltOptions.setCommandLine(StringUtils.toString(args, " "));
 
         // END OF OPTIONS
 
@@ -274,20 +276,20 @@ public class MaltRun {
         {
             var fileNumber = 0;
             for (var inFile : inputFileNames) {
-                if (Basic.fileExistsAndIsNonEmpty(inFile)) {
-                    var rmaOutputFile = getOutputFileName(fileNumber, inputFileNames, outputRMAFileNames, ".rma6", false);
-                    if (Basic.notBlank(rmaOutputFile))
-                        Basic.checkFileWritable(rmaOutputFile, true);
-                    var matchesOutputFile = getOutputFileName(fileNumber, inputFileNames, outputMatchesFileNames, maltOptions.getMatchesOutputSuffix(), maltOptions.isGzipMatches());
-                    if (Basic.notBlank(matchesOutputFile))
-                        Basic.checkFileWritable(matchesOutputFile, true);
-                    var alignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputAlignedFileNames, "-aligned.fna", maltOptions.isGzipAlignedReads());
-                    if (Basic.notBlank(alignedReadsOutputFile))
-                        Basic.checkFileWritable(alignedReadsOutputFile, true);
-                   var unalignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputUnAlignedFileNames, "-unaligned.fna", maltOptions.isGzipUnalignedReads());
-                    if (Basic.notBlank(unalignedReadsOutputFile))
-                        Basic.checkFileWritable(unalignedReadsOutputFile, true);
-                }
+				if (FileUtils.fileExistsAndIsNonEmpty(inFile)) {
+					var rmaOutputFile = getOutputFileName(fileNumber, inputFileNames, outputRMAFileNames, ".rma6", false);
+					if (StringUtils.notBlank(rmaOutputFile))
+						FileUtils.checkFileWritable(rmaOutputFile, true);
+					var matchesOutputFile = getOutputFileName(fileNumber, inputFileNames, outputMatchesFileNames, maltOptions.getMatchesOutputSuffix(), maltOptions.isGzipMatches());
+					if (StringUtils.notBlank(matchesOutputFile))
+						FileUtils.checkFileWritable(matchesOutputFile, true);
+					var alignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputAlignedFileNames, "-aligned.fna", maltOptions.isGzipAlignedReads());
+					if (StringUtils.notBlank(alignedReadsOutputFile))
+						FileUtils.checkFileWritable(alignedReadsOutputFile, true);
+					var unalignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputUnAlignedFileNames, "-unaligned.fna", maltOptions.isGzipUnalignedReads());
+					if (StringUtils.notBlank(unalignedReadsOutputFile))
+						FileUtils.checkFileWritable(unalignedReadsOutputFile, true);
+				}
             }
         }
 
@@ -335,16 +337,16 @@ public class MaltRun {
             int fileNumber = 0;
             for (var inFile : inputFileNames) {
                 try {
-                    if (Basic.fileExistsAndIsNonEmpty(inFile)) {
-                        var rmaOutputFile = getOutputFileName(fileNumber, inputFileNames, outputRMAFileNames, ".rma6", false);
-                        var matchesOutputFile = getOutputFileName(fileNumber, inputFileNames, outputMatchesFileNames, maltOptions.getMatchesOutputSuffix(), maltOptions.isGzipMatches());
-                        var alignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputAlignedFileNames, "-aligned.fna", maltOptions.isGzipAlignedReads());
-                        var unalignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputUnAlignedFileNames, "-unaligned.fna", maltOptions.isGzipUnalignedReads());
-                        launchAlignmentThreads(alignerOptions, maltOptions, inFile, rmaOutputFile, matchesOutputFile,
-                                alignedReadsOutputFile, unalignedReadsOutputFile, referencesDB, hashTables, geneTableAccess);
-                    } else {
-                        System.err.println("File not found: '" + inFile + "', skipped");
-                    }
+					if (FileUtils.fileExistsAndIsNonEmpty(inFile)) {
+						var rmaOutputFile = getOutputFileName(fileNumber, inputFileNames, outputRMAFileNames, ".rma6", false);
+						var matchesOutputFile = getOutputFileName(fileNumber, inputFileNames, outputMatchesFileNames, maltOptions.getMatchesOutputSuffix(), maltOptions.isGzipMatches());
+						var alignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputAlignedFileNames, "-aligned.fna", maltOptions.isGzipAlignedReads());
+						var unalignedReadsOutputFile = getOutputFileName(fileNumber, inputFileNames, outputUnAlignedFileNames, "-unaligned.fna", maltOptions.isGzipUnalignedReads());
+						launchAlignmentThreads(alignerOptions, maltOptions, inFile, rmaOutputFile, matchesOutputFile,
+								alignedReadsOutputFile, unalignedReadsOutputFile, referencesDB, hashTables, geneTableAccess);
+					} else {
+						System.err.println("File not found: '" + inFile + "', skipped");
+					}
                 } catch (IOException ex) {
                     System.err.println("Exception for file: '" + inFile + "', skipped (" + ex + ")");
 
@@ -384,8 +386,8 @@ public class MaltRun {
         final String matchesOutputFileUsed;
         final boolean usingTemporarySAMOutputFile;
         if (matchesOutputFile != null && maltOptions.getMatchOutputFormat() == MaltOptions.MatchOutputFormat.SAM && !maltOptions.isSparseSAM()) {
-            matchesOutputFileUsed = Basic.getTemporaryFileName(matchesOutputFile);
-            usingTemporarySAMOutputFile = true;
+			matchesOutputFileUsed = FileUtils.getTemporaryFileName(matchesOutputFile);
+			usingTemporarySAMOutputFile = true;
         } else {
             matchesOutputFileUsed = matchesOutputFile;
             usingTemporarySAMOutputFile = false;
@@ -456,7 +458,7 @@ public class MaltRun {
 
         // if using temporary file, prepend @SQ lines, if requested, and sort by query name, if requested
         if (usingTemporarySAMOutputFile) {
-            var w = new BufferedWriter(new OutputStreamWriter(Basic.getOutputStreamPossiblyZIPorGZIP(matchesOutputFile)));
+			var w = new BufferedWriter(new OutputStreamWriter(FileUtils.getOutputStreamPossiblyZIPorGZIP(matchesOutputFile)));
             w.write(SAMHelper.getSAMHeader(maltOptions.getMode(), maltOptions.getCommandLine()));
 
             // prepend SQ lines
@@ -469,8 +471,8 @@ public class MaltRun {
                 if (allIds.cardinality() > 0) {
                     var progress = new ProgressPercentage("Prepending @SQ lines to SAM file: " + matchesOutputFile, allIds.size());
                     for (var r = allIds.nextSetBit(0); r != -1; r = allIds.nextSetBit(r + 1)) {
-                        w.write("@SQ\tSN:" + (Basic.toString(Utilities.getFirstWordSkipLeadingGreaterSign(referencesDB.getHeader(r)))) + "\tLN:" + referencesDB.getSequenceLength(r));
-                        w.write('\n');
+						w.write("@SQ\tSN:" + (StringUtils.toString(Utilities.getFirstWordSkipLeadingGreaterSign(referencesDB.getHeader(r)))) + "\tLN:" + referencesDB.getSequenceLength(r));
+						w.write('\n');
                         progress.incrementProgress();
                     }
                     progress.close();
@@ -527,28 +529,28 @@ public class MaltRun {
         if (outFiles.size() == 0)
             fileName = null;
         else if (outFiles.size() == 1) {
-            if (outFiles.get(0).equalsIgnoreCase("stdout")) {
-                fileName = "stdout";
-            } else if (inFiles.size() == 1 && !Basic.isDirectory(outFiles.get(0))) {
-                var outfileName = outFiles.get(0);
-                if (gzip && !outfileName.endsWith(".gz"))
-                    fileName = outfileName + ".gz";
-                else
-                    fileName = outfileName;
-            } else {
-                if (!Basic.isDirectory(outFiles.get(0)))
-                    throw new IOException("Specified output location does not exist or is not a directory: " + outFiles.get(0));
-                var infile = new File(inFiles.get(fileNumber));
-                var  nameRoot = Basic.getFileNameWithoutPath(inFiles.get(fileNumber)).replaceAll(".gz$","");
-                var outfileName = Basic.replaceFileSuffix(nameRoot, suffix);
-                var outfile = new File(outFiles.get(0), outfileName);
-                if (infile.equals(outfile))
-                    throw new IOException("Output file equals input file: " + infile);
-                if (gzip && !outfile.toString().endsWith(".gz"))
-                    fileName = outfile.getPath()+ ".gz";
-                else
-                    fileName = outfile.getPath();
-            }
+			if (outFiles.get(0).equalsIgnoreCase("stdout")) {
+				fileName = "stdout";
+			} else if (inFiles.size() == 1 && !FileUtils.isDirectory(outFiles.get(0))) {
+				var outfileName = outFiles.get(0);
+				if (gzip && !outfileName.endsWith(".gz"))
+					fileName = outfileName + ".gz";
+				else
+					fileName = outfileName;
+			} else {
+				if (!FileUtils.isDirectory(outFiles.get(0)))
+					throw new IOException("Specified output location does not exist or is not a directory: " + outFiles.get(0));
+				var infile = new File(inFiles.get(fileNumber));
+				var nameRoot = FileUtils.getFileNameWithoutPath(inFiles.get(fileNumber)).replaceAll(".gz$", "");
+				var outfileName = FileUtils.replaceFileSuffix(nameRoot, suffix);
+				var outfile = new File(outFiles.get(0), outfileName);
+				if (infile.equals(outfile))
+					throw new IOException("Output file equals input file: " + infile);
+				if (gzip && !outfile.toString().endsWith(".gz"))
+					fileName = outfile.getPath() + ".gz";
+				else
+					fileName = outfile.getPath();
+			}
         } else {
             if (inFiles.size() != outFiles.size())
                 throw new IOException("Number of output files=" + outFiles.size() + " must equal 1 or number of input files (" + inFiles.size() + ")");
@@ -558,7 +560,7 @@ public class MaltRun {
                 fileName = outFiles.get(fileNumber);
         }
         if (fileName != null && !fileName.equalsIgnoreCase("stdout")) {
-            Basic.checkFileWritable(fileName, true);
+			FileUtils.checkFileWritable(fileName, true);
         }
         return fileName;
     }

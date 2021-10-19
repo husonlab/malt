@@ -19,7 +19,7 @@
  */
 package malt;
 
-import jloda.util.Basic;
+import jloda.util.StringUtils;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -35,7 +35,7 @@ public class TestIO {
 
     public static void main(String[] args) throws IOException {
 
-        String choice = (args.length == 0 ? "wfrf wnrn" : Basic.toString(args, " "));
+		String choice = (args.length == 0 ? "wfrf wnrn" : StringUtils.toString(args, " "));
 
         // create a test buffer
         int[][] arrays = createArrays();

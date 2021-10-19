@@ -21,7 +21,8 @@ package malt.data;
 
 import jloda.thirdparty.MurmurHash3;
 import jloda.util.Basic;
-import jloda.util.ProgressPercentage;
+import jloda.util.progress.ProgressPercentage;
+import jloda.util.StringUtils;
 import malt.MaltOptions;
 import malt.util.Utilities;
 import megan.io.*;
@@ -72,8 +73,8 @@ public class ReferencesHashTableAccess implements Closeable {
                 byte[] reductionBytes = new byte[length];
                 if (ins.read(reductionBytes, 0, length) != length)
                     throw new IOException("Read failed");
-                seedAlphabet = new ReducedAlphabet(Basic.toString(reductionBytes));
-                System.err.println("Protein reduction: " + seedAlphabet);
+				seedAlphabet = new ReducedAlphabet(StringUtils.toString(reductionBytes));
+				System.err.println("Protein reduction: " + seedAlphabet);
             } else
                 seedAlphabet = DNA5.getInstance();
 

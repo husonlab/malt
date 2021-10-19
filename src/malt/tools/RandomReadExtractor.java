@@ -22,6 +22,9 @@ package malt.tools;
 
 import jloda.swing.util.ArgsOptions;
 import jloda.util.*;
+import jloda.seq.FastA;
+import jloda.seq.SequenceUtils;
+import jloda.util.progress.ProgressPercentage;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -74,10 +77,10 @@ public class RandomReadExtractor {
         int count = 0;
 
         final FastA fastA = new FastA();
-        try (Reader r = new InputStreamReader(Basic.getInputStreamPossiblyZIPorGZIP(inputFile))) {
-            fastA.read(r);
-            System.err.printf("Sequence '%s' length: %,d%n", Basic.getFirstWord(fastA.getHeader(0)), fastA.getSequence(0).length());
-        }
+		try (Reader r = new InputStreamReader(FileUtils.getInputStreamPossiblyZIPorGZIP(inputFile))) {
+			fastA.read(r);
+			System.err.printf("Sequence '%s' length: %,d%n", StringUtils.getFirstWord(fastA.getHeader(0)), fastA.getSequence(0).length());
+		}
         final String genome = fastA.getSequence(0);
 
         final ArrayList<Integer> starts = new ArrayList<>();
