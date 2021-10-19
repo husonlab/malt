@@ -20,10 +20,10 @@
 
 package malt.tools;
 
-import jloda.swing.util.ArgsOptions;
-import jloda.util.*;
 import jloda.seq.FastA;
 import jloda.seq.SequenceUtils;
+import jloda.swing.util.ArgsOptions;
+import jloda.util.*;
 import jloda.util.progress.ProgressPercentage;
 
 import java.io.*;
@@ -88,8 +88,8 @@ public class RandomReadExtractor {
             try (FileLineIterator it = new FileLineIterator(startsFile, true)) {
                 while (it.hasNext()) {
                     String aLine = it.next();
-                    if (Basic.isInteger(aLine))
-                        starts.add(Basic.parseInt(aLine)); // either start or -start to indicate reverse complement
+                    if (NumberUtils.isInteger(aLine))
+                        starts.add(NumberUtils.parseInt(aLine)); // either start or -start to indicate reverse complement
                 }
             }
         } else {

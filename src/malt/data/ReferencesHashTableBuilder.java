@@ -21,8 +21,9 @@ package malt.data;
 
 import jloda.thirdparty.MurmurHash3;
 import jloda.util.Basic;
-import jloda.util.progress.ProgressPercentage;
+import jloda.util.CollectionUtils;
 import jloda.util.Single;
+import jloda.util.progress.ProgressPercentage;
 import malt.util.Utilities;
 import megan.io.IntFilePutter;
 import megan.io.OutputWriter;
@@ -212,10 +213,10 @@ public class ReferencesHashTableBuilder {
                     Basic.caught(e);
                     break;
                 }
-                progressPercentage.setProgress(Basic.getSum(countsForProgress));
+                progressPercentage.setProgress(CollectionUtils.getSum(countsForProgress));
             }
             progressPercentage.close();
-            System.err.printf("Number of low-complexity seeds skipped: %,d%n", Basic.getSum(countLowComplexitySeeds));
+            System.err.printf("Number of low-complexity seeds skipped: %,d%n", CollectionUtils.getSum(countLowComplexitySeeds));
         } finally {
             executor.shutdown();
         }
@@ -287,12 +288,12 @@ public class ReferencesHashTableBuilder {
                     Basic.caught(e);
                     break;
                 }
-                progressPercentage.setProgress(Basic.getSum(countsForProgress));
+                progressPercentage.setProgress(CollectionUtils.getSum(countsForProgress));
             }
             progressPercentage.reportTaskCompleted();
-            System.err.printf("Total keys used:    %,14d%n", Basic.getSum(totalKeys));
-            System.err.printf("Total seeds matched:%,14d%n", Basic.getSum(totalSeeds));
-            System.err.printf("Total seeds dropped:%,14d%n", Basic.getSum(totalDropped));
+            System.err.printf("Total keys used:    %,14d%n", CollectionUtils.getSum(totalKeys));
+            System.err.printf("Total seeds matched:%,14d%n", CollectionUtils.getSum(totalSeeds));
+            System.err.printf("Total seeds dropped:%,14d%n", CollectionUtils.getSum(totalDropped));
         } finally {
             executor.shutdownNow();
         }
@@ -363,14 +364,14 @@ public class ReferencesHashTableBuilder {
                     Basic.caught(e);
                     break;
                 }
-                progressPercentage.setProgress(Basic.getSum(countsForProgress));
+                progressPercentage.setProgress(CollectionUtils.getSum(countsForProgress));
             }
             progressPercentage.reportTaskCompleted();
         } finally {
             executor.shutdownNow();
         }
 
-        theSize = Basic.getSum(counts);
+        theSize = CollectionUtils.getSum(counts);
     }
 
     /**
@@ -421,7 +422,7 @@ public class ReferencesHashTableBuilder {
                     Basic.caught(e);
                     break;
                 }
-                progressPercentage.setProgress(Basic.getSum(countsForProgress));
+                progressPercentage.setProgress(CollectionUtils.getSum(countsForProgress));
             }
             progressPercentage.reportTaskCompleted();
         } finally {

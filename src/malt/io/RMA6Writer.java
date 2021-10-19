@@ -19,7 +19,10 @@
  */
 package malt.io;
 
-import jloda.util.*;
+import jloda.util.CanceledException;
+import jloda.util.FileUtils;
+import jloda.util.NumberUtils;
+import jloda.util.StringUtils;
 import jloda.util.progress.ProgressPercentage;
 import malt.MaltOptions;
 import malt.Version;
@@ -170,8 +173,8 @@ public class RMA6Writer {
     private int parseIdInHeader(String key, String word) {
         int pos = word.indexOf(key);
         if (pos != -1) {
-            if (Basic.isInteger(word.substring(pos + key.length())))
-                return Basic.parseInt(word.substring(pos + key.length()));
+            if (NumberUtils.isInteger(word.substring(pos + key.length())))
+                return NumberUtils.parseInt(word.substring(pos + key.length()));
         }
         return 0;
     }
