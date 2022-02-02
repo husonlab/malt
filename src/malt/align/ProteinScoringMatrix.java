@@ -190,8 +190,6 @@ public class ProteinScoringMatrix implements IScoringMatrix {
     /**
      * get the score for two letters
      *
-     * @param a
-     * @param b
      * @return score, or -20, if matrix not defined for (a,b)
      */
     public int getScore(byte a, byte b) {
@@ -201,10 +199,8 @@ public class ProteinScoringMatrix implements IScoringMatrix {
     /**
      * creates a scoring matrix
      *
-     * @param name
      * @return protein scoring matrix
-     * @throws IOException
-     */
+	 */
     public static ProteinScoringMatrix create(String name) throws IOException {
         return create(ScoringScheme.valueOf(name));
     }
@@ -212,10 +208,8 @@ public class ProteinScoringMatrix implements IScoringMatrix {
     /**
      * creates a scoring matrix
      *
-     * @param which
      * @return protein scoring matrix
-     * @throws IOException
-     */
+	 */
     public static ProteinScoringMatrix create(ScoringScheme which) throws IOException {
         switch (which) {
             case BLOSUM90:
@@ -321,9 +315,7 @@ public class ProteinScoringMatrix implements IScoringMatrix {
     /**
      * load a matrix
      *
-     * @param r0
-     * @throws java.io.IOException
-     */
+	 */
     public void load(Reader r0) throws IOException {
         BufferedReader r = new BufferedReader(r0);
 

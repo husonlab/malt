@@ -45,9 +45,7 @@ public class SequenceStore {
     /**
      * constructor
      *
-     * @param sequenceEncoder
-     * @param size
-     */
+	 */
     public SequenceStore(final SequenceEncoder sequenceEncoder, final int size) {
         this.sequenceEncoder = sequenceEncoder;
         headers = new byte[size][];
@@ -57,8 +55,6 @@ public class SequenceStore {
     /**
      * read sequences from a fastA or fastQ file
      *
-     * @param it
-     * @param numberToRead
      * @return number of sequences read
      */
     public int readFromFastA(FastAFileIteratorCode it, int numberToRead, ProgressListener progress) throws CanceledException {
@@ -82,8 +78,7 @@ public class SequenceStore {
     /**
      * write to a file in binary format
      *
-     * @param fileName
-     */
+	 */
     public void write(final String fileName) throws IOException {
         try (OutputWriter outs = new OutputWriter(new File(fileName)); ProgressPercentage progress = new ProgressPercentage("Writing file: " + fileName, numberOfSequences)) {
             outs.writeInt(numberOfSequences);
@@ -107,10 +102,8 @@ public class SequenceStore {
     /**
      * read a file in binary format
      *
-     * @param fileName
      * @return number of sequences read
-     * @throws IOException
-     */
+	 */
     public int read(final String fileName) throws IOException {
         DataInputStream ins = new DataInputStream(new FileInputStream(fileName));
         numberOfSequences = ins.readInt();
@@ -141,8 +134,7 @@ public class SequenceStore {
     /**
      * get the number of sequences
      *
-     * @return
-     */
+	 */
     public int getNumberOfSequences() {
         return numberOfSequences;
     }
@@ -150,7 +142,6 @@ public class SequenceStore {
     /**
      * gets the i-th header
      *
-     * @param i
      * @return header
      */
     public byte[] getHeader(int i) {
@@ -160,7 +151,6 @@ public class SequenceStore {
     /**
      * gets the i-th sequence
      *
-     * @param i
      * @return sequence
      */
     public byte[] getSequence(int i) {
@@ -170,7 +160,6 @@ public class SequenceStore {
     /**
      * gets the i-th sequence code
      *
-     * @param i
      * @return sequence code
      */
     public long[] getSequenceCode(int i) {
@@ -180,8 +169,7 @@ public class SequenceStore {
     /**
      * gets the sequence encoder
      *
-     * @return
-     */
+	 */
     public SequenceEncoder getSequenceEncoder() {
         return sequenceEncoder;
     }

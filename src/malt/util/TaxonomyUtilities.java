@@ -35,7 +35,6 @@ public class TaxonomyUtilities {
     /**
      * get the species for the taxon
      *
-     * @param taxonId
      * @return species
      */
 
@@ -58,7 +57,6 @@ public class TaxonomyUtilities {
     /**
      * get the genus
      *
-     * @param taxonId
      * @return genus
      */
     public static String getContainingGenus(Integer taxonId) {
@@ -80,9 +78,7 @@ public class TaxonomyUtilities {
     /**
      * gets the strain
      *
-     * @param taxonId
-     * @return
-     */
+	 */
     public static String getStrain(int taxonId) {
         final Classification classification = ClassificationManager.get(Classification.Taxonomy, false);
         final int speciesId = TaxonomicLevels.getSpeciesId();
@@ -108,9 +104,7 @@ public class TaxonomyUtilities {
     /**
      * gets the taxonomic path to the named taxon
      *
-     * @param taxonId
-     * @return
-     */
+	 */
     public static String getPath(int taxonId) {
         final Classification classification = ClassificationManager.get(Classification.Taxonomy, false);
         final int genus = TaxonomicLevels.getGenusId();

@@ -103,8 +103,7 @@ public class MaltOptions {
     /**
      * set seed shift step
      *
-     * @param shift
-     */
+	 */
     public void setShift(int shift) {
         this.shift = shift;
     }
@@ -121,8 +120,7 @@ public class MaltOptions {
     /**
      * set number of worker threads
      *
-     * @param numberOfThreads
-     */
+	 */
     public void setNumberOfThreads(int numberOfThreads) {
         this.numberOfThreads = numberOfThreads;
     }

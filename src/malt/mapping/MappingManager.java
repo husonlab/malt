@@ -39,11 +39,7 @@ public class MappingManager {
     /**
      * load all mappings
      *
-     * @param cNames
-     * @param indexDirectory
-     * @throws IOException
-     * @throws CanceledException
-     */
+	 */
     public static void loadMappings(String[] cNames, String indexDirectory) throws IOException, CanceledException {
         MappingManager.cNames = cNames;
         mappings = new Mapping[cNames.length];
@@ -74,7 +70,6 @@ public class MappingManager {
     /**
      * gets the appopriate mapping for the given fID
      *
-     * @param fID
      * @return mapping
      */
     public static Mapping getMapping(int fID) {
@@ -96,7 +91,6 @@ public class MappingManager {
     /**
      * determine all available classifications
      *
-     * @param indexDirectory
      * @return list of available classifications
      */
     public static String[] determineAvailableMappings(String indexDirectory) {

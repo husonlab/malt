@@ -18,11 +18,6 @@
  */
 package malt;
 
-/**
- * this contains all query specific data that is passed to the inner loop of the algorithm
- * Daniel Huson, 8.2014
- */
-
 import jloda.seq.BlastMode;
 import malt.data.DNA5;
 import malt.data.Row;
@@ -55,10 +50,7 @@ public class DataForInnerLoop {
     /**
      * constructor
      *
-     * @param mode
-     * @param maxNumberOfFrames
-     * @param numberOfTables
-     */
+	 */
     public DataForInnerLoop(BlastMode mode, boolean doForward, boolean doReverse, int maxNumberOfFrames, int numberOfTables) {
         this.mode = mode;
         this.doForward = doForward;
@@ -116,10 +108,7 @@ public class DataForInnerLoop {
      * For BlastP there are no frames, for BlastN there can be up to two frames, +1 and -1,
      * for BlastX the max number is 6
      *
-     * @param query
-     * @param queryLength
-     * @throws java.io.IOException
-     */
+	 */
     public void computeFrames(byte[] query, byte[] queryQualityValues, int queryLength) throws IOException {
         this.queryLength = queryLength;
 

@@ -43,9 +43,7 @@ public class SeedShape {
     /**
      * constructor
      *
-     * @param shape
-     * @throws IOException
-     */
+	 */
     public SeedShape(IAlphabet alphabet, String shape) throws IOException {
         this(alphabet, shape.getBytes());
     }
@@ -53,9 +51,7 @@ public class SeedShape {
     /**
      * constructor
      *
-     * @param shapeBytes
-     * @throws IOException
-     */
+	 */
     public SeedShape(IAlphabet alphabet, byte[] shapeBytes) throws IOException {
         this.alphabet = alphabet;
         StringBuilder buf = new StringBuilder();
@@ -92,8 +88,6 @@ public class SeedShape {
     /**
      * gets a spaced seed from the given sequence starting at the given offset
      *
-     * @param sequence
-     * @param offset
      * @param result   if non-null, is used for result
      * @return spaced seed
      */
@@ -112,10 +106,6 @@ public class SeedShape {
     /**
      * are query and reference equalOverShorterOfBoth sequences at given offset for the given seed shape?
      *
-     * @param query
-     * @param qOffset
-     * @param reference
-     * @param rOffset
      * @return true if equalOverShorterOfBoth for seed shape
      */
     public boolean equalSequences(byte[] query, int qOffset, byte[] reference, int rOffset) {
@@ -187,12 +177,10 @@ public class SeedShape {
     /**
      * gets the expected number of seeds
      *
-     * @param numberOfSequences
-     * @param numberOfLetters
      * @return expected number of seeds
      */
     public long getEstimatedSeedCount(int numberOfSequences, long numberOfLetters, int numberOfJobs) {
-        return Math.max(1, numberOfLetters - numberOfSequences * (weight - 1)) / numberOfJobs;
+		return Math.max(1, numberOfLetters - (long) numberOfSequences * (weight - 1)) / numberOfJobs;
     }
 
     public void setId(int id) {

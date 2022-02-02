@@ -68,10 +68,7 @@ public class RMA6Writer {
     /**
      * constructor
      *
-     * @param maltOptions
-     * @param rma6File
-     * @throws IOException
-     */
+	 */
     public RMA6Writer(final MaltOptions maltOptions, String rma6File) throws IOException {
         System.err.println("Starting file: " + rma6File);
         this.maltOptions = maltOptions;
@@ -100,11 +97,7 @@ public class RMA6Writer {
      * process the matches associated with a given query.
      * This is used in malt1
      *
-     * @param queryHeader
-     * @param matchesArray
-     * @param numberOfMatches
-     * @throws IOException
-     */
+	 */
     public synchronized void processMatches(String queryHeader, String querySequence, ReadMatch[] matchesArray, int numberOfMatches) throws IOException {
         // setup query text:
 		byte[] queryName = StringUtils.swallowLeadingGreaterSign(StringUtils.getFirstWord(queryHeader)).getBytes();
@@ -181,9 +174,7 @@ public class RMA6Writer {
     /**
      * finish generation of RMA6 file
      *
-     * @throws IOException
-     * @throws CanceledException
-     */
+	 */
     public void close(String contaminantsFile) throws IOException {
         try {
             System.err.println("Finishing file: " + rma6File);
@@ -257,7 +248,6 @@ public class RMA6Writer {
     /**
      * get key
      *
-     * @param fName
      * @return key
      */
     private static String getKey(String fName) {
@@ -274,8 +264,6 @@ public class RMA6Writer {
     /**
      * get a word as string
      *
-     * @param text
-     * @param whichWord
      * @return string or null
      */
     private static String getWordAsString(byte[] text, int whichWord) {

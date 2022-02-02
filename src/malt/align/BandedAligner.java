@@ -114,8 +114,7 @@ public class BandedAligner {
     /**
      * constructor
      *
-     * @param alignerOptions
-     */
+	 */
     public BandedAligner(final AlignerOptions alignerOptions, final BlastMode mode) {
         this.scoringMatrix = alignerOptions.getScoringMatrix().getMatrix();
         this.isDNAAlignment = (mode == BlastMode.BlastN);
@@ -150,13 +149,7 @@ public class BandedAligner {
      * Computes a banded local or semiGlobal alignment.
      * The raw score is computed.
      *
-     * @param query
-     * @param queryLength
-     * @param reference
-     * @param referenceLength
-     * @param queryPos
-     * @param refPos
-     */
+	 */
     public void computeAlignment(byte[] query, int queryLength, byte[] reference, int referenceLength, int queryPos, int refPos, int seedLength) {
         this.query = query;
         this.queryLength = queryLength;
@@ -741,8 +734,7 @@ public class BandedAligner {
     /**
      * gets the alignment. Also sets the number of matches, mismatches and gaps
      *
-     * @return alignment
-     */
+	 */
     public void computeAlignmentByTraceBack() {
         if (rawScore <= 0) {
             alignment = null;
@@ -1112,9 +1104,7 @@ public class BandedAligner {
     /**
      * reverse bytes
      *
-     * @param array
-     * @return reversed bytes
-     */
+	 */
     private void reverseInPlace(byte[] array, int length) {
         int top = length / 2;
         for (int i = 0; i < top; i++) {
@@ -1128,7 +1118,6 @@ public class BandedAligner {
     /**
      * grow an array
      *
-     * @param a
      * @return larger array containing values
      */
     private byte[] grow(byte[] a) {
@@ -1140,8 +1129,6 @@ public class BandedAligner {
     /**
      * return a copy
      *
-     * @param array
-     * @param length
      * @return copy
      */
     public byte[] copy(byte[] array, int length) {
@@ -1153,8 +1140,6 @@ public class BandedAligner {
     /**
      * return a reverse copy
      *
-     * @param array
-     * @param length
      * @return copy
      */
     public byte[] copyReverse(byte[] array, int length) {
@@ -1167,9 +1152,7 @@ public class BandedAligner {
     /**
      * to string
      *
-     * @param colRowMatrix
-     * @return
-     */
+	 */
     private String toString(int[][] colRowMatrix, int firstCol, int cols, byte[] query) {
         StringBuilder buf = new StringBuilder();
 
@@ -1215,7 +1198,6 @@ public class BandedAligner {
     /**
      * gets the alignment text
      *
-     * @param data
      * @return alignment text
      */
     public byte[] getAlignmentText(DataForInnerLoop data, int frameRank) {
@@ -1293,10 +1275,6 @@ public class BandedAligner {
     /**
      * get alignment in tabular format. If queryHeader==null, skips the first entry which is the query name
      *
-     * @param data
-     * @param queryHeader
-     * @param referenceHeader
-     * @param frameRank
      * @return tabular format without first field
      */
     public byte[] getAlignmentTab(final DataForInnerLoop data, final byte[] queryHeader, final byte[] referenceHeader, final int frameRank) {
@@ -1331,9 +1309,6 @@ public class BandedAligner {
     /**
      * get alignment in SAM format
      *
-     * @param queryHeader
-     * @param referenceHeader
-     * @param frameRank
      * @return SAM line
      */
     public byte[] getAlignmentSAM(final DataForInnerLoop data, final byte[] queryHeader, final byte[] querySequence, final byte[] referenceHeader, final int frameRank) {
@@ -1367,7 +1342,6 @@ public class BandedAligner {
     /**
      * maps a bit score to a raw score
      *
-     * @param bitScore
      * @return raw score
      */
     public int getRawScoreForBitScore(double bitScore) {
@@ -1380,10 +1354,6 @@ public class BandedAligner {
     /**
      * heuristically check whether there is going to be a good alignment
      *
-     * @param query
-     * @param reference
-     * @param queryPos
-     * @param refPos
      * @return true, if good alignment is likely
      */
     public boolean quickCheck(final byte[] query, final int queryLength, final byte[] reference, final int referenceLength, final int queryPos, final int refPos) {

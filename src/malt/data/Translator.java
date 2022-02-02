@@ -28,13 +28,6 @@ public class Translator {
     /**
      * translate a given DNA sequence into protein sequences
      *
-     * @param doForward
-     * @param doReverse
-     * @param dnaSequence
-     * @param length
-     * @param frame
-     * @param proteinSequences
-     * @param proteinLengths
      * @return number of sequences returned
      */
     public static int getBestFrames(boolean doForward, boolean doReverse, byte[] dnaSequence, int length, int[] frame, byte[][] proteinSequences, int[] proteinLengths) {
@@ -69,8 +62,6 @@ public class Translator {
     /**
      * heuristically determine whether this looks like real coding sequence
      *
-     * @param sequence
-     * @param length
      * @return true, if there is a stop-free run of at least 20 amino acids or if whole sequence is stop-free
      */
     private static boolean isPossibleCodingSequence(byte[] sequence, int length) {

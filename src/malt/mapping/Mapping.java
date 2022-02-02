@@ -46,8 +46,7 @@ public class Mapping extends RefIndex2ClassId {
     /**
      * construct a table
      *
-     * @param maxIndex
-     */
+	 */
     public Mapping(String fName, int maxIndex) {
         super(maxIndex);
         this.fName = fName;
@@ -56,9 +55,7 @@ public class Mapping extends RefIndex2ClassId {
     /**
      * compute the mapping for the given reference database
      *
-     * @param referencesDB
-     * @param progress
-     */
+	 */
     public static Mapping create(String fName, ISequenceAccessor referencesDB, IdParser classificationMapper, ProgressListener progress) throws IOException {
         final Mapping mapping = new Mapping(fName, referencesDB.getNumberOfSequences());
         final String tag = Classification.createShortTag(fName);
@@ -84,9 +81,7 @@ public class Mapping extends RefIndex2ClassId {
     /**
      * compute the mapping for the given reference database
      *
-     * @param referencesDB
-     * @param progress
-     */
+	 */
     public static Map<String, Mapping> create(Collection<String> namesToUse, ISequenceAccessor referencesDB, AccessAccessionMappingDatabase mappingDatabase, ProgressListener progress) throws IOException, SQLException {
 
         final Collection<String> cNames = mappingDatabase.getClassificationNames();
@@ -179,9 +174,7 @@ public class Mapping extends RefIndex2ClassId {
     /**
      * save to a stream and then close the stream
      *
-     * @param file
-     * @throws IOException
-     */
+	 */
     public void save(File file) throws IOException {
         super.save(file, makeMagicNumber(fName));
     }
@@ -189,10 +182,7 @@ public class Mapping extends RefIndex2ClassId {
     /**
      * construct from an existing file
      *
-     * @param file
-     * @throws IOException
-     * @throws CanceledException
-     */
+	 */
     public Mapping(String fName, File file) throws IOException, CanceledException {
         super(file, makeMagicNumber(fName));
         this.fName = fName;

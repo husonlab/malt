@@ -35,9 +35,7 @@ public class ProteinSequenceEncoder {
     /**
      * test program
      *
-     * @param args
-     * @throws java.io.IOException
-     */
+	 */
     public static void main(String[] args) throws IOException {
         SequenceEncoder encoder = new SequenceEncoder(ProteinAlphabet.getInstance());
         ReducedAlphabet reducedAlphabet = new ReducedAlphabet(ProteinAlphabet.getInstance(), "DIAMOND_11");
@@ -115,8 +113,6 @@ public class ProteinSequenceEncoder {
     /**
      * radix sort list of longs, using entries with even index as keys and entries with odd indices as associated values
      *
-     * @param array
-     * @param length
      * @param w      number of bits to use (64 to sort full numbers)
      * @param d      number of bits to consider at a time - in the case of 4-bit encoded letters: 4
      * @return sorted array

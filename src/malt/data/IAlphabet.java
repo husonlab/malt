@@ -26,16 +26,12 @@ public interface IAlphabet extends INormalizer {
     /**
      * maps letter to normalized base or amino acid
      *
-     * @param letter
-     * @return
-     */
+	 */
     byte getNormalized(byte letter);
 
     /**
      * do letters a and b correspond to the same base or amino acid?
      *
-     * @param a
-     * @param b
      * @return true, if equalOverShorterOfBoth bases
      */
     boolean equal(byte a, byte b);
@@ -71,8 +67,6 @@ public interface IAlphabet extends INormalizer {
     /**
      * is this word a good seed?
      *
-     * @param word
-     * @param length
      * @return true, if good
      */
     boolean isGoodSeed(byte[] word, int length);

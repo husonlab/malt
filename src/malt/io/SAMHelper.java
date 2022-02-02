@@ -51,26 +51,7 @@ public class SAMHelper {
     /**
      * creates a SAM line. If queryHeader==null, does not output the initial query token
      *
-     * @param mode
-     * @param queryHeader
-     * @param queryStart
-     * @param queryStartBlastX
-     * @param queryEnd
-     * @param queryLength
-     * @param alignedQuery
-     * @param referenceHeader
-     * @param referenceStart
-     * @param referenceEnd
-     * @param alignedReference
-     * @param referenceLength
-     * @param bitScore
-     * @param rawScore
-     * @param expected
-     * @param percentIdentity
-     * @param frame
-     * @param softClipped
-     * @return
-     */
+	 */
     public static String createSAMLine(final BlastMode mode, final byte[] queryHeader, final byte[] querySequence, final int queryStart, final int queryStartBlastX, final int queryEnd, final int queryLength, final byte[] alignedQuery,
                                        final byte[] referenceHeader, final int referenceStart, final int referenceEnd, final byte[] alignedReference, final int referenceLength,
                                        final double bitScore, final int rawScore, final double expected, final float percentIdentity, int frame, final byte[] qualityValues, boolean softClipped) {
@@ -216,8 +197,8 @@ public class SAMHelper {
         buffer.append(String.format("NM:i:%d\t", computeEditDistance(alignedQuery, alignedReference)));
         buffer.append(String.format("ZL:i:%d\t", referenceLength));
         buffer.append(String.format("ZR:i:%d\t", rawScore));
-        buffer.append(String.format("ZE:f:%g\t", (float) expected));
-        buffer.append(String.format("ZI:i:%d\t", (int) Math.round(percentIdentity)));
+		buffer.append(String.format("ZE:f:%g\t", (float) expected));
+		buffer.append(String.format("ZI:i:%d\t", Math.round(percentIdentity)));
         if (mode == BlastMode.BlastX) {
             buffer.append(String.format("ZF:i:%d\t", frame));
             buffer.append(String.format("ZS:i:%d\t", queryStartBlastX));
@@ -231,14 +212,7 @@ public class SAMHelper {
     /**
      * append the cigar string
      *
-     * @param alignedQuery
-     * @param queryOffset
-     * @param queryLength
-     * @param alignedReference
-     * @param reverseComplemented
-     * @param softClipped
-     * @param buffer
-     */
+	 */
     private static void appendCigar(byte[] alignedQuery, int queryOffset, int queryLength, byte[] alignedReference, boolean reverseComplemented, boolean softClipped, StringBuilder buffer) {
         int clip = (!reverseComplemented ? queryOffset : (queryLength - queryOffset - alignedQuery.length));
         if (clip > 0) {
@@ -324,11 +298,7 @@ public class SAMHelper {
     /**
      * append the MD string
      *
-     * @param alignedQuery
-     * @param alignedReference
-     * @param reverseComplemented
-     * @param buffer
-     */
+	 */
     private static void appendMDString(final byte[] alignedQuery, final byte[] alignedReference, final boolean reverseComplemented, final StringBuilder buffer) {
         buffer.append("MD:Z:");
         if (reverseComplemented) {
@@ -407,8 +377,6 @@ public class SAMHelper {
     /**
      * compute edit distance from alignment
      *
-     * @param alignedQuery
-     * @param alignedReference
      * @return edit distance
      */
     private static int computeEditDistance(byte[] alignedQuery, byte[] alignedReference) {
@@ -423,7 +391,6 @@ public class SAMHelper {
     /**
      * gets the SAM header line
      *
-     * @param mode
      * @return SAM header line or null
      */
     public static String getSAMHeader(BlastMode mode, String commandLine) {

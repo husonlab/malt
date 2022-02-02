@@ -46,9 +46,7 @@ public class ProteinAlphabet implements IAlphabet {
     /**
      * maps letter to normalized base or amino acid
      *
-     * @param letter
-     * @return
-     */
+	 */
     public byte getNormalized(byte letter) {
         return normalizedLetters[letter];
     }
@@ -56,8 +54,6 @@ public class ProteinAlphabet implements IAlphabet {
     /**
      * do letters a and b correspond to the same base or amino acid?
      *
-     * @param a
-     * @param b
      * @return true, if equalOverShorterOfBoth bases
      */
     public boolean equal(byte a, byte b) {
@@ -103,10 +99,7 @@ public class ProteinAlphabet implements IAlphabet {
     /**
      * a protein seed is a good seed if it contains more than 2 different letters and no unknown
      *
-     * @param word
-     * @param length
-     * @return
-     */
+	 */
     @Override
     public boolean isGoodSeed(byte[] word, int length) {
         final byte a = word[0];

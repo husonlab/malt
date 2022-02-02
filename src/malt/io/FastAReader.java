@@ -49,9 +49,7 @@ public class FastAReader {
     /**
      * constructor
      *
-     * @param fileName
-     * @throws java.io.FileNotFoundException
-     */
+	 */
     public FastAReader(final String fileName, final IAlphabet alphabet) throws IOException {
         this(fileName, alphabet, null);
     }
@@ -59,10 +57,7 @@ public class FastAReader {
     /**
      * constructor
      *
-     * @param fileName
-     * @param progress
-     * @throws java.io.FileNotFoundException
-     */
+	 */
     public FastAReader(final String fileName, final IAlphabet alphabet, final ProgressPercentage progress) throws IOException {
         this.alphabet = alphabet;
 
@@ -91,10 +86,8 @@ public class FastAReader {
      * Header and sequence are both 0-terminated.
      * This method is thread safe
      *
-     * @param fastARecord
      * @return true if read
-     * @throws IOException
-     */
+	 */
     public boolean readAsFastA(FastARecord fastARecord) throws IOException {
         lock.lock();
         try {
@@ -152,9 +145,7 @@ public class FastAReader {
     /**
      * reads the header line
      *
-     * @param fastARecord
-     * @throws IOException
-     */
+	 */
     private void readHeader(FastARecord fastARecord) throws IOException {
         byte[] aline = fastARecord.header;
         int value = inputStream.read();
@@ -177,9 +168,7 @@ public class FastAReader {
     /**
      * reads the sequence line
      *
-     * @param fastARecord
-     * @throws IOException
-     */
+	 */
     private void readSequence(FastARecord fastARecord) throws IOException {
         byte[] aline = fastARecord.sequence;
         int value = inputStream.read();
@@ -200,10 +189,8 @@ public class FastAReader {
     /**
      * reads the quality values line
      *
-     * @param fastARecord
      * @return the number of letters read
-     * @throws IOException
-     */
+	 */
     private int readQualityValues(FastARecord fastARecord) throws IOException {
         byte[] aline = fastARecord.qualityValues;
         int value = inputStream.read();
@@ -224,7 +211,6 @@ public class FastAReader {
     /**
      * grow the array
      *
-     * @param bytes
      * @return bigger copy of array
      */
     private byte[] grow(byte[] bytes) {
@@ -236,8 +222,7 @@ public class FastAReader {
     /**
      * skip the current line
      *
-     * @throws java.io.IOException
-     */
+	 */
     private void skipLine() throws IOException {
         int value = inputStream.read();
         position++;
@@ -250,8 +235,7 @@ public class FastAReader {
     /**
      * close the stream
      *
-     * @throws java.io.IOException
-     */
+	 */
     public void close() throws IOException {
         inputStream.close();
         if (progress != null)
@@ -288,7 +272,6 @@ public class FastAReader {
     /**
      * create a fastA record to be used with this reader
      *
-     * @param initialLength
      * @return fastA record
      */
     public static FastARecord createFastARecord(int initialLength, boolean wantQualityValues) {

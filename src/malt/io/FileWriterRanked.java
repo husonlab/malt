@@ -50,10 +50,8 @@ public class FileWriterRanked {
     /**
      * constructor
      *
-     * @param fileName
      * @param smallestRank value of first byte string to be written
-     * @throws java.io.IOException
-     */
+	 */
     public FileWriterRanked(String fileName, final int numberOfThreads, int smallestRank) throws IOException {
         // one wait queue for each thread:
         threadSpecificWaitQueues = new ArrayBlockingQueue[numberOfThreads];
@@ -150,8 +148,7 @@ public class FileWriterRanked {
     /**
      * close
      *
-     * @throws java.io.IOException
-     */
+	 */
     public void close() throws IOException {
         isClosing = true;
         try {
@@ -194,10 +191,7 @@ public class FileWriterRanked {
      * has already been written
      * Does not make a copy of the byte arrays, so shouldn't recycle because unclear when this will be written
      *
-     * @param rank
-     * @param header
-     * @param body
-     */
+	 */
     public void writeByRank(int threadId, long rank, byte[] header, byte[] body) {
         try {
             threadSpecificWaitQueues[threadId].put(new OutputItem(rank, new byte[][]{header, body}));
@@ -209,8 +203,7 @@ public class FileWriterRanked {
     /**
      * skip a rank
      *
-     * @param rank
-     */
+	 */
     public void skipByRank(int threadId, int rank) {
         try {
             threadSpecificWaitQueues[threadId].put(new OutputItem(rank, null));
@@ -222,9 +215,7 @@ public class FileWriterRanked {
     /**
      * write this at the top of the file
      *
-     * @param string
-     * @throws java.io.IOException
-     */
+	 */
     public void writeFirst(String string) throws IOException {
         writer.write(string);
     }
@@ -232,9 +223,7 @@ public class FileWriterRanked {
     /**
      * write this at the end of the file
      *
-     * @param string
-     * @throws java.io.IOException
-     */
+	 */
     public void writeLast(String string) {
         fileFooter.append(string);
     }

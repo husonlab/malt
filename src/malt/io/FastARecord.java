@@ -43,8 +43,7 @@ public class FastARecord {
     /**
      * constructor
      *
-     * @param initialLength
-     */
+	 */
     public FastARecord(int initialLength, boolean wantQualityValuesIfAvailable) {
         header = new byte[1000];
         sequence = new byte[initialLength];
@@ -103,9 +102,7 @@ public class FastARecord {
     /**
      * set the sequence
      *
-     * @param sequence
-     * @param length
-     */
+	 */
     public void setSequence(byte[] sequence, int length) {
         this.sequence = sequence;
         this.sequence[length] = 0;
@@ -126,8 +123,7 @@ public class FastARecord {
     /**
      * get as string
      *
-     * @return
-     */
+	 */
     public String toString() {
 		return (new StringBuilder()).append(StringUtils.toString(header, headerLength)).append("\n").append(StringUtils.toString(sequence, sequenceLength)).append("\n").toString();
     }

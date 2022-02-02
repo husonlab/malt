@@ -43,9 +43,7 @@ public class FastAFileIteratorCode {
     /**
      * constructor
      *
-     * @param fileName
-     * @throws java.io.FileNotFoundException
-     */
+	 */
     public FastAFileIteratorCode(final String fileName, final SequenceEncoder sequenceEncoder) throws IOException {
 		this.sequenceEncoder = sequenceEncoder;
 		inputStream = new BufferedInputStream(FileUtils.getInputStreamPossiblyZIPorGZIP(fileName), 8192);
@@ -54,7 +52,7 @@ public class FastAFileIteratorCode {
 		try {
 			int value = inputStream.read();
 			isFastQ = (value == '@');
-		} catch (IOException e) {
+		} catch (IOException ignored) {
 		}
 	}
 
@@ -191,8 +189,6 @@ public class FastAFileIteratorCode {
     /**
      * read the next line into the buffer
      *
-     * @param inputStream
-     * @param offset
      * @return position of next available position in buffer
      */
     private int readLineIntoBuffer(BufferedInputStream inputStream, int offset) throws IOException {
@@ -211,7 +207,7 @@ public class FastAFileIteratorCode {
      * grows the line buffer
      */
     private void growBuffer() {
-        byte[] nextBuffer = new byte[(int) Math.min(Integer.MAX_VALUE - 10L, 2 * buffer.length)];
+		byte[] nextBuffer = new byte[(int) Math.min(Integer.MAX_VALUE - 10L, 2L * buffer.length)];
         System.arraycopy(buffer, 0, nextBuffer, 0, buffer.length);
         buffer = nextBuffer;
     }
@@ -219,9 +215,7 @@ public class FastAFileIteratorCode {
     /**
      * skip the current line
      *
-     * @param inputStream
-     * @throws java.io.IOException
-     */
+	 */
     private int skipLine(BufferedInputStream inputStream) throws IOException {
         int skipped = 0;
         int value = inputStream.read();
@@ -239,8 +233,7 @@ public class FastAFileIteratorCode {
     /**
      * close the stream
      *
-     * @throws java.io.IOException
-     */
+	 */
     public void close() throws IOException {
         inputStream.close();
     }

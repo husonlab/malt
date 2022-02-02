@@ -39,9 +39,7 @@ public class SeedShape2 {
     /**
      * constructor
      *
-     * @param shape
-     * @throws java.io.IOException
-     */
+	 */
     public SeedShape2(String shape) throws IOException {
         this.shape = shape;
         mask = new boolean[shape.length()];
@@ -115,12 +113,10 @@ public class SeedShape2 {
     /**
      * gets the expected number of seeds
      *
-     * @param numberOfSequences
-     * @param numberOfLetters
      * @return expected number of seeds
      */
     public long getMaxSeedCount(int numberOfSequences, long numberOfLetters, int numberOfJobs) {
-        return Math.max(1, numberOfLetters - numberOfSequences * (weight - 1)) / numberOfJobs;
+		return Math.max(1, numberOfLetters - (long) numberOfSequences * (weight - 1)) / numberOfJobs;
     }
 
     public void setId(int id) {

@@ -52,10 +52,7 @@ public class MaltBuild {
     /**
      * run the program
      *
-     * @param args
-     * @throws jloda.util.UsageException
-     * @throws java.io.IOException
-     */
+	 */
     public static void main(String[] args) {
         ResourceManager.insertResourceRoot(megan.resources.Resources.class);
 
@@ -88,10 +85,7 @@ public class MaltBuild {
     /**
      * run the program
      *
-     * @param args
-     * @throws UsageException
-     * @throws IOException
-     */
+	 */
     public void run(String[] args) throws Exception {
 // parse commandline options:
         final ArgsOptions options = new ArgsOptions(args, this, "Builds an index for MALT (MEGAN alignment tool)");
@@ -222,7 +216,7 @@ public class MaltBuild {
 
         AAdderBuild.setupGFFFiles(gffFiles, lookInside);
 
-        System.err.println("Reference sequence type set to: " + sequenceType.toString());
+		System.err.println("Reference sequence type set to: " + sequenceType);
         final IAlphabet referenceAlphabet;
         final IAlphabet seedAlphabet;
 

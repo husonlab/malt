@@ -20,7 +20,6 @@ package malt.util;
 
 import jloda.seq.BlastMode;
 import jloda.util.FileUtils;
-import jloda.util.UsageException;
 import malt.data.ReadMatch;
 import malt.data.Row;
 import malt.data.SequenceType;
@@ -40,11 +39,9 @@ public class Utilities {
     /**
      * randomize array of longs using (Durstenfeld 1964)
      *
-     * @param array
      * @param offset start of numbers to be randomized
      * @param length number of numbers to be randomized
-     * @param random
-     */
+	 */
     public static void randomize(long[] array, int offset, int length, Random random) {
         for (int i = offset + length - 1; i >= offset + 1; i--) {
             int j = random.nextInt(i - offset) + offset;
@@ -57,11 +54,9 @@ public class Utilities {
     /**
      * randomize array of integers using (Durstenfeld 1964) in consecutive pairs
      *
-     * @param array
      * @param offset start of numbers to be randomized
      * @param length number of numbers to be randomized. Must be even for this to make sense
-     * @param random
-     */
+	 */
     public static void randomizePairs(int[] array, int offset, int length, Random random) {
         int end = offset + length / 2;
         for (int i = end - 1; i >= offset + 1; i--) {
@@ -82,11 +77,9 @@ public class Utilities {
     /**
      * randomize array of integers using (Durstenfeld 1964) in consecutive pairs
      *
-     * @param array
      * @param offset start of numbers to be randomized
      * @param length number of numbers to be randomized. Must be even for this to make sense
-     * @param random
-     */
+	 */
     public static void randomizePairs(IIntPutter array, long offset, int length, Random random) {
         long end = offset + length / 2;
         for (long i = end - 1; i >= offset + 1; i--) {
@@ -107,7 +100,6 @@ public class Utilities {
     /**
      * resize array
      *
-     * @param array
      * @return new array
      */
     public static int[] resize(int[] array, int newSize) {
@@ -119,7 +111,6 @@ public class Utilities {
     /**
      * resize array
      *
-     * @param array
      * @return new array
      */
     public static Row[] resizeAndConstructEntries(Row[] array, int newSize) {
@@ -133,7 +124,6 @@ public class Utilities {
     /**
      * resize array
      *
-     * @param array
      * @return new array
      */
     public static ReadMatch[] resize(ReadMatch[] array, int newSize) {
@@ -145,7 +135,6 @@ public class Utilities {
     /**
      * get first word of header
      *
-     * @param header
      * @return first word
      */
     public static byte[] getFirstWordSkipLeadingGreaterSign(byte[] header) {
@@ -171,7 +160,6 @@ public class Utilities {
     /**
      * get first word of header and make sure it starts with a greater sign
      *
-     * @param header
      * @return first word
      */
     public static byte[] getFirstWordEnsureLeadingGreaterSign(byte[] header) {
@@ -199,7 +187,6 @@ public class Utilities {
     /**
      * copy a 0-terminated byte array
      *
-     * @param bytes
      * @return copy (up to first 0)
      */
     public static byte[] copy0Terminated(byte[] bytes) {
@@ -217,7 +204,6 @@ public class Utilities {
     /**
      * get first word of header and write it to result
      *
-     * @param header
      * @return first word
      */
     public static int getFirstWordSkipLeadingGreaterSign(byte[] header, byte[] result) {
@@ -255,8 +241,7 @@ public class Utilities {
     /**
      * remove all existing index files
      *
-     * @param indexDirectory
-     */
+	 */
     public static void cleanIndexDirectory(File indexDirectory) throws IOException {
         if (!indexDirectory.isDirectory())
             throw new IOException("Not a directory: " + indexDirectory);
@@ -273,10 +258,8 @@ public class Utilities {
     /**
      * gets the query sequence type from the alignment program mode
      *
-     * @param mode
      * @return query type
-     * @throws UsageException
-     */
+	 */
     public static SequenceType getQuerySequenceTypeFromMode(BlastMode mode) throws IOException {
         switch (mode) {
             case BlastN:
@@ -292,10 +275,8 @@ public class Utilities {
     /**
      * gets the reference sequence type from the alignment program mode
      *
-     * @param mode
      * @return query type
-     * @throws UsageException
-     */
+	 */
     public static SequenceType getReferenceSequenceTypeFromMode(BlastMode mode) throws IOException {
         switch (mode) {
             case BlastN:
@@ -312,12 +293,8 @@ public class Utilities {
     /**
      * determines how many different frames are possible for a given query
      *
-     * @param mode
-     * @param dnaDoForward
-     * @param dnaDoReverse
      * @return number of frames
-     * @throws IOException
-     */
+	 */
     public static int getMaxFramesPerQuery(BlastMode mode, boolean dnaDoForward, boolean dnaDoReverse) throws IOException {
         switch (mode) {
             case BlastN:
@@ -334,7 +311,6 @@ public class Utilities {
     /**
      * count the number of gaps ('-') in a sequence
      *
-     * @param sequence
      * @return number of gaps
      */
     public static int countGaps(byte[] sequence, int offset, int length) {
@@ -350,7 +326,6 @@ public class Utilities {
     /**
      * does this contain only at most two different letters
      *
-     * @param seq
      * @return True at most two different letters occur
      */
     public static boolean hasAtMostTwoLetters(byte[] seq) {
@@ -385,9 +360,6 @@ public class Utilities {
     /**
      * gets a file for a given directory with a given name, if it exists. If gzippedOk, also tries adding .gz or replacing the suffix by .gz
      *
-     * @param directory
-     * @param name
-     * @param gzippedOk
      * @return file or null
      */
     public static File getFile(String directory, String name, boolean gzippedOk) {
@@ -408,11 +380,7 @@ public class Utilities {
     /**
      * load a mapping file
      *
-     * @param fileName
-     * @param mapType
-     * @param cName
-     * @throws Exception
-     */
+	 */
     public static void loadMapping(String fileName, IdMapper.MapType mapType, String cName) throws Exception {
         if (fileName.length() > 0)
             (new LoadMappingFileCommand()).apply("load mapFile='" + fileName + "' mapType=" + mapType.toString() + " cName=" + cName + ";");

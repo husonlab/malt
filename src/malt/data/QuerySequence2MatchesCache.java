@@ -40,9 +40,7 @@ public class QuerySequence2MatchesCache {
     /**
      * constructor
      *
-     * @param bits
-     * @throws Exception
-     */
+	 */
     public QuerySequence2MatchesCache(int bits) {
         if (bits > 31)
             throw new RuntimeException("bits exceed 31");
@@ -57,11 +55,7 @@ public class QuerySequence2MatchesCache {
     /**
      * put a copy into the cache
      *
-     * @param sequence
-     * @param sequenceLength
-     * @param matches
-     * @param numberOfMatches
-     */
+	 */
     public void put(byte[] sequence, int sequenceLength, ReadMatch[] matches, int numberOfMatches) {
         int hash = getHash(sequence, sequenceLength);
         synchronized (syncTable[hash & syncObjectsMask]) {
@@ -81,8 +75,6 @@ public class QuerySequence2MatchesCache {
     /**
      * get the read matches associated with this sequence, if cached
      *
-     * @param sequence
-     * @param sequenceLength
      * @return associated read matches
      */
     public ReadMatch[] get(byte[] sequence, int sequenceLength) {
@@ -103,7 +95,6 @@ public class QuerySequence2MatchesCache {
      * for a given key, add the reference id and sequence offset to table
      * uses very naive synchronization
      *
-     * @param key
      * @return hash value
      */
     private int getHash(byte[] key, int length) {
@@ -123,8 +114,6 @@ public class QuerySequence2MatchesCache {
     /**
      * determine whether cache contains this sequence
      *
-     * @param sequence
-     * @param sequenceLength
      * @return true, if sequence contained in cache
      */
     public boolean contains(byte[] sequence, int sequenceLength) {
@@ -137,34 +126,25 @@ public class QuerySequence2MatchesCache {
         }
     }
 
-    /**
-     * hash table item
-     */
-    class Item {
-        private Item next;
-        private final byte[] sequence;
-        private final ReadMatch[] matches;
+	/**
+	 * hash table item
+	 */
+	static class Item {
+		private Item next;
+		private final byte[] sequence;
+		private final ReadMatch[] matches;
 
-        /**
-         * constructor
-         *
-         * @param sequence
-         * @param sequenceLength
-         * @param matches
-         * @param numberOfMatches
-         */
-        public Item(byte[] sequence, int sequenceLength, ReadMatch[] matches, int numberOfMatches) {
-            this.sequence = copy(sequence, sequenceLength);
+		/**
+		 * constructor
+		 */
+		public Item(byte[] sequence, int sequenceLength, ReadMatch[] matches, int numberOfMatches) {
+			this.sequence = copy(sequence, sequenceLength);
             this.matches = copy(matches, numberOfMatches);
         }
 
         /**
          * add item if new
          *
-         * @param sequence
-         * @param sequenceLength
-         * @param matches
-         * @param numberOfMatches
          * @return true, if added, false if not
          */
         public boolean addIfNew(byte[] sequence, int sequenceLength, ReadMatch[] matches, int numberOfMatches) {
@@ -183,8 +163,6 @@ public class QuerySequence2MatchesCache {
         /**
          * does this item contain this sequence
          *
-         * @param sequence
-         * @param sequenceLength
          * @return true, if this item or any chained to it equals the given one
          */
         public boolean contains(byte[] sequence, int sequenceLength) {
@@ -201,8 +179,6 @@ public class QuerySequence2MatchesCache {
         /**
          * get list of matches for the given sequence2
          *
-         * @param sequence
-         * @param sequenceLength
          * @return matches or null
          */
         public ReadMatch[] getMatches(byte[] sequence, int sequenceLength) {
@@ -220,10 +196,6 @@ public class QuerySequence2MatchesCache {
         /**
          * check whether two strings are equalOverShorterOfBoth
          *
-         * @param a
-         * @param aLength
-         * @param b
-         * @param bLength
          * @return true, if equalOverShorterOfBoth
          */
         private boolean equal(byte[] a, int aLength, byte[] b, int bLength) {
@@ -239,8 +211,6 @@ public class QuerySequence2MatchesCache {
         /**
          * copy a byte array
          *
-         * @param array
-         * @param length
          * @return copy
          */
         private byte[] copy(byte[] array, int length) {
@@ -252,8 +222,6 @@ public class QuerySequence2MatchesCache {
         /**
          * copy a read match array. Makes a copy of each entry
          *
-         * @param array
-         * @param length
          * @return read match array copy
          */
         private ReadMatch[] copy(ReadMatch[] array, int length) {

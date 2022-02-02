@@ -35,9 +35,7 @@ public class ReducedAlphabet extends Alphabet implements ISeedExtractor {
     /**
      * constructor
      *
-     * @param proteinAlphabet
-     * @param reductionDefinition
-     */
+	 */
     public ReducedAlphabet(final Alphabet proteinAlphabet, String reductionDefinition) throws IOException {
         super(getReductionDefinition(reductionDefinition), (byte) 'X');
         this.proteinAlphabet = proteinAlphabet;
@@ -54,7 +52,6 @@ public class ReducedAlphabet extends Alphabet implements ISeedExtractor {
     /**
      * decode a sequenceCode
      *
-     * @param sequenceCode
      * @param bytes        sequence
      * @return sequence length
      */
@@ -81,8 +78,6 @@ public class ReducedAlphabet extends Alphabet implements ISeedExtractor {
     /**
      * decode a sequence
      *
-     * @param seedCode
-     * @param seedWeight
      * @return seed sequence
      */
     @Override
@@ -95,10 +90,6 @@ public class ReducedAlphabet extends Alphabet implements ISeedExtractor {
     /**
      * gets a seed code using the reduced alphabet
      *
-     * @param seedShape
-     * @param seedWeight
-     * @param sequenceCode
-     * @param pos
      * @return reduced code
      */
     public long getSeedCode(final boolean[] seedShape, int seedWeight, long[] sequenceCode, int pos) {
@@ -108,10 +99,6 @@ public class ReducedAlphabet extends Alphabet implements ISeedExtractor {
     /**
      * gets a seed code using the reduced alphabet
      *
-     * @param seedShape
-     * @param seedWeight
-     * @param sequenceCode
-     * @param pos
      * @param failValue    value to return if seed extraction fails due to sequence being too short   @return reduced code
      */
     public long getSeedCode(final boolean[] seedShape, int seedWeight, long[] sequenceCode, int pos, int failValue) {
@@ -148,7 +135,6 @@ public class ReducedAlphabet extends Alphabet implements ISeedExtractor {
     /**
      * get a reduction by name
      *
-     * @param name
      * @return reduction definition string or null
      */
     public static String getReductionDefinition(String name) throws IOException {
@@ -167,7 +153,6 @@ public class ReducedAlphabet extends Alphabet implements ISeedExtractor {
     /**
      * is this a good seed? Yes, if it contains at least three different letters and none is undefined
      *
-     * @param seedCode
      * @return true, if good
      */
     public boolean isGoodSeed(long seedCode, int seedWeight) {

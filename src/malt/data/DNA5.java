@@ -56,9 +56,7 @@ public class DNA5 implements IAlphabet {
     /**
      * maps letter to 'A', 'C', 'G', 'T' or 'N'
      *
-     * @param letter
-     * @return
-     */
+	 */
     public byte getNormalized(byte letter) {
         return DNA5.normalizedLetters[letter];
     }
@@ -66,8 +64,7 @@ public class DNA5 implements IAlphabet {
     /**
      * normalize a sequence
      *
-     * @param sequence
-     */
+	 */
     public void normalize(byte[] sequence) {
         for (int i = 0; i < sequence.length; i++) {
             sequence[i] = getNormalized(sequence[i]);
@@ -77,9 +74,7 @@ public class DNA5 implements IAlphabet {
     /**
      * get complement of base
      *
-     * @param letter
-     * @return
-     */
+	 */
     public byte getBaseComplement(byte letter) {
         return normalizedComplement[letter];
     }
@@ -87,8 +82,6 @@ public class DNA5 implements IAlphabet {
     /**
      * do letters a and b correspond to the same base?
      *
-     * @param a
-     * @param b
      * @return true, if equalOverShorterOfBoth bases
      */
     public boolean equal(byte a, byte b) {
@@ -98,8 +91,6 @@ public class DNA5 implements IAlphabet {
     /**
      * do strings a and b correspond to the same DNA sequences?
      *
-     * @param a
-     * @param b
      * @return true, if equalOverShorterOfBoth DNA sequences
      */
     public boolean equal(byte[] a, byte[] b) {
@@ -115,7 +106,6 @@ public class DNA5 implements IAlphabet {
     /**
      * gets reverse complement of a DNA sequence
      *
-     * @param sequence
      * @return reverse complement
      */
     public byte[] getReverseComplement(byte[] sequence) {
@@ -129,10 +119,7 @@ public class DNA5 implements IAlphabet {
     /**
      * gets reverse complement of a DNA sequence
      *
-     * @param sequence
-     * @param length
-     * @param reverseComplement
-     */
+	 */
     public void getReverseComplement(byte[] sequence, int length, byte[] reverseComplement) {
         for (int i = 0; i < length; i++) {
             reverseComplement[i] = normalizedComplement[sequence[length - 1 - i]];
@@ -142,10 +129,7 @@ public class DNA5 implements IAlphabet {
     /**
      * gets reverse, but not complement, of a DNA sequence
      *
-     * @param sequence
-     * @param length
-     * @param reverse
-     */
+	 */
     public void getReverseNotComplement(byte[] sequence, int length, byte[] reverse) {
         for (int i = 0; i < length; i++) {
             reverse[i] = sequence[length - 1 - i];
@@ -178,8 +162,7 @@ public class DNA5 implements IAlphabet {
     /**
      * reverse complement in place
      *
-     * @param bytes
-     */
+	 */
     public void reverseComplement(byte[] bytes) {
         int top = (bytes.length + 1) / 2;
         for (int i = 0; i < top; i++) {
@@ -193,8 +176,7 @@ public class DNA5 implements IAlphabet {
     /**
      * reverse (but no complement) in place
      *
-     * @param bytes
-     */
+	 */
     public void reverse(byte[] bytes) {
         int top = bytes.length / 2;
         for (int i = 0; i < top; i++) {
@@ -217,10 +199,7 @@ public class DNA5 implements IAlphabet {
     /**
      * a DNA seed is good it does not contain an N and contains at least two different letters
      *
-     * @param word
-     * @param length
-     * @return
-     */
+	 */
     @Override
     public boolean isGoodSeed(byte[] word, int length) {
         byte a = word[0];

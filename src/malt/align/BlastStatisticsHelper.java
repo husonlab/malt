@@ -107,11 +107,7 @@ public class BlastStatisticsHelper {
     /**
      * constructor
      *
-     * @param referenceLength
-     * @param blosumName
-     * @param gapOpenPenalty
-     * @param gapExtensionPenalty
-     */
+	 */
     public BlastStatisticsHelper(long referenceLength, String blosumName, int gapOpenPenalty, int gapExtensionPenalty) throws IOException {
         this.referenceLength = referenceLength;
         Pair<Double, Double> pair = lookupLambdaAndK(blosumName, gapOpenPenalty, gapExtensionPenalty);
@@ -124,10 +120,7 @@ public class BlastStatisticsHelper {
     /**
      * constructor
      *
-     * @param referenceLength
-     * @param k
-     * @param lambda
-     */
+	 */
     public BlastStatisticsHelper(long referenceLength, float k, float lambda) {
         this.referenceLength = referenceLength;
         this.k = k;
@@ -138,8 +131,7 @@ public class BlastStatisticsHelper {
     /**
      * set the reference length
      *
-     * @param referenceLength
-     */
+	 */
     public void setReferenceLength(long referenceLength) {
         this.referenceLength = referenceLength;
     }
@@ -147,7 +139,6 @@ public class BlastStatisticsHelper {
     /**
      * get the bit score
      *
-     * @param alignmentScore
      * @return bit score
      */
     public double getBitScore(int alignmentScore) {
@@ -157,8 +148,6 @@ public class BlastStatisticsHelper {
     /**
      * get the e-value
      *
-     * @param queryLength
-     * @param alignmentScore
      * @return e-evalue
      */
     public double getExpect(int queryLength, int alignmentScore) {
@@ -186,12 +175,8 @@ public class BlastStatisticsHelper {
     /**
      * lookup the blast K and Lambda values for a given setting
      *
-     * @param blosumName
-     * @param gapOpen
-     * @param gapExtend
      * @return k and lambda
-     * @throws IOException
-     */
+	 */
     public static Pair<Double, Double> lookupLambdaAndK(String blosumName, int gapOpen, int gapExtend) throws IOException {
         blosumName = blosumName.toUpperCase();
         for (String line : table) {

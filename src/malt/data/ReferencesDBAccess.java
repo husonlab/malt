@@ -49,9 +49,7 @@ public class ReferencesDBAccess implements Closeable {
     /**
      * construct from an input file
      *
-     * @param refIndexFile
-     * @throws java.io.IOException
-     */
+	 */
     public ReferencesDBAccess(MaltOptions.MemoryMode memoryMode, File refIndexFile, File refDBFile, File refInfFile) throws IOException {
         syncObjects = new Object[SYNC_BITMASK + 1];
         for (int i = 0; i < syncObjects.length; i++) {
@@ -97,7 +95,6 @@ public class ReferencesDBAccess implements Closeable {
     /**
      * Get header string. Index starts at 0
      *
-     * @param index
      * @return header
      */
     public byte[] getHeader(int index) throws IOException {
@@ -122,7 +119,6 @@ public class ReferencesDBAccess implements Closeable {
     /**
      * Get sequence. Index starts at 0
      *
-     * @param index
      * @return sequence
      */
     public byte[] getSequence(int index) throws IOException {
@@ -146,7 +142,6 @@ public class ReferencesDBAccess implements Closeable {
     /**
      * Get sequence length
      *
-     * @param index
      * @return sequence length
      */
     public int getSequenceLength(int index) throws IOException {

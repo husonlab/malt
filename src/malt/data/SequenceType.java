@@ -29,7 +29,6 @@ public enum SequenceType {
     /**
      * get rank
      *
-     * @param sequenceType
      * @return rank
      */
     public static int rankOf(SequenceType sequenceType) {
@@ -42,9 +41,7 @@ public enum SequenceType {
     /**
      * get type from rank
      *
-     * @param rank
-     * @return
-     */
+	 */
     public static SequenceType valueOf(int rank) {
         return values()[rank];
     }
@@ -52,7 +49,6 @@ public enum SequenceType {
     /**
      * get value ignoring case
      *
-     * @param label
      * @return value
      */
     public static SequenceType valueOfIgnoreCase(String label) {

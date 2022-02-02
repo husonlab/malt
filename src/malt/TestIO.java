@@ -104,7 +104,7 @@ public class TestIO {
 
     public static void fasterToFile(String fileName, int[][] arrays) throws IOException {
         // final long maxNumberOfInts = Integer.MAX_VALUE / 4 - MAGIC_NUMBER.length;
-        final long maxNumberOfInts = 100 * arrays.length;   // about 10 files
+        final long maxNumberOfInts = 100L * arrays.length;   // about 10 files
 
         int start = 0;
         int fileCount = 0;
@@ -253,11 +253,7 @@ public class TestIO {
     /**
      * writes an int value
      *
-     * @param outs
-     * @param value
-     * @param bytes
-     * @throws java.io.IOException
-     */
+	 */
     public static void writeInt(OutputStream outs, int value, byte[] bytes) throws IOException {
         bytes[0] = (byte) (value >> 24);
         bytes[1] = (byte) (value >> 16);
@@ -269,11 +265,8 @@ public class TestIO {
     /**
      * read an int from an input stream
      *
-     * @param ins
-     * @param bytes
      * @return long value
-     * @throws java.io.IOException
-     */
+	 */
     public static int readInt(InputStream ins, byte[] bytes) throws IOException {
         if (ins.read(bytes, 0, 4) != 4)
             throw new IOException("Read int: too few bytes");
@@ -283,8 +276,6 @@ public class TestIO {
     /**
      * replace the suffix of a file
      *
-     * @param fileName
-     * @param newSuffix
      * @return new file name
      */
     public static String replaceFileSuffix(String fileName, String newSuffix) {
@@ -294,8 +285,6 @@ public class TestIO {
     /**
      * replace the suffix of a file
      *
-     * @param file
-     * @param newSuffix
      * @return new file
      */
     public static File replaceFileSuffix(File file, String newSuffix) {
@@ -309,7 +298,6 @@ public class TestIO {
     /**
      * returns name without any .suffix removed
      *
-     * @param name
      * @return name without .suffix
      */
     public static String getFileBaseName(String name) {

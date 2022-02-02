@@ -55,9 +55,7 @@ public class DNA5Alphabet extends Alphabet {
     /**
      * gets the reverse complement
      *
-     * @param sequence
-     * @param reverseComplement
-     */
+	 */
     public static void reverseComplement(byte[] sequence, byte[] reverseComplement) {
         for (int i = 0; i < sequence.length; i++) {
             reverseComplement[sequence.length - (i + 1)] = normalizedComplement[sequence[i]];

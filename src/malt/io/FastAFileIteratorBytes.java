@@ -24,7 +24,6 @@ import jloda.util.ICloseableIterator;
 import malt.data.INormalizer;
 
 import java.io.BufferedInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -48,9 +47,7 @@ public class FastAFileIteratorBytes implements Iterator<byte[]>, ICloseableItera
     /**
      * constructor
      *
-     * @param fileName
-     * @throws FileNotFoundException
-     */
+	 */
     public FastAFileIteratorBytes(final String fileName, final INormalizer normalizer) throws IOException {
 		this.normalizer = normalizer;
 		inputStream = new BufferedInputStream(FileUtils.getInputStreamPossiblyZIPorGZIP(fileName), 8192);
@@ -171,8 +168,6 @@ public class FastAFileIteratorBytes implements Iterator<byte[]>, ICloseableItera
     /**
      * read the next line into the buffer
      *
-     * @param inputStream
-     * @param offset
      * @return position of next available position in buffer
      */
     private int readLineIntoBuffer(BufferedInputStream inputStream, int offset) throws IOException {
@@ -199,9 +194,7 @@ public class FastAFileIteratorBytes implements Iterator<byte[]>, ICloseableItera
     /**
      * skip the current line
      *
-     * @param inputStream
-     * @throws IOException
-     */
+	 */
     private int skipLine(BufferedInputStream inputStream) throws IOException {
         int skipped = 0;
         int value = inputStream.read();
@@ -219,8 +212,7 @@ public class FastAFileIteratorBytes implements Iterator<byte[]>, ICloseableItera
     /**
      * close the stream
      *
-     * @throws IOException
-     */
+	 */
     public void close() throws IOException {
         inputStream.close();
     }

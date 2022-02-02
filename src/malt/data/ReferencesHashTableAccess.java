@@ -54,8 +54,7 @@ public class ReferencesHashTableAccess implements Closeable {
     /**
      * construct the table from the given directory
      *
-     * @param indexDirectory
-     */
+	 */
     public ReferencesHashTableAccess(MaltOptions.MemoryMode memoryMode, String indexDirectory, int tableNumber) throws IOException {
         final File indexFile = new File(indexDirectory, "index" + tableNumber + ".idx");
         final File tableIndexFile = new File(indexDirectory, "table" + tableNumber + ".idx");
@@ -120,9 +119,7 @@ public class ReferencesHashTableAccess implements Closeable {
      * lookup all entries for a given key and put them in the given row object. If none found, row is set to empty
      * todo: re-implement this
      *
-     * @param key
-     * @param row
-     */
+	 */
     public int lookup(byte[] key, Row row) throws IOException {
         int hashValue = getHash(key);
         if (hashValue >= 0 && hashValue < tableIndexGetter.limit() && setRow(tableIndexGetter.get(hashValue), row))
@@ -134,7 +131,6 @@ public class ReferencesHashTableAccess implements Closeable {
     /**
      * get the hash value
      *
-     * @param key
      * @return hash value
      */
     public int getHash(byte[] key) {
@@ -165,8 +161,7 @@ public class ReferencesHashTableAccess implements Closeable {
     /**
      * show the whole hash table in human readable form
      *
-     * @throws java.io.IOException
-     */
+	 */
     public void show() throws IOException {
         System.err.println("Table (" + tableSize + "):");
 
@@ -193,8 +188,6 @@ public class ReferencesHashTableAccess implements Closeable {
     /**
      * set the row for the given location
      *
-     * @param location
-     * @param row
      * @return false, if location invalid
      */
     private boolean setRow(long location, Row row) throws IOException {
@@ -227,9 +220,7 @@ public class ReferencesHashTableAccess implements Closeable {
     /**
      * make sure that we can reads the files
      *
-     * @param indexDirectory
-     * @throws IOException
-     */
+	 */
     public static void checkFilesExist(String indexDirectory, int tableNumber) throws IOException {
         Utilities.checkFileExists(new File(indexDirectory));
         Utilities.checkFileExists(new File(indexDirectory, "index" + tableNumber + ".idx"));
@@ -240,7 +231,6 @@ public class ReferencesHashTableAccess implements Closeable {
     /**
      * determines the number of tables existing in the index
      *
-     * @param indexDirectory
      * @return number of tables
      */
     public static int determineNumberOfTables(String indexDirectory) {
@@ -254,8 +244,7 @@ public class ReferencesHashTableAccess implements Closeable {
     /**
      * show part of the hash table in human readable form
      *
-     * @throws java.io.IOException
-     */
+	 */
     public void showAPart() throws IOException {
         final Row row = new Row();
 
@@ -282,8 +271,7 @@ public class ReferencesHashTableAccess implements Closeable {
     /**
      * construct the table from the given directory
      *
-     * @param indexDirectory
-     */
+	 */
     public static SequenceType getIndexSequenceType(String indexDirectory) throws IOException {
         File indexFile = new File(indexDirectory, "index0.idx");
         try (DataInputStream ins = new DataInputStream(new BufferedInputStream(new FileInputStream(indexFile), 8192))) {

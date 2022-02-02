@@ -18,11 +18,6 @@
  */
 package malt.data;
 
-/**
- * A seed match as used in the inner loop of the alignment engine
- * Daniel Huson, 8.2014
- */
-
 import java.util.Comparator;
 
 /**
@@ -46,13 +41,8 @@ public class SeedMatch {
         else if (a.rank < b.rank)
             return -1;
         else if (a.rank > b.rank)
-            return 1;
-        else if (a.seedLength < b.seedLength)
-            return -1;
-        else if (a.seedLength > b.seedLength)
-            return 1;
-        else
-            return 0;
+			return 1;
+		else return Integer.compare(a.seedLength, b.seedLength);
     };
 
     /**
@@ -64,9 +54,6 @@ public class SeedMatch {
     /**
      * set the seed match
      *
-     * @param queryOffset
-     * @param referenceOffset
-     * @param rank
      * @return this
      */
     public SeedMatch set(int queryOffset, int referenceOffset, int rank, int seedLength) {
@@ -109,7 +96,6 @@ public class SeedMatch {
     /**
      * determines whether this seed follows the previous one. It is deemed to follow, if on the same diagonal +-3
      *
-     * @param prev
      * @return true if prev not null and in same frame and similar coordinates
      */
     public boolean follows(SeedMatch prev) {
@@ -119,7 +105,6 @@ public class SeedMatch {
     /**
      * resize array
      *
-     * @param array
      * @return new array
      */
     public static SeedMatch[] resizeAndConstructEntries(SeedMatch[] array, int newSize) {

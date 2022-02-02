@@ -24,7 +24,10 @@ import jloda.util.progress.ProgressPercentage;
 import malt.io.FastAFileIteratorBytes;
 import megan.io.OutputWriter;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -51,8 +54,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * resize
      *
-     * @param newSize
-     */
+	 */
     public void grow(int newSize) {
         if (newSize > headers.length) {
             byte[][] newHeaders = new byte[newSize][];
@@ -69,9 +71,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * add a header and sequence to the list of sequences
      *
-     * @param header
-     * @param sequence
-     */
+	 */
     public void add(byte[] header, byte[] sequence) {
         if (numberOfSequences == sequences.length) {
             headers = grow(headers);
@@ -86,7 +86,6 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * grow an array
      *
-     * @param array
      * @return bigger array
      */
     private byte[][] grow(byte[][] array) {
@@ -98,7 +97,6 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * Get header string. Index starts at 0
      *
-     * @param index
      * @return header
      */
     public byte[] getHeader(int index) {
@@ -134,7 +132,6 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * Get sequence. Index starts at 0
      *
-     * @param index
      * @return sequence
      */
     public byte[] getSequence(int index) {
@@ -144,10 +141,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * load a collection of fastA files
      *
-     * @param fileNames
-     * @throws IOException
-     * @throws CanceledException
-     */
+	 */
     public void loadFastAFiles(final List<String> fileNames, final IAlphabet alphabet) throws IOException {
         long totalSize = 0;
         for (String fileName : fileNames) {
@@ -167,9 +161,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * load data from a fastA file
      *
-     * @param fileName
-     * @throws FileNotFoundException
-     */
+	 */
     private void loadFastAFile(final String fileName, final IAlphabet alphabet) throws IOException {
         try (FastAFileIteratorBytes it = new FastAFileIteratorBytes(fileName, alphabet)) {
             while (it.hasNext()) {
@@ -185,10 +177,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * save sequences in fastA format
      *
-     * @param fileName
-     * @throws IOException
-     * @throws CanceledException
-     */
+	 */
     public void saveFastAFile(String fileName) throws IOException {
         try (BufferedWriter w = new BufferedWriter(new FileWriter(fileName), 8192)) {
             for (int i = 0; i < numberOfSequences; i++) {
@@ -201,11 +190,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * Save the reference data as an index file and a datafile
      *
-     * @param refIndexFile
-     * @param refDBFile
-     * @throws IOException
-     * @throws CanceledException
-     */
+	 */
     public void save(File refIndexFile, File refDBFile, File refInfFile, boolean saveFirstWordOnly) throws IOException, CanceledException {
         System.err.println("Writing file: " + refDBFile);
 
@@ -239,7 +224,6 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * get string consisting of first word
      *
-     * @param str
      * @return first word
      */
     static public byte[] getFirstWord(byte[] str) {
@@ -274,10 +258,7 @@ public class ReferencesDBBuilder implements ISequenceAccessor {
     /**
      * extend the header by the given tag. We use this to write the taxon id into a reference sequence
      *
-     * @param index
-     * @param tag
-     * @param id
-     */
+	 */
     public void extendHeader(int index, String tag, Integer id) {
         byte[] header = headers[index];
         int pos = 0;

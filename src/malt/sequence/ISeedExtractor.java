@@ -28,9 +28,6 @@ public interface ISeedExtractor {
     /**
      * extract a seed from a sequence code
      *
-     * @param seedShape
-     * @param seedWeight
-     * @param sequenceCode
      * @param pos          @return seed
      */
     long getSeedCode(boolean[] seedShape, int seedWeight, long[] sequenceCode, int pos);
@@ -38,10 +35,6 @@ public interface ISeedExtractor {
     /**
      * extract a seed from a sequence code
      *
-     * @param seedShape
-     * @param seedWeight
-     * @param sequenceCode
-     * @param pos
      * @param failValue    value returned if sequence too short   @return seed
      */
     long getSeedCode(boolean[] seedShape, int seedWeight, long[] sequenceCode, int pos, int failValue);
@@ -49,7 +42,6 @@ public interface ISeedExtractor {
     /**
      * is this a good seed?
      *
-     * @param seedCode
      * @return true, if good
      */
     boolean isGoodSeed(long seedCode, int seedWeight);

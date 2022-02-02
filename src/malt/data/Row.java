@@ -52,9 +52,7 @@ public class Row {
     /**
      * setting a single pair of numbers
      *
-     * @param refId
-     * @param position
-     */
+	 */
     public void setPair(int refId, int position) {
         size = 2;
         offset = 0;
@@ -82,7 +80,6 @@ public class Row {
     /**
      * use this to access numbers 0,..,size-1
      *
-     * @param index
      * @return item
      */
     public int get(int index) {
@@ -101,8 +98,7 @@ public class Row {
     /**
      * get string representation
      *
-     * @return
-     */
+	 */
     public String toString() {
         if (size > 0) {
             final StringBuilder buf = new StringBuilder();

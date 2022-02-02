@@ -51,9 +51,7 @@ public class BuildRow {
     /**
      * setting a single pair of numbers
      *
-     * @param firstNumber
-     * @param secondNumber
-     */
+	 */
     public void setPair(int firstNumber, int secondNumber) {
         size = 2;
         offset = 0;
@@ -81,7 +79,6 @@ public class BuildRow {
     /**
      * use this to access numbers 0,..,size-1
      *
-     * @param index
      * @return item
      */
     public int get(int index) {
@@ -109,8 +106,7 @@ public class BuildRow {
     /**
      * get string representation
      *
-     * @return
-     */
+	 */
     public String toString() {
         if (size > 0) {
             StringBuilder buf = new StringBuilder();

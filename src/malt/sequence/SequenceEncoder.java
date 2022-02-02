@@ -36,8 +36,7 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * constructor
      *
-     * @param alphabet
-     */
+	 */
     public SequenceEncoder(final Alphabet alphabet) {
         bitsPerLetter = alphabet.getBitsPerLetter();
         lettersPerWord = 64 / bitsPerLetter;
@@ -52,8 +51,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * encode a sequence
      *
-     * @param sequence
-     * @param length
      * @param sequenceCode array to use or null
      * @return encoded sequence
      */
@@ -86,8 +83,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * encode a sequence
      *
-     * @param sequence
-     * @param length
      * @return encoded sequence
      */
     public long[] encode(byte[] sequence, int length) {
@@ -97,7 +92,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * encode a sequence
      *
-     * @param sequence
      * @return encoded sequence
      */
     public long[] encode(byte[] sequence) {
@@ -107,7 +101,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * encode a single letter
      *
-     * @param letter
      * @return code
      */
     public byte encode(byte letter) {
@@ -117,7 +110,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * decode a sequenceCode
      *
-     * @param sequenceCode
      * @param bytes        sequence
      * @return sequence length
      */
@@ -144,7 +136,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * decode a sequence
      *
-     * @param sequenceCode
      * @return sequence
      */
     public byte[] decode(long[] sequenceCode) {
@@ -156,7 +147,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * compute the length of the sequence. It is not stored explicitly.
      *
-     * @param sequenceCode
      * @return sequence length
      */
     public int computeLength(long[] sequenceCode) {
@@ -177,8 +167,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * get a letter
      *
-     * @param sequenceCode
-     * @param pos
      * @return letter
      */
     public byte getLetterCode(long[] sequenceCode, int pos) {
@@ -192,7 +180,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * gets an getLetterCodeIterator over all letters
      *
-     * @param sequenceCode
      * @return getLetterCodeIterator
      */
     public Iterator<Byte> getLetterIterator(final long[] sequenceCode) {
@@ -203,7 +190,6 @@ public class SequenceEncoder implements ISeedExtractor {
      * gets an iterator over all letters.
      * No check is performed to see whether pos is in range
      *
-     * @param sequenceCode
      * @return iterator
      */
     public Iterator<Byte> getLetterIterator(final long[] sequenceCode, final int pos) {
@@ -241,7 +227,6 @@ public class SequenceEncoder implements ISeedExtractor {
      * gets a reverse iterator over all letters.
      * No check is performed to see whether pos is in range
      *
-     * @param sequenceCode
      * @return iterator
      */
     public Iterator<Byte> getLetterReverseIterator(final long[] sequenceCode, final int pos) {
@@ -277,9 +262,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * gets a seed code using the reduced alphabet
      *
-     * @param seedShape
-     * @param seedWeight
-     * @param sequenceCode
      * @param pos          @return reduced code
      */
     public long getSeedCode(final boolean[] seedShape, int seedWeight, long[] sequenceCode, int pos) {
@@ -289,10 +271,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * get the code for a given seed
      *
-     * @param seedShape
-     * @param seedWeight
-     * @param sequenceCode
-     * @param pos
      * @param failValue    @return code
      */
     public long getSeedCode(boolean[] seedShape, int seedWeight, long[] sequenceCode, int pos, int failValue) {
@@ -325,7 +303,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * decodes a seed code. For debugging only
      *
-     * @param seedCode
      * @return bytes for seed
      */
     public byte[] decodeSeed(long seedCode, int seedWeight) {
@@ -335,7 +312,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * decodes a letter code
      *
-     * @param letterCode
      * @return letter
      */
     public byte decode(byte letterCode) {
@@ -345,12 +321,7 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * get the code for sequence spanned by a seed
      *
-     * @param seedLength
-     * @param sequenceCode
-     * @param pos
-     * @param seedWords
-     * @return
-     */
+	 */
     public long[] getSeedSpanCode(int seedLength, long[] sequenceCode, int pos, long[] seedWords) {
         if (seedWords == null)
             seedWords = new long[1 + seedLength / lettersPerWord];
@@ -384,7 +355,6 @@ public class SequenceEncoder implements ISeedExtractor {
     /**
      * is this a good seed? Yes, if it contains at least two different letters and none is undefined
      *
-     * @param seedCode
      * @return true, if good
      */
     public boolean isGoodSeed(long seedCode, int seedWeight) {

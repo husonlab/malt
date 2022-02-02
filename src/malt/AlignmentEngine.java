@@ -240,7 +240,7 @@ public class AlignmentEngine {
 
                                     // todo: debugging
                                     if (refIndex >= referencesDB.getNumberOfSequences()) {
-                                        System.err.println("matchLocations=" + matchLocations.toString());
+                                        System.err.println("matchLocations=" + matchLocations);
                                         throw new IOException("refIndex=" + refIndex + ": out of bounds: " + referencesDB.getNumberOfSequences());
                                     }
 
@@ -288,7 +288,7 @@ public class AlignmentEngine {
                             if (!seedMatch.follows(previous)) {   // ignore back-to-back matches
                                 // todo: debugging
                                 if (refIndex >= referencesDB.getNumberOfSequences()) {
-                                    System.err.println("seedMatch=" + seedMatch.toString());
+									System.err.println("seedMatch=" + seedMatch);
                                     throw new IOException("refIndex=" + refIndex + ": out of bounds: " + referencesDB.getNumberOfSequences());
                                 }
                                 final byte[] referenceSequence = referencesDB.getSequence(refIndex);

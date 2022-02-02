@@ -27,8 +27,7 @@ public class Tester {
     /**
      * shows that modulo takes three times as long as bitwise-and or shift
      *
-     * @param args
-     */
+	 */
     public static void main(String[] args) {
         System.err.println("MAX:  " + Integer.MAX_VALUE + " bin: " + Integer.toBinaryString(Integer.MAX_VALUE));
         System.err.println("MIN+1:  " + (Integer.MIN_VALUE + 1));
@@ -58,7 +57,7 @@ public class Tester {
         }
         */
 
-        long numberOfSeeds = (long) (10000);
+		long numberOfSeeds = 10000;
         System.err.println("numberOfSeeds: " + numberOfSeeds);
 
         int tableSize;

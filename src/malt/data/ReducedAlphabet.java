@@ -111,9 +111,7 @@ public class ReducedAlphabet implements IAlphabet {
     /**
      * maps letter to normalized base or amino acid
      *
-     * @param letter
-     * @return
-     */
+	 */
     public byte getNormalized(byte letter) {
         return normalizedLetters[letter];
     }
@@ -121,8 +119,6 @@ public class ReducedAlphabet implements IAlphabet {
     /**
      * do letters a and b correspond to the same base or amino acid?
      *
-     * @param a
-     * @param b
      * @return true, if equalOverShorterOfBoth bases
      */
     public boolean equal(byte a, byte b) {
@@ -159,8 +155,7 @@ public class ReducedAlphabet implements IAlphabet {
     /**
      * size of alphabet
      *
-     * @return
-     */
+	 */
     public int size() {
         return size;
     }
@@ -177,10 +172,7 @@ public class ReducedAlphabet implements IAlphabet {
     /**
      * a reduced protein seed good if it doesn't contain an X
      *
-     * @param word
-     * @param length
-     * @return
-     */
+	 */
     @Override
     public boolean isGoodSeed(byte[] word, int length) {
         for (int i = 0; i < length; i++) {
@@ -211,8 +203,8 @@ public class ReducedAlphabet implements IAlphabet {
                 }
             }
             ReducedAlphabet alphabet = new ReducedAlphabet(name);
-            System.err.println("Alphabet: " + alphabet.toString());
-            System.err.println("Size:     " + alphabet.size());
+			System.err.println("Alphabet: " + alphabet);
+			System.err.println("Size:     " + alphabet.size());
         }
     }
 }

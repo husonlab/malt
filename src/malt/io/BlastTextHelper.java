@@ -66,7 +66,6 @@ public class BlastTextHelper {
     /**
      * gets the appropriate header line
      *
-     * @param mode
      * @return header line
      */
     public static String getBlastTextHeader(BlastMode mode) {
@@ -85,7 +84,6 @@ public class BlastTextHelper {
     /**
      * get query name followed by tab
      *
-     * @param query
      * @return query name plus tab
      */
     public static byte[] getQueryNamePlusTab(final FastARecord query) {

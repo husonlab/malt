@@ -27,9 +27,6 @@ import java.util.Comparator;
  * Daniel Huson, 8.2014
  */
 public
-/**
- * a read match, consisting of a score, reference ID and the match text
- */
 class ReadMatch {
     private static long numberOfEntries = 0;
     private long entryNumber;  // used to make all matches unique
@@ -63,10 +60,7 @@ class ReadMatch {
     /**
      * constructor
      *
-     * @param bitScore
-     * @param referenceId
-     * @param text
-     */
+	 */
     public ReadMatch(float bitScore, float expected, int percentIdentity, int referenceId, byte[] text, byte[] rma6Text, int startRef, int endRef) {
         this.bitScore = bitScore;
         this.expected = expected;
@@ -82,10 +76,7 @@ class ReadMatch {
     /**
      * reuse this object
      *
-     * @param score
-     * @param referenceId
-     * @param text
-     */
+	 */
     public void set(float score, int referenceId, byte[] text, byte[] rma3Text, int startRef, int endRef) {
         this.bitScore = score;
         this.referenceId = referenceId;
@@ -144,21 +135,14 @@ class ReadMatch {
             else if (a.referenceId < b.referenceId)
                 return 1;
             else if (a.referenceId > b.referenceId)
-                return -1;
-            else if (a.entryNumber < b.entryNumber)
-                return -1;
-            else if (a.entryNumber > b.entryNumber)
-                return 1;
-            else
-                return 0;
+				return -1;
+			else return Long.compare(a.entryNumber, b.entryNumber);
         };
     }
 
     /**
      * does this overlap the given reference coordinates?
      *
-     * @param start
-     * @param end
      * @return overlaps the given coordinates?
      */
     public boolean overlap(int start, int end) {

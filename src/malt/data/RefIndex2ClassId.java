@@ -42,9 +42,7 @@ public class RefIndex2ClassId {
     /**
      * put, indices start at 0
      *
-     * @param refIndex
-     * @param classId
-     */
+	 */
     public void put(int refIndex, int classId) {
         refIndex2ClassId[refIndex] = classId;
     }
@@ -52,7 +50,6 @@ public class RefIndex2ClassId {
     /**
      * get, indices start at 0
      *
-     * @param refIndex
      * @return class id for given reference id
      */
     public int get(int refIndex) {
@@ -62,9 +59,7 @@ public class RefIndex2ClassId {
     /**
      * save to a stream and then close the stream
      *
-     * @param file
-     * @throws java.io.IOException
-     */
+	 */
     public void save(File file) throws IOException {
         save(file, MAGIC_NUMBER);
     }
@@ -72,9 +67,7 @@ public class RefIndex2ClassId {
     /**
      * save to a stream and then close the stream
      *
-     * @param file
-     * @throws java.io.IOException
-     */
+	 */
     public void save(File file, byte[] magicNumber) throws IOException {
         try (BufferedOutputStream outs = new BufferedOutputStream(new FileOutputStream(file)); ProgressPercentage progressListener = new ProgressPercentage("Writing file: " + file, maxRefId)) {
             outs.write(magicNumber);
@@ -94,8 +87,7 @@ public class RefIndex2ClassId {
     /**
      * constructor from a file
      *
-     * @param file
-     */
+	 */
     public RefIndex2ClassId(File file) throws IOException {
         this(file, MAGIC_NUMBER);
     }
@@ -103,8 +95,7 @@ public class RefIndex2ClassId {
     /**
      * constructor from a file
      *
-     * @param file
-     */
+	 */
     public RefIndex2ClassId(File file, byte[] magicNumber) throws IOException {
         ProgressPercentage progressListener = null;
         try (BufferedInputStream ins = new BufferedInputStream(new FileInputStream(file))) {
@@ -128,10 +119,8 @@ public class RefIndex2ClassId {
     /**
      * read an int from an input stream
      *
-     * @param ins
      * @return long value
-     * @throws java.io.IOException
-     */
+	 */
     public static int readInt(InputStream ins) throws IOException {
         return ((ins.read() & 0xFF) << 24)
                 + ((ins.read() & 0xFF) << 16)
@@ -142,10 +131,7 @@ public class RefIndex2ClassId {
     /**
      * writes an int value
      *
-     * @param outs
-     * @param value
-     * @throws java.io.IOException
-     */
+	 */
     public static void writeInt(OutputStream outs, int value) throws IOException {
         outs.write((byte) (value >> 24));
         outs.write((byte) (value >> 16));

@@ -69,11 +69,7 @@ public class ReferencesHashTableBuilder {
     /**
      * constructor
      *
-     * @param seedShape
-     * @param numberOfSequences
-     * @param numberOfLetters
-     * @param randomNumberSeed
-     */
+	 */
     public ReferencesHashTableBuilder(SequenceType referenceSequenceType, IAlphabet alphabet, SeedShape seedShape,
                                       int numberOfSequences, long numberOfLetters, int randomNumberSeed, int maxHitPerSeed, float hashTableLoadFactor, int stepSize) throws IOException {
         this.referenceSequenceType = referenceSequenceType;
@@ -83,7 +79,7 @@ public class ReferencesHashTableBuilder {
         this.stepSize = stepSize;
 
         // total is numberOfLetters minus last letter of each sequence divided by stepSize
-        final long totalNumberOfSeeds = (long) (Math.ceil((numberOfLetters - (numberOfSequences * (seedShape.getLength() - 1))) / stepSize));
+		final long totalNumberOfSeeds = (long) (Math.ceil((numberOfLetters - ((long) numberOfSequences * (seedShape.getLength() - 1))) / stepSize));
         // number of possible different seed values:
         final long numberOfPossibleHashValues = (long) Math.ceil(Math.pow(alphabet.size(), seedShape.getWeight()));
 
@@ -124,9 +120,7 @@ public class ReferencesHashTableBuilder {
     /**
      * build the hash table
      *
-     * @param referencesDB
-     * @param numberOfThreads
-     */
+	 */
     public void buildTable(final File tableIndexFile, final File tableDataFile, final ReferencesDBBuilder referencesDB, int numberOfThreads, boolean buildTableInMemory) throws IOException {
         tableIndex = new long[tableSize];
 
@@ -143,10 +137,7 @@ public class ReferencesHashTableBuilder {
     /**
      * save the table index
      *
-     * @param tableIndex
-     * @param tableIndexFile
-     * @throws IOException
-     */
+	 */
     private void saveTableIndex(long[] tableIndex, File tableIndexFile) throws IOException {
         final ProgressPercentage progress = new ProgressPercentage("Writing file: " + tableIndexFile, tableIndex.length);
         try (OutputWriter outs = new OutputWriter(tableIndexFile)) {
@@ -161,9 +152,7 @@ public class ReferencesHashTableBuilder {
     /**
      * count the seeds. He we use forwardTable and reverseTable to hold the counts, later the counts are replaced by locations
      *
-     * @param referencesDB
-     * @param numberOfThreads0
-     */
+	 */
     private void countSeeds(final ReferencesDBBuilder referencesDB, int numberOfThreads0) {
         final int numberOfThreads = Math.min(referencesDB.getNumberOfSequences(), numberOfThreads0);
 
@@ -224,8 +213,7 @@ public class ReferencesHashTableBuilder {
     /**
      * allocate the hash table
      *
-     * @param numberOfThreads0
-     */
+	 */
     private long allocateTable(final int numberOfThreads0) throws IOException {
         final int numberOfThreads = Math.min(tableSize, numberOfThreads0);
 
@@ -303,9 +291,7 @@ public class ReferencesHashTableBuilder {
     /**
      * Fill the hash table
      *
-     * @param referencesDB
-     * @param numberOfThreads0
-     */
+	 */
     private void fillTable(final ReferencesDBBuilder referencesDB, int numberOfThreads0) {
         final int numberOfThreads = Math.min(referencesDB.getNumberOfSequences(), numberOfThreads0);
 
@@ -376,8 +362,7 @@ public class ReferencesHashTableBuilder {
     /**
      * randomize the rows of the table, parallel version
      *
-     * @param numberOfThreads
-     */
+	 */
     private void randomizeBuildRows(final int numberOfThreads) {
         final ProgressPercentage progressPercentage = new ProgressPercentage("Randomizing rows...", tableSize);
 
@@ -434,7 +419,6 @@ public class ReferencesHashTableBuilder {
      * for a given key, add the reference id and sequence offset to table
      * uses very naive synchronization
      *
-     * @param key
      * @return hash value
      */
     public int getHash(byte[] key) {
@@ -457,9 +441,7 @@ public class ReferencesHashTableBuilder {
     /**
      * save master index file
      *
-     * @param file
-     * @throws IOException
-     */
+	 */
     public void saveIndexFile(File file) throws IOException {
         final ProgressPercentage progressPercentage = new ProgressPercentage("Writing file: " + file);
 
@@ -489,9 +471,7 @@ public class ReferencesHashTableBuilder {
     /**
      * make sure that we can write the files
      *
-     * @param indexDirectory
-     * @throws IOException
-     */
+	 */
     public static void checkCanWriteFiles(String indexDirectory, int tableNumber) throws IOException {
         final File indexFile = new File(indexDirectory, "index" + tableNumber + ".idx");
         if ((!indexFile.exists() || indexFile.delete()) && !indexFile.createNewFile())
