@@ -1235,8 +1235,8 @@
 }
 return true;</validation>
                 <preActivation>WizardContext wizardContext = context.getWizardContext();
-wizardContext.setNextButtonVisible(false);
-wizardContext.setCancelButtonVisible(false);</preActivation>
+wizardContext.setControlButtonEnabled(ControlButtonType.NEXT, false);
+wizardContext.setControlButtonEnabled(ControlButtonType.CANCEL, false);</preActivation>
                 <postActivation />
                 <actions />
                 <formComponents />
