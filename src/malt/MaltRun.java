@@ -69,8 +69,8 @@ public class MaltRun {
             PeakMemoryUsageMonitor.start();
             var program = new MaltRun();
             ResourceManager.setWarningMissingIcon(false);
-            ProgramProperties.setProgramIcons(ResourceManager.getIcons("malt-run16.png", "malt-run32.png", "malt-run48.png"));
-            ProgramProperties.setProgramName("MaltRun");
+			jloda.swing.util.ProgramProperties.setProgramIcons(ResourceManager.getIcons("malt-run16.png", "malt-run32.png", "malt-run48.png"));
+			ProgramProperties.setProgramName("MaltRun");
             ProgramProperties.setProgramVersion(Version.SHORT_DESCRIPTION);
 
             program.run(args);

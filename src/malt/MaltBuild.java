@@ -60,8 +60,8 @@ public class MaltBuild {
             PeakMemoryUsageMonitor.start();
             final MaltBuild maltBuild = new MaltBuild();
             ResourceManager.setWarningMissingIcon(false);
-            ProgramProperties.setProgramIcons(ResourceManager.getIcons("malt-build16.png", "malt-build32.png", "malt-build48.png"));
-            ProgramProperties.setProgramName("MaltBuild");
+			jloda.swing.util.ProgramProperties.setProgramIcons(ResourceManager.getIcons("malt-build16.png", "malt-build32.png", "malt-build48.png"));
+			ProgramProperties.setProgramName("MaltBuild");
             ProgramProperties.setProgramVersion(Version.SHORT_DESCRIPTION);
 
             maltBuild.run(args);
