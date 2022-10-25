@@ -26,14 +26,11 @@ import jloda.util.progress.ProgressPercentage;
 import malt.MaltOptions;
 import malt.Version;
 import malt.data.ReadMatch;
-import malt.mapping.Mapping;
 import malt.mapping.MappingManager;
 import megan.classification.Classification;
 import megan.core.ContaminantManager;
 import megan.core.Document;
 import megan.core.SyncArchiveAndDataTable;
-import megan.data.IReadBlock;
-import megan.data.IReadBlockIterator;
 import megan.io.InputOutputReaderWriter;
 import megan.rma6.MatchLineRMA6;
 import megan.rma6.RMA6Connector;
@@ -96,38 +93,37 @@ public class RMA6Writer {
     /**
      * process the matches associated with a given query.
      * This is used in malt1
-     *
 	 */
     public synchronized void processMatches(String queryHeader, String querySequence, ReadMatch[] matchesArray, int numberOfMatches) throws IOException {
         // setup query text:
-		byte[] queryName = StringUtils.swallowLeadingGreaterSign(StringUtils.getFirstWord(queryHeader)).getBytes();
-		byte[] queryHeaderText = queryHeader.getBytes();
-        byte[] querySequenceText = querySequence.getBytes();
+        var queryName = StringUtils.swallowLeadingGreaterSign(StringUtils.getFirstWord(queryHeader)).getBytes();
+        var queryHeaderText = queryHeader.getBytes();
+        var querySequenceText = querySequence.getBytes();
         if (queryHeaderText.length + querySequenceText.length + 100 > queryText.length) {
             queryText = new byte[100 + queryHeaderText.length + querySequenceText.length];
         }
         System.arraycopy(queryHeaderText, 0, queryText, 0, queryHeaderText.length);
-        int queryTextLength = queryHeaderText.length;
+        var queryTextLength = queryHeaderText.length;
         queryText[queryTextLength++] = '\n';
         System.arraycopy(querySequenceText, 0, queryText, queryTextLength, querySequenceText.length);
         queryTextLength += querySequenceText.length;
         queryText[queryTextLength++] = '\n';
 
-        final String[] key = new String[cNames.length];
-        for (int i = 0; i < cNames.length; i++) {
+        final var key = new String[cNames.length];
+        for (var i = 0; i < cNames.length; i++) {
             key[i] = getKey(cNames[i]);
         }
 
         // setup matches text:
-        int matchesTextLength = 0;
+        var matchesTextLength = 0;
         numberOfMatches = Math.min(maxMatchesPerQuery, numberOfMatches);
-        for (int m = 0; m < numberOfMatches; m++) {
-            final ReadMatch match = matchesArray[m];
-            final byte[] matchText = match.getRMA6Text();
+        for (var m = 0; m < numberOfMatches; m++) {
+            final var match = matchesArray[m];
+            final var matchText = match.getRMA6Text();
 
-            final int approximateLengthToAdd = matchesTextLength + matchText.length + queryName.length;
+            final var approximateLengthToAdd = matchesTextLength + matchText.length + queryName.length;
             if (approximateLengthToAdd + 100 > matchesText.length) {
-                byte[] tmp = new byte[approximateLengthToAdd + 10000];
+                var tmp = new byte[approximateLengthToAdd + 10000];
                 System.arraycopy(matchesText, 0, tmp, 0, matchesTextLength);
                 matchesText = tmp;
             }
@@ -143,14 +139,14 @@ public class RMA6Writer {
             matches[m].setExpected(match.getExpected());
             matches[m].setPercentIdentity(match.getPercentIdentity());
 
-            final String refHeader = (parseHeaders ? getWordAsString(match.getRMA6Text(), 2) : null);
+            final var refHeader = (parseHeaders ? getWordAsString(match.getRMA6Text(), 2) : null);
 
-            for (int i = 0; i < cNames.length; i++) {
-                int id = 0;
-                if (parseHeaders)
+            for (var i = 0; i < cNames.length; i++) {
+                var id = 0;
+                if (parseHeaders && refHeader != null)
                     id = parseIdInHeader(key[i], refHeader);
                 if (id == 0) {
-                    Mapping mapping = MappingManager.getMapping(i);
+                    var mapping = MappingManager.getMapping(i);
                     if (mapping != null)
                         id = MappingManager.getMapping(i).get(match.getReferenceId());
                 }
@@ -163,7 +159,7 @@ public class RMA6Writer {
     }
 
     private int parseIdInHeader(String key, String word) {
-        int pos = word.indexOf(key);
+        var pos = word.indexOf(key);
         if (pos != -1) {
             if (NumberUtils.isInteger(word.substring(pos + key.length())))
                 return NumberUtils.parseInt(word.substring(pos + key.length()));
@@ -186,14 +182,14 @@ public class RMA6Writer {
             final boolean pairedReads = maltOptions.isPairedReads();
             if (pairedReads) { // update paired reads info and then run dataprocessor
                 long count = 0;
-                try (InputOutputReaderWriter raf = new InputOutputReaderWriter(rma6File, "rw");
-                     IReadBlockIterator it = (new RMA6Connector(rma6File)).getAllReadsIterator(0, 1000, false, false)) {
-                    final ProgressPercentage progress = new ProgressPercentage("Linking paired reads");
+                try (var raf = new InputOutputReaderWriter(rma6File, "rw");
+                     var it = (new RMA6Connector(rma6File)).getAllReadsIterator(0, 1000, false, false);
+                     var progress = new ProgressPercentage("Linking paired reads")) {
                     progress.setProgress(0);
                     progress.setProgress(it.getMaximumProgress());
 
                     while (it.hasNext()) {
-                        final IReadBlock readBlock = it.next();
+                        final var readBlock = it.next();
                         if (readBlock.getMateUId() > 0) {
                             if (readBlock.getMateUId() > readBlock.getUId())
                                 throw new IOException("Mate uid=" + readBlock.getMateUId() + ": too big");
@@ -203,14 +199,13 @@ public class RMA6Writer {
                         }
                         progress.setProgress(it.getProgress());
                     }
-                    progress.close();
                     System.err.printf("Number of pairs:%,14d%n", count);
                 }
             }
 
             // we need to run data processor
 
-            final Document doc = new Document();
+            final var doc = new Document();
             doc.setTopPercent(maltOptions.getTopPercentLCA());
             doc.setLcaAlgorithm(maltOptions.isUseWeightedLCA() ? Document.LCAAlgorithm.weighted : Document.LCAAlgorithm.naive);
             doc.setLcaCoveragePercent(maltOptions.getLcaCoveragePercent());
@@ -237,7 +232,7 @@ public class RMA6Writer {
             doc.processReadHits();
 
             // update and then save auxiliary data:
-			final String sampleName = FileUtils.replaceFileSuffix(FileUtils.getFileNameWithoutPath(rma6File), "");
+            final var sampleName = FileUtils.replaceFileSuffix(FileUtils.getFileNameWithoutPath(rma6File), "");
             SyncArchiveAndDataTable.syncRecomputedArchive2Summary(doc.getReadAssignmentMode(), sampleName, "LCA", doc.getBlastMode(), doc.getParameterString(), new RMA6Connector(rma6File), doc.getDataTable(), 0);
             doc.saveAuxiliaryData();
         } catch (CanceledException ex) {
@@ -251,14 +246,11 @@ public class RMA6Writer {
      * @return key
      */
     private static String getKey(String fName) {
-        switch (fName.toLowerCase()) {
-            case "interpro2go":
-                return "ipr|";
-            case "eggnog":
-                return "cog|";
-            default:
-                return fName.toLowerCase() + "|";
-        }
+        return switch (fName.toLowerCase()) {
+            case "interpro2go" -> "ipr|";
+            case "eggnog" -> "cog|";
+            default -> fName.toLowerCase() + "|";
+        };
     }
 
     /**
@@ -267,9 +259,9 @@ public class RMA6Writer {
      * @return string or null
      */
     private static String getWordAsString(byte[] text, int whichWord) {
-        int start = -1;
+        var start = -1;
         whichWord--;
-        for (int i = 0; i < text.length; i++) {
+        for (var i = 0; i < text.length; i++) {
             if (Character.isWhitespace(text[i])) {
                 if (whichWord > 0) {
                     whichWord--;

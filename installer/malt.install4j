@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="8.0.4" transformSequenceNumber="8">
+<install4j version="10.0.3" transformSequenceNumber="10">
   <directoryPresets config="../../jloda" />
-  <application name="MALT" applicationId="3229-5251-7410-5330" mediaDir="../../../builds" shortName="MALT" publisher="Daniel Huson's Lab, University of Tuebingen" publisherWeb="www-ab.informatik.uni-tuebingen.de" version="0" allPathsRelative="true" backupOnSave="true" macVolumeId="970a61501b2fa775" javaMinVersion="13" allowBetaVM="true">
-    <variables>
-      <variable name="variable" />
-    </variables>
+  <application name="MALT" applicationId="3229-5251-7410-5330" mediaDir="../../../builds" shortName="MALT" publisher="Daniel Huson's Lab, University of Tuebingen" publisherWeb="ab.inf.uni-tuebingen.de" version="0" allPathsRelative="true" backupOnSave="true" macVolumeId="970a61501b2fa775" javaMinVersion="17" allowBetaVM="true">
     <codeSigning macEnabled="true" macPkcs12File="../../../../etc/application.p12">
       <macSearchedJars>
         <entry>jna-*</entry>
@@ -12,7 +9,7 @@
         <entry>sqlite-*</entry>
       </macSearchedJars>
     </codeSigning>
-    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk14/jdk-14.0.2+12">
+    <jreBundles jdkProviderId="Liberica" release="18/18.0.2.1+1">
       <modules />
     </jreBundles>
   </application>
@@ -67,13 +64,11 @@
           <versionLine x="17" y="10" text="MALT ${compiler:sys.version}" fontSize="12" />
         </text>
       </splashScreen>
-      <java mainClass="malt/malt.MaltBuild" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US  --add-modules=malt" arguments="--argsGui" preferredVM="server">
+      <java mainClass="malt/malt.MaltBuild" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" arguments="--argsGui" preferredVM="server">
         <modulePath>
           <directory location="jars" failOnError="false" />
-          <directory location="jars/megan6server" failOnError="false" />
         </modulePath>
       </java>
-      <macStaticAssociationActions mode="selected" />
       <vmOptionsFile overwriteMode="1" />
       <iconImageFiles>
         <file path="../src/malt/resources/icons/malt-build16.png" />
@@ -83,13 +78,11 @@
     </launcher>
     <launcher name="malt-run-gui" id="1691243093">
       <executable name="malt-run-gui" iconSet="true" stderrFile="malt-run.log" redirectStdout="true" stdoutFile="malt-run.log" executableMode="gui" changeWorkingDirectory="false" dpiAware="false" />
-      <java mainClass="malt/malt.MaltRun" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US  --add-modules=malt" arguments="--argsGui">
+      <java mainClass="malt/malt.MaltRun" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" arguments="--argsGui">
         <modulePath>
           <directory location="jars" failOnError="false" />
-          <directory location="jars/megan6server" failOnError="false" />
         </modulePath>
       </java>
-      <macStaticAssociationActions mode="selected" />
       <iconImageFiles>
         <file path="../src/malt/resources/icons/malt-build16.png" />
         <file path="../src/malt/resources/icons/malt-build32.png" />
@@ -104,13 +97,11 @@
           <versionLine x="17" y="10" text="MALT ${compiler:sys.version}" fontSize="12" />
         </text>
       </splashScreen>
-      <java mainClass="malt/malt.MaltBuild" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US  --add-modules=malt" preferredVM="server">
+      <java mainClass="malt/malt.MaltBuild" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US" preferredVM="server">
         <modulePath>
           <directory location="jars" failOnError="false" />
-          <directory location="jars/megan6server" failOnError="false" />
         </modulePath>
       </java>
-      <macStaticAssociationActions mode="selected" />
       <vmOptionsFile overwriteMode="1" />
       <iconImageFiles>
         <file path="../src/malt/resources/icons/malt-build16.png" />
@@ -120,13 +111,11 @@
     </launcher>
     <launcher name="malt-run" id="1691243207">
       <executable name="malt-run" iconSet="true" redirectStderr="false" executableMode="console" changeWorkingDirectory="false" dpiAware="false" />
-      <java mainClass="malt/malt.MaltRun" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US  --add-modules=malt">
+      <java mainClass="malt/malt.MaltRun" mainMode="module" vmParameters="-server    -Dapple.laf.useScreenMenuBar=true  -Duser.language=en -Duser.region=US">
         <modulePath>
           <directory location="jars" failOnError="false" />
-          <directory location="jars/megan6server" failOnError="false" />
         </modulePath>
       </java>
-      <macStaticAssociationActions mode="selected" />
       <iconImageFiles>
         <file path="../src/malt/resources/icons/malt-build16.png" />
         <file path="../src/malt/resources/icons/malt-build32.png" />
@@ -940,11 +929,19 @@ context.goForward(1, true, true);
           <group id="1691243595" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize banner image" externalParametrizationMode="include">
             <serializedBean>
               <property name="backgroundColor">
-                <object class="java.awt.Color">
-                  <int>255</int>
-                  <int>255</int>
-                  <int>255</int>
-                  <int>255</int>
+                <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                  <object class="java.awt.Color">
+                    <int>255</int>
+                    <int>255</int>
+                    <int>255</int>
+                    <int>255</int>
+                  </object>
+                  <object class="java.awt.Color">
+                    <int>49</int>
+                    <int>52</int>
+                    <int>53</int>
+                    <int>255</int>
+                  </object>
                 </object>
               </property>
               <property name="borderSides">
@@ -953,11 +950,19 @@ context.goForward(1, true, true);
                 </object>
               </property>
               <property name="imageEdgeBackgroundColor">
-                <object class="java.awt.Color">
-                  <int>25</int>
-                  <int>143</int>
-                  <int>220</int>
-                  <int>255</int>
+                <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                  <object class="java.awt.Color">
+                    <int>25</int>
+                    <int>143</int>
+                    <int>220</int>
+                    <int>255</int>
+                  </object>
+                  <object class="java.awt.Color">
+                    <int>0</int>
+                    <int>74</int>
+                    <int>151</int>
+                    <int>255</int>
+                  </object>
                 </object>
               </property>
               <property name="imageEdgeBorder" type="boolean" value="true" />
@@ -1011,11 +1016,19 @@ context.goForward(1, true, true);
               <group id="1691243602" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize title bar" externalParametrizationMode="include">
                 <serializedBean>
                   <property name="backgroundColor">
-                    <object class="java.awt.Color">
-                      <int>255</int>
-                      <int>255</int>
-                      <int>255</int>
-                      <int>255</int>
+                    <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                      <object class="java.awt.Color">
+                        <int>255</int>
+                        <int>255</int>
+                        <int>255</int>
+                        <int>255</int>
+                      </object>
+                      <object class="java.awt.Color">
+                        <int>49</int>
+                        <int>52</int>
+                        <int>53</int>
+                        <int>255</int>
+                      </object>
                     </object>
                   </property>
                   <property name="borderSides">
@@ -1123,30 +1136,14 @@ context.goForward(1, true, true);
         <launcher id="1691242235" />
         <launcher id="1691243093" />
       </excludedLaunchers>
-      <jreBundle jreBundleSource="generated">
-        <modules>
-          <defaultModules set="jre" />
-          <jmodDirectory location="../../javafx-jmods/unix" />
-        </modules>
-      </jreBundle>
     </unixInstaller>
-    <macosFolder name="Mac OS X Folder" id="1691242149" installDir="MALT" overridePrincipalLanguage="true">
-      <jreBundle jreBundleSource="generated">
-        <modules>
-          <jmodDirectory location="../../javafx-jmods/macos" />
-        </modules>
-      </jreBundle>
-    </macosFolder>
-    <windows name="Windows" id="1691242407" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" installDir="Malt" overridePrincipalLanguage="true">
-      <jreBundle jreBundleSource="generated" installOnlyIfNecessary="true">
-        <modules>
-          <jmodDirectory location="../../javafx-jmods/windows" />
-        </modules>
-      </jreBundle>
+    <macosFolder name="Mac OS X Folder" id="1691242149" installDir="MALT" overridePrincipalLanguage="true" />
+    <windows name="Windows" id="1691242407" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" installDir="Malt" overridePrincipalLanguage="true" architecture="64">
+      <jreBundle installOnlyIfNecessary="true" />
     </windows>
   </mediaSets>
   <buildIds>
-    <mediaSet refId="1691242149" />
+    <mediaSet refId="1691242146" />
   </buildIds>
   <buildOptions disableSigning="true" disableNotarization="true" />
 </install4j>

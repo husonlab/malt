@@ -363,18 +363,14 @@ public class AlignmentEngine {
                                                 byte[] rma6Text = null;
                                                 if (matchesWriter != null) {
                                                     switch (matchOutputFormat) {
-                                                        default:
-                                                        case Text: {
+                                                        case Text -> {
                                                             text = aligner.getAlignmentText(dataForInnerLoop, seedMatch.getRank());
-                                                            break;
                                                         }
-                                                        case Tab: {
+                                                        case Tab -> {
                                                             text = aligner.getAlignmentTab(dataForInnerLoop, null, referenceHeader, seedMatch.getRank()); // don't pass queryHeader, it is added below
-                                                            break;
                                                         }
-                                                        case SAM: {
+                                                        case SAM -> {
                                                             rma6Text = text = aligner.getAlignmentSAM(dataForInnerLoop, null, query.getSequence(), referenceHeader, seedMatch.getRank()); // don't pass queryHeader, it is added below
-                                                            break;
                                                         }
                                                     }
                                                 }
@@ -428,8 +424,7 @@ public class AlignmentEngine {
         if (numberOfMatches > 0) {
             if (matchesWriter != null) {
                 switch (matchOutputFormat) {
-                    default:
-                    case Text: {
+                    case Text -> {
                         byte[][] strings = new byte[3 * numberOfMatches + 1][];
                         strings[0] = BlastTextHelper.makeQueryLine(query);
                         for (int i = 0; i < numberOfMatches; i++) {
@@ -439,10 +434,8 @@ public class AlignmentEngine {
                             strings[3 * i + 3] = readMatch.getText();
                         }
                         matchesWriter.writeByRank(threadNumber, query.getId(), strings);
-                        break;
                     }
-                    case SAM:
-                    case Tab: {
+                    case SAM, Tab -> {
                         byte[] queryNamePlusTab = BlastTextHelper.getQueryNamePlusTab(query);
                         byte[][] strings = new byte[2 * numberOfMatches][];
                         for (int i = 0; i < numberOfMatches; i++) {
@@ -451,7 +444,6 @@ public class AlignmentEngine {
                             strings[2 * i + 1] = readMatch.getText();
                         }
                         matchesWriter.writeByRank(threadNumber, query.getId(), strings);
-                        break;
                     }
                 }
             }

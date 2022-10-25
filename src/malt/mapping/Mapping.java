@@ -84,8 +84,8 @@ public class Mapping extends RefIndex2ClassId {
 	 */
     public static Map<String, Mapping> create(Collection<String> namesToUse, ISequenceAccessor referencesDB, AccessAccessionMappingDatabase mappingDatabase, ProgressListener progress) throws IOException, SQLException {
 
-        final Collection<String> cNames = mappingDatabase.getClassificationNames();
-        final int maxIndex = cNames.stream().mapToInt(name -> {
+        final var cNames = mappingDatabase.getClassificationNames();
+        final var maxIndex = cNames.stream().mapToInt(name -> {
             try {
                 return mappingDatabase.getClassificationIndex(name);
             } catch (SQLException throwables) {
@@ -94,15 +94,14 @@ public class Mapping extends RefIndex2ClassId {
             }
         }).max().orElse(-1);
 
-        final Map<String, Mapping> mappings = new HashMap<>();
-        final String[] cIndex2Name = new String[maxIndex + 1];
-        final String[] tags = new String[maxIndex + 1];
+        final var mappings = new HashMap<String, Mapping>();
+        final var cIndex2Name = new String[maxIndex + 1];
+        final var tags = new String[maxIndex + 1];
 
         {
             int c = 0;
-            for (String cName : cNames) {
-                final int index = mappingDatabase.getClassificationIndex(cName) - 2;
-
+            for (var cName : cNames) {
+                final var index = mappingDatabase.getClassificationIndex(cName) - 2;
                 if (namesToUse.contains(cName)) {
                     mappings.put(cName, new Mapping(cName, referencesDB.getNumberOfSequences()));
                     cIndex2Name[index] = cName;
@@ -115,27 +114,27 @@ public class Mapping extends RefIndex2ClassId {
         progress.setMaximum(referencesDB.getNumberOfSequences());
         progress.setProgress(0);
 
-        final int chunkSize = 10000;
-        final String[] accessions = new String[chunkSize];
+        final var chunkSize = 10000;
+        final var accessions = new String[chunkSize];
 
-        for (int offset = 0; offset < referencesDB.getNumberOfSequences(); offset += chunkSize) {
+        for (var offset = 0; offset < referencesDB.getNumberOfSequences(); offset += chunkSize) {
 
-            final int numberInChunk = Math.min(chunkSize, referencesDB.getNumberOfSequences() - offset * chunkSize);
-            for (int r = 0; r < numberInChunk; r++) {
+            final var numberInChunk = Math.min(chunkSize, referencesDB.getNumberOfSequences() - offset * chunkSize);
+            for (var r = 0; r < numberInChunk; r++) {
                 accessions[r] = getFirstWordAccession(referencesDB.getHeader(offset + r));
             }
-            final Map<String, int[]> accession2ids = mappingDatabase.getValues(accessions, numberInChunk);
-            for (int r = 0; r < numberInChunk; r++) {
+            final var accession2ids = mappingDatabase.getValues(accessions, numberInChunk);
+            for (var r = 0; r < numberInChunk; r++) {
                 if (accessions[r].length() > 0) {
-                    final int[] ids = accession2ids.get(accessions[r]);
+                    final var ids = accession2ids.get(accessions[r]);
                     if (ids != null) {
                         //System.err.println((offset+r)+" -> "+Basic.toString(referencesDB.getHeader(offset + r))+" -> "+accessions[r]);
 
-                        for (int c = 0; c < cIndex2Name.length; c++) {
+                        for (var c = 0; c < cIndex2Name.length; c++) {
                             if (cIndex2Name[c] != null) {
-                                final int index = ids[c];
+                                final var index = ids[c];
                                 if (index != 0) {
-                                    //System.err.println(cIndex2Name[c]+" -> "+index);
+                                    //System.err.println(accessions[r] +": "+cIndex2Name[c]+" -> "+index);
                                     mappings.get(cIndex2Name[c]).put(offset + r, index);
                                     referencesDB.extendHeader(c, tags[c], index);
                                 }
@@ -150,15 +149,15 @@ public class Mapping extends RefIndex2ClassId {
     }
 
     public static String getFirstWordAccession(byte[] bytes) {
-		final String aLine = StringUtils.toString(bytes);
-		int a = 0;
+        final var aLine = StringUtils.toString(bytes);
+        var a = 0;
         while (a < aLine.length()) {
             if (aLine.charAt(a) == '>' || aLine.charAt(a) == '@' || Character.isWhitespace(aLine.charAt(a)))
                 a++;
             else
                 break;
         }
-        int b = a + 1;
+        var b = a + 1;
         while (b < aLine.length()) {
             if (Character.isLetterOrDigit(aLine.charAt(b)) || aLine.charAt(b) == '_')
                 b++;
