@@ -1142,8 +1142,8 @@ context.goForward(1, true, true);
       <jreBundle installOnlyIfNecessary="true" />
     </windows>
   </mediaSets>
-  <buildIds>
-    <mediaSet refId="1691242146" />
+  <buildIds buildAll="false">
+    <mediaSet refId="1691242149" />
   </buildIds>
   <buildOptions disableSigning="true" disableNotarization="true" />
 </install4j>
