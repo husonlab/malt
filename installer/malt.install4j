@@ -123,7 +123,7 @@
       </iconImageFiles>
     </launcher>
   </launchers>
-  <installerGui autoUpdateDescriptorUrl="http://software-ab.informatik.uni-tuebingen.de/download/malt/updates.xml">
+  <installerGui autoUpdateDescriptorUrl="https://software-ab.cs.uni-tuebingen.de/download/malt/updates.xml">
     <autoUpdate useMinUpdatableVersion="true" minUpdatableVersion="0" />
     <applications>
       <application id="installer" beanClass="com.install4j.runtime.beans.applications.InstallerApplication" styleId="1691243588" launchInNewProcess="false">
