@@ -216,6 +216,7 @@ public class MaltRun {
         final boolean showAPart = options.getOption("xP", "xPart", "Show part of the table in human readable form for debugging", false);
 
         options.done();
+
         Basic.setDebugMode(options.isVerbose());
 
 		maltOptions.setCommandLine(StringUtils.toString(args, " "));
