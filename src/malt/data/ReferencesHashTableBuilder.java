@@ -61,7 +61,7 @@ public class ReferencesHashTableBuilder {
     private final SeedShape seedShape; //  seed shape that is saved and loaded from index
 
     private final int SYNC_BITMASK = 1023;
-    // use lots of objects to synchronize on so that threads don't in each others way
+    // use lots of objects to synchronize on so that threads don't in each other's way
     private final Object[] syncObjects = new Object[SYNC_BITMASK + 1];
 
     private final int stepSize;
