@@ -117,11 +117,11 @@ public class MaltRun {
 
         options.comment("Output:");
         var outputRMAFileNames = options.getOption("o", "output", "Output RMA file(s) or directory or stdout", new LinkedList<>());
-        if (outputRMAFileNames.size() > 0 || options.isDoHelp())
+        if (!outputRMAFileNames.isEmpty() || options.isDoHelp())
             maltOptions.setSaveUnalignedToRMA(options.getOption("iu", "includeUnaligned", "Include unaligned queries in RMA output file", false));
 
        var outputMatchesFileNames = options.getOption("a", "alignments", "Output alignment file(s) or directory or stdout", new LinkedList<>());
-        if (outputMatchesFileNames.size() > 0 || options.isDoHelp()) {
+        if (!outputMatchesFileNames.isEmpty() || options.isDoHelp()) {
             maltOptions.setMatchOutputFormat(options.getOption("f", "format", "Alignment output format", MaltOptions.MatchOutputFormat.values(), maltOptions.getMatchOutputFormat().toString()));
             maltOptions.setGzipMatches(options.getOption("za", "gzipAlignments", "Compress alignments using gzip", maltOptions.isGzipMatches()));
         }
@@ -133,11 +133,11 @@ public class MaltRun {
             maltOptions.setSparseSAM(options.getOption("sps", "sparseSAM", "Produce sparse SAM format (smaller, faster, but only suitable for MEGAN)", maltOptions.isSparseSAM()));
         }
         var outputAlignedFileNames = options.getOption("oa", "outAligned", "Aligned reads output file(s) or directory or stdout", new LinkedList<>());
-        if (outputAlignedFileNames.size() > 0 || options.isDoHelp()) {
+        if (!outputAlignedFileNames.isEmpty() || options.isDoHelp()) {
             maltOptions.setGzipAlignedReads(options.getOption("zal", "gzipAligned", "Compress aligned reads output using gzip", maltOptions.isGzipAlignedReads()));
         }
         var outputUnAlignedFileNames = options.getOption("ou", "outUnaligned", "Unaligned reads output file(s) or directory or stdout", new LinkedList<>());
-        if (outputUnAlignedFileNames.size() > 0 || options.isDoHelp()) {
+        if (!outputUnAlignedFileNames.isEmpty() || options.isDoHelp()) {
             maltOptions.setGzipUnalignedReads(options.getOption("zul", "gzipUnaligned", "Compress unaligned reads output using gzip", maltOptions.isGzipUnalignedReads()));
         }
 
@@ -251,7 +251,7 @@ public class MaltRun {
             throw new UsageException("Undefined reference sequence type: " + referenceSequenceType);
 
         // check consistency of all options:
-        if (inputFileNames.size() == 0)
+        if (inputFileNames.isEmpty())
             throw new UsageException("You must specify at least one input file");
         Utilities.checkFileExists(new File(inputFileNames.iterator().next()));
 

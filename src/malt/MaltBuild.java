@@ -164,7 +164,7 @@ public class MaltBuild {
             if (file.isDirectory()) {
                 System.err.println("Looking for FastA files in directory: " + file);
                 inputFiles.clear();
-                for (var aFile : BasicSwing.getAllFilesInDirectory(file, new FastaFileFilter(), true)) {
+                for (var aFile : BasicSwing.getAllFilesInDirectory(file, new FastaFileFilter(true), true)) {
                     inputFiles.add(aFile.getPath());
                 }
 				if (inputFiles.size() == 0)
