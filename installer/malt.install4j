@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="10.0.3" transformSequenceNumber="10">
+<install4j version="10.0.6" transformSequenceNumber="10">
   <directoryPresets config="../../jloda" />
   <application name="MALT" applicationId="3229-5251-7410-5330" mediaDir="../../../builds" shortName="MALT" publisher="Daniel Huson's Lab, University of Tuebingen" publisherWeb="ab.inf.uni-tuebingen.de" version="0" allPathsRelative="true" backupOnSave="true" macVolumeId="970a61501b2fa775" javaMinVersion="17" allowBetaVM="true">
     <codeSigning macEnabled="true" macPkcs12File="../../../../etc/application.p12">
@@ -9,7 +9,7 @@
         <entry>sqlite-*</entry>
       </macSearchedJars>
     </codeSigning>
-    <jreBundles jdkProviderId="Liberica" release="18/18.0.2.1+1">
+    <jreBundles jdkProviderId="Liberica" release="20/20.0.2+10">
       <modules />
     </jreBundles>
   </application>
