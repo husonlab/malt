@@ -88,7 +88,7 @@ public class MaltBuild {
         final var options = new ArgsOptions(args, this, "Builds an index for MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
         options.setVersion(ProgramProperties.getProgramVersion());
-        options.setLicense("Copyright (C) 2023 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
+        options.setLicense("Copyright (C) 2023. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Input:");
         final var inputFiles = options.getOptionMandatory("i", "input", "Input reference files in FastA format (or specify a single directory)", new LinkedList<>());

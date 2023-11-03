@@ -103,7 +103,7 @@ public class MaltRun {
         var options = new ArgsOptions(args, this, "Aligns sequences using MALT (MEGAN alignment tool)");
         options.setAuthors("Daniel H. Huson");
         options.setVersion(ProgramProperties.getProgramVersion());
-        options.setLicense("Copyright (C) 2023 Daniel H. Huson. This program comes with ABSOLUTELY NO WARRANTY.");
+        options.setLicense("Copyright (C) 2023. This program comes with ABSOLUTELY NO WARRANTY.");
 
         options.comment("Mode:");
         maltOptions.setMode(BlastMode.valueOfIgnoreCase(options.getOptionMandatory("m", "mode", "Program mode", BlastMode.values(), BlastMode.BlastX.toString())));
