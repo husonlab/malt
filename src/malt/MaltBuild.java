@@ -167,7 +167,7 @@ public class MaltBuild {
                 for (var aFile : BasicSwing.getAllFilesInDirectory(file, new FastaFileFilter(true), true)) {
                     inputFiles.add(aFile.getPath());
                 }
-				if (inputFiles.size() == 0)
+                if (inputFiles.isEmpty())
 					throw new IOException("No files found in directory: " + file);
 				else
 					System.err.printf("Found: %,d%n", inputFiles.size());
